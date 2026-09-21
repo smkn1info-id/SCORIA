@@ -252,6 +252,41 @@
   .btn-sm{padding:6px 11px; font-size:0.76rem;}
   .btn svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
 
+  /* ---------- Tab Kelas ---------- */
+  .kelas-tabs{
+    display:flex;
+    gap:4px;
+    margin:0 0 14px;
+    border-bottom:2px solid rgba(15,118,110,0.2);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .kelas-tabs::-webkit-scrollbar{display:none;}
+  .kelas-tabs[hidden]{display:none;}
+  .kelas-tab{
+    font-family:inherit;
+    font-size:0.84rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:transparent;
+    border:none;
+    border-bottom:3px solid transparent;
+    border-radius:6px 6px 0 0;
+    margin-bottom:-2px;
+    padding:10px 16px;
+    cursor:pointer;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .kelas-tab:hover{color:var(--turquoise); background:rgba(15,118,110,0.07);}
+  .kelas-tab.active{
+    color:var(--turquoise);
+    background:rgba(15,118,110,0.11);
+    border-bottom-color:var(--turquoise);
+  }
+  .kelas-tab:focus-visible{outline-offset:-3px;}
+
   /* ---------- Table ---------- */
   .scroll-hint{
     display:flex;
@@ -626,9 +661,6 @@
     <div class="nilai-toolbar">
       <div class="nilai-toolbar-group">
         <input type="text" class="panel-search" id="searchInputNilai" placeholder="Cari nama siswa / NISN / kelas / mapel...">
-        <select id="filterKelasNilai" class="panel-select" disabled>
-          <option value="">Semua Kelas</option>
-        </select>
         <select id="filterMapelNilai" class="panel-select" disabled>
           <option value="">Semua Mata Pelajaran</option>
         </select>
@@ -645,12 +677,14 @@
       </div>
     </div>
 
+    <div class="kelas-tabs" id="kelasTabsNilai" role="tablist" aria-label="Pilih kelas" hidden></div>
+
     <p class="scroll-hint">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
       Geser tabel ke samping untuk melihat kolom lainnya
     </p>
 
-    <div class="table-wrap">
+    <div class="table-wrap" id="panelTabelNilai" role="tabpanel">
       <table class="preview-table" id="tableNilaiSiswa">
         <thead>
           <tr>
@@ -986,7 +1020,7 @@
   const btnPrevNilai = document.getElementById('btnPrevNilai');
   const btnNextNilai = document.getElementById('btnNextNilai');
   const searchInputNilai = document.getElementById('searchInputNilai');
-  const filterKelasNilaiEl = document.getElementById('filterKelasNilai');
+  const kelasTabsNilaiEl = document.getElementById('kelasTabsNilai');
   const filterMapelNilaiEl = document.getElementById('filterMapelNilai');
 
   // Ambil seluruh baris "daftarnilai" untuk mata pelajaran yang diampu guru
@@ -1653,36 +1687,70 @@
     btnNextNilai.disabled = offset + shownCount >= totalRowsNilai;
   }
 
-  // Filter Kelas & Mata Pelajaran bertingkat, opsinya dibangun dari hasil
-  // yang sedang tersedia (sebelum difilter kelas/mapel/pencarian).
+  // ---------- Tab Kelas ----------
+  // Satu tab per kelas (diambil dari data nilai yang tersedia) ditambah tab
+  // "Semua" di awal. Tab yang aktif = selectedKelasNilai ('' berarti Semua).
+  // Bar tab hanya dibangun ulang bila daftar kelasnya berubah; selain itu
+  // cukup memperbarui status aktif, supaya posisi scroll dan fokus keyboard
+  // pada bar tab tidak hilang setiap kali data dimuat ulang.
+  let kelasTabsKey = '';
+
+  function updateKelasTabsActive(){
+    kelasTabsNilaiEl.querySelectorAll('.kelas-tab').forEach(btn => {
+      const aktif = (btn.getAttribute('data-kelas') || '') === selectedKelasNilai;
+      btn.classList.toggle('active', aktif);
+      btn.setAttribute('aria-selected', aktif ? 'true' : 'false');
+      btn.tabIndex = aktif ? 0 : -1;
+    });
+  }
+
+  function renderKelasTabs(kelasList){
+    if(kelasList.length === 0){
+      kelasTabsKey = '';
+      kelasTabsNilaiEl.innerHTML = '';
+      kelasTabsNilaiEl.hidden = true;
+      return;
+    }
+    const key = kelasList.join('\u0001');
+    if(key !== kelasTabsKey){
+      kelasTabsKey = key;
+      const tabs = [{ value: '', label: 'Semua' }].concat(kelasList.map(k => ({ value: k, label: k })));
+      kelasTabsNilaiEl.innerHTML = tabs.map(t =>
+        `<button type="button" role="tab" class="kelas-tab" aria-controls="panelTabelNilai" data-kelas="${escapeHtml(t.value)}">${escapeHtml(t.label)}</button>`
+      ).join('');
+    }
+    kelasTabsNilaiEl.hidden = false;
+    updateKelasTabsActive();
+  }
+
+  // Filter Kelas (tab) & Mata Pelajaran (dropdown) bertingkat, opsinya
+  // dibangun dari hasil yang sedang tersedia (sebelum difilter
+  // kelas/mapel/pencarian).
   function populateNilaiFilterOptions(rows){
     if(!rows || rows.length === 0){
-      filterKelasNilaiEl.innerHTML = '<option value="">Semua Kelas</option>';
       filterMapelNilaiEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>';
-      filterKelasNilaiEl.value = '';
       filterMapelNilaiEl.value = '';
-      filterKelasNilaiEl.disabled = true;
       filterMapelNilaiEl.disabled = true;
+      renderKelasTabs([]);
       return;
     }
     const kelasSource = rows.filter(r => !selectedMapelNilai || String(r.mata_pelajaran ?? '') === selectedMapelNilai);
     const mapelSource = rows.filter(r => !selectedKelasNilai || String(r.kelas ?? '') === selectedKelasNilai);
 
-    const kelasList = Array.from(new Set(kelasSource.map(r => String(r.kelas ?? '')).filter(Boolean))).sort();
+    // Urutan natural: "X-2" tampil sebelum "X-10".
+    const kelasList = Array.from(new Set(kelasSource.map(r => String(r.kelas ?? '')).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, 'id', { numeric: true }));
     const mapelList = Array.from(new Set(mapelSource.map(r => String(r.mata_pelajaran ?? '')).filter(Boolean))).sort();
 
     if(!kelasList.includes(selectedKelasNilai)) selectedKelasNilai = '';
     if(!mapelList.includes(selectedMapelNilai)) selectedMapelNilai = '';
 
-    filterKelasNilaiEl.innerHTML = '<option value="">Semua Kelas</option>' +
-      kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
     filterMapelNilaiEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>' +
       mapelList.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
 
-    filterKelasNilaiEl.value = selectedKelasNilai;
     filterMapelNilaiEl.value = selectedMapelNilai;
-    filterKelasNilaiEl.disabled = false;
     filterMapelNilaiEl.disabled = false;
+    renderKelasTabs(kelasList);
   }
 
   async function fetchNilaiSiswa(){
@@ -1748,10 +1816,33 @@
     }, 300);
   });
 
-  filterKelasNilaiEl.addEventListener('change', (e)=>{
-    selectedKelasNilai = e.target.value;
+  kelasTabsNilaiEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.kelas-tab');
+    if(!btn) return;
+    const kelas = btn.getAttribute('data-kelas') || '';
+    if(kelas === selectedKelasNilai) return;
+    selectedKelasNilai = kelas;
     currentPageNilai = 0;
+    updateKelasTabsActive(); // tab langsung berubah, tanpa menunggu data selesai dimuat
+    btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
     fetchNilaiSiswa();
+  });
+
+  // Navigasi keyboard: panah kiri/kanan (serta Home/End) memindahkan fokus
+  // antar tab; Enter/Spasi mengaktifkan tab yang sedang difokus.
+  kelasTabsNilaiEl.addEventListener('keydown', (e)=>{
+    const tabs = Array.from(kelasTabsNilaiEl.querySelectorAll('.kelas-tab'));
+    const idx = tabs.indexOf(document.activeElement);
+    if(idx === -1) return;
+    let target = null;
+    if(e.key === 'ArrowRight') target = tabs[(idx + 1) % tabs.length];
+    else if(e.key === 'ArrowLeft') target = tabs[(idx - 1 + tabs.length) % tabs.length];
+    else if(e.key === 'Home') target = tabs[0];
+    else if(e.key === 'End') target = tabs[tabs.length - 1];
+    if(target){
+      e.preventDefault();
+      target.focus();
+    }
   });
   filterMapelNilaiEl.addEventListener('change', (e)=>{
     selectedMapelNilai = e.target.value;
