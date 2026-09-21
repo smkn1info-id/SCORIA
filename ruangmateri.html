@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruang Materi — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --amber:#92600F;
+    --blue:#2F80ED;
+    --orange:#F2994A;
+    --footer-h:72px;
+    --reading-size:1.02rem;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden; scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--footer-h) + 20px);
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+    html{scroll-behavior:auto;}
+  }
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--brand); color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px; border-radius:50%; background:var(--paper); color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.75rem; flex-shrink:0; overflow:hidden;
+  }
+  .school-logo img{ width:100%; height:100%; object-fit:cover; }
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .school-name{ font-size:0.92rem; font-weight:500; color:var(--paper); max-width:32ch; }
+  .term-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; letter-spacing:0.02em;
+    color:var(--gold); background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4); padding:2px 9px; border-radius:999px; white-space:nowrap;
+  }
+  .term-badge .dot{ width:5px; height:5px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+  .admin-account{ display:flex; align-items:center; gap:8px; padding-left:16px; border-left:1px solid rgba(240,234,217,0.25); }
+  .avatar{
+    width:32px; height:32px; border-radius:50%; background:var(--gold); color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.78rem; flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Progress baca ---------- */
+  .read-progress{
+    position:sticky; top:66px; z-index:19;
+    height:4px; background:rgba(122,113,145,0.16);
+  }
+  .read-progress span{
+    display:block; height:100%; width:0%; background:var(--gold);
+    transition:width 0.1s linear;
+  }
+
+  /* ---------- Layout ---------- */
+  main{ max-width:1120px; margin:0 auto; padding:22px clamp(16px,4vw,40px) 12px; }
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:18px;
+    font-size:0.82rem; font-weight:600; color:var(--ink-soft);
+    text-decoration:none; padding:6px 12px 6px 8px;
+    border:1px solid var(--paper-line); border-radius:999px; background:#fffdf7;
+  }
+  .back-link:hover{ color:var(--brand); border-color:var(--brand); }
+  .back-link svg{ width:15px; height:15px; }
+
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; align-items:start; }
+  @media (max-width:900px){ .layout{ grid-template-columns:minmax(0,1fr); } }
+  @media (max-width:560px){
+    main{padding-left:8px; padding-right:8px;}
+    .navbar{padding-left:10px; padding-right:10px;}
+  }
+
+  /* ---------- Hero materi ---------- */
+  .materi-hero{
+    background:#fffdf7; border:1px solid var(--paper-line);
+    border-top:5px solid var(--brand); border-radius:12px;
+    padding:22px clamp(16px,3vw,28px) 20px; margin-bottom:18px;
+    box-shadow:0 4px 14px rgba(59,46,99,0.06);
+  }
+  .materi-hero.jenis-video{ border-top-color:var(--brick); }
+  .materi-hero.jenis-tautan{ border-top-color:var(--blue); }
+  .materi-hero.jenis-teks{ border-top-color:var(--amber); }
+
+  .badge-jenis{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:20px;
+    font-size:0.72rem; font-weight:600; background:#EDE7FE; color:var(--brand);
+  }
+  .badge-jenis svg{ width:13px; height:13px; }
+  .badge-jenis.video{ background:#FDE7EE; color:var(--brick); }
+  .badge-jenis.tautan{ background:#E6F0FF; color:var(--blue); }
+  .badge-jenis.teks{ background:#FFF3DE; color:var(--amber); }
+
+  .materi-title{
+    font-family:'Newsreader',serif; font-weight:600; line-height:1.22;
+    font-size:clamp(1.5rem,3.4vw,2.15rem); margin:12px 0 10px;
+  }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .meta-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:0.76rem; color:var(--ink-soft);
+    background:var(--paper-deep); border:1px solid var(--paper-line);
+    padding:4px 10px; border-radius:6px;
+  }
+  .meta-chip svg{ width:13px; height:13px; }
+  .materi-desk{
+    margin:16px 0 0; padding-left:14px; border-left:3px solid var(--paper-line);
+    font-size:0.92rem; line-height:1.6; color:var(--ink);
+  }
+
+  /* ---------- Panel konten ---------- */
+  .content-panel{
+    background:#fffdf7; border:1px solid var(--paper-line); border-radius:12px;
+    padding:0 0 4px; overflow:hidden;
+  }
+  .panel-head{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px clamp(16px,3vw,26px); background:var(--paper-deep);
+    border-bottom:1px solid var(--paper-line);
+  }
+  .panel-head h2{
+    font-family:'Newsreader',serif; font-weight:500; font-size:1.05rem; margin:0;
+  }
+  .font-control{ display:flex; align-items:center; gap:6px; }
+  .font-control button{
+    font-family:'Newsreader',serif; font-weight:600; cursor:pointer;
+    width:30px; height:30px; border-radius:6px; background:#fffdf7;
+    border:1px solid var(--paper-line); color:var(--ink); line-height:1;
+  }
+  .font-control button:hover{ border-color:var(--brand); color:var(--brand); }
+  .font-control button[aria-pressed="true"]{ background:var(--brand); border-color:var(--brand); color:#fff; }
+
+  .reading{
+    padding:24px clamp(16px,3vw,30px) 30px;
+    font-size:var(--reading-size); line-height:1.78; color:var(--ink);
+    max-width:72ch;
+  }
+  .reading p{ margin:0 0 1.05em; }
+  .reading ul{ margin:0 0 1.05em; padding-left:1.2em; }
+  .reading li{ margin-bottom:0.4em; }
+  .reading p:first-child::first-letter{
+    font-family:'Newsreader',serif; font-weight:600; font-size:2.9em;
+    float:left; line-height:0.86; padding:0.06em 0.1em 0 0; color:var(--brand);
+  }
+
+  .embed-wrap{ padding:clamp(12px,2.5vw,22px); }
+  .ratio-16x9{ position:relative; width:100%; padding-top:56.25%; border-radius:10px; overflow:hidden; background:#241d3f; }
+  .ratio-16x9 iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .doc-frame{
+    width:100%; height:min(72vh,720px); border:1px solid var(--paper-line);
+    border-radius:10px; background:#fff;
+  }
+
+  .link-box{
+    margin:clamp(14px,3vw,24px); padding:26px 22px; text-align:center;
+    border:1px dashed var(--paper-line); border-radius:12px; background:var(--paper-deep);
+  }
+  .link-box .url{
+    display:block; font-family:'JetBrains Mono',monospace; font-size:0.78rem;
+    color:var(--ink-soft); word-break:break-all; margin:10px 0 18px;
+  }
+  .link-box p{ margin:0; font-size:0.88rem; color:var(--ink-soft); }
+  .link-icon{
+    width:52px; height:52px; margin:0 auto 6px; border-radius:50%;
+    background:#fffdf7; border:1px solid var(--paper-line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .link-icon svg{ width:24px; height:24px; color:var(--brand); }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    font-family:inherit; font-size:0.84rem; font-weight:600; cursor:pointer;
+    border:none; border-radius:7px; padding:10px 16px; text-decoration:none;
+    background:var(--brand); color:#FFFFFF; transition:background 0.15s ease;
+  }
+  .btn:hover{ background:#5A3FCC; }
+  .btn svg{ width:15px; height:15px; }
+  .btn.ghost{ background:#fffdf7; color:var(--ink); border:1px solid var(--paper-line); }
+  .btn.ghost:hover{ background:var(--paper-deep); color:var(--brand); }
+  .btn.green{ background:var(--green); }
+  .btn.green:hover{ background:#146C43; }
+  .btn.full{ width:100%; }
+  .btn-row{ display:flex; flex-wrap:wrap; gap:10px; padding:0 clamp(16px,3vw,26px) 20px; }
+
+  /* ---------- Sidebar ---------- */
+  .side-card{
+    background:#fffdf7; border:1px solid var(--paper-line); border-radius:12px;
+    padding:16px 18px; margin-bottom:16px;
+  }
+  .side-card h3{
+    font-family:'Newsreader',serif; font-weight:500; font-size:1rem; margin:0 0 12px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .side-card h3 svg{ width:16px; height:16px; color:var(--brand); }
+  .side-stat{ display:flex; justify-content:space-between; gap:10px; font-size:0.82rem; padding:6px 0; }
+  .side-stat + .side-stat{ border-top:1px dashed var(--paper-line); }
+  .side-stat span:first-child{ color:var(--ink-soft); }
+  .side-stat span:last-child{ font-weight:600; }
+
+  .status-done{
+    display:none; align-items:center; gap:7px; font-size:0.82rem; font-weight:600;
+    color:var(--green); background:#E7F5EE; border:1px solid #BFE3D0;
+    padding:9px 12px; border-radius:7px; margin-top:12px;
+  }
+  .status-done.show{ display:flex; }
+  .status-done svg{ width:16px; height:16px; }
+
+  .note-area{
+    width:100%; min-height:120px; resize:vertical; font-family:inherit; font-size:0.84rem;
+    line-height:1.55; color:var(--ink); background:#fff; border:1px solid var(--paper-line);
+    border-radius:8px; padding:10px 12px;
+  }
+  .note-area:focus{ outline:none; border-color:var(--brand); }
+  .note-status{ font-size:0.72rem; color:var(--ink-soft); margin:8px 0 0; min-height:1em; }
+
+  .other-item{
+    display:block; text-decoration:none; color:var(--ink);
+    padding:10px 12px; border-radius:8px; border:1px solid var(--paper-line);
+    background:var(--paper-deep); margin-bottom:8px;
+  }
+  .other-item:hover{ border-color:var(--brand); background:#EDE7FE; }
+  .other-item strong{ display:block; font-weight:600; font-size:0.85rem; line-height:1.35; }
+  .other-item small{ color:var(--ink-soft); font-size:0.72rem; }
+  .other-item.active{ border-color:var(--brand); background:#EDE7FE; }
+
+  .pager{ display:flex; gap:10px; margin:18px 0 6px; }
+  .pager a{ flex:1; min-width:0; }
+  .pager .btn{ width:100%; }
+
+  .state-box{
+    text-align:center; color:var(--ink-soft); font-size:0.9rem;
+    padding:46px 20px; background:#fffdf7; border:1px dashed var(--paper-line); border-radius:12px;
+  }
+  .state-box strong{ display:block; font-family:'Newsreader',serif; font-size:1.15rem; color:var(--ink); margin-bottom:8px; }
+
+  /* ---------- Footer sticky ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0; height:var(--footer-h);
+    background:var(--turquoise); display:flex; align-items:stretch; justify-content:center;
+    z-index:30; box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    background:none; border:none; color:var(--ink); font-size:0.75rem; font-weight:600;
+    width:140px; cursor:pointer; transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-divider{ width:1px; background:rgba(59,46,99,0.2); margin:14px 0; }
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+
+  /* ---------- Bottom sheet menu ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0; background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden; transition:opacity 0.2s ease; z-index:40;
+  }
+  .sheet-backdrop.open{opacity:1; visibility:visible;}
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; background:var(--paper);
+    border-radius:16px 16px 0 0; padding:10px 20px calc(20px + var(--footer-h));
+    max-width:640px; margin:0 auto; transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.3,1); z-index:41; max-height:78vh; overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+  .sheet-handle{ width:40px; height:4px; background:var(--paper-line); border-radius:2px; margin:8px auto 16px; }
+  .sheet h3{ font-family:'Newsreader',serif; font-weight:500; font-size:1.15rem; margin:0 0 16px; }
+  .menu-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .menu-item{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    text-align:center; background:var(--paper-deep); border:1px solid var(--paper-line); border-radius:8px;
+    padding:16px 8px; text-decoration:none; color:var(--ink); font-size:0.78rem; font-weight:500; line-height:1.25;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:hover{border-color:var(--brick); background:#FFE3EE;}
+  .menu-item svg{width:22px; height:22px; color:var(--brick);}
+  .menu-item.current{ border-color:var(--brand); background:#EDE7FE; }
+  .menu-item.current svg{ color:var(--brand); }
+
+  @media (max-width:520px){ .nav-schoolinfo{display:none;} }
+
+  @media print{
+    .navbar,.footer-bar,.sheet-backdrop,.read-progress,.back-link,.side-card,.pager,.panel-head,.btn-row{ display:none !important; }
+    body{ padding:0; background:#fff; }
+    .layout{ grid-template-columns:1fr; }
+    .content-panel,.materi-hero{ border:none; box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar" id="siswaAvatar">SW</span>
+      <span class="admin-name" id="siswaName">Siswa</span>
+    </div>
+  </div>
+</header>
+
+<div class="read-progress"><span id="readProgressBar"></span></div>
+
+<main>
+  <a class="back-link" href="pelajaranku.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Kembali ke daftar materi
+  </a>
+
+  <div id="pageRoot">
+    <p class="state-box">Memuat materi...</p>
+  </div>
+</main>
+
+<!-- Footer sticky -->
+<div class="footer-bar">
+  <button class="footer-btn" id="openMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    Menu
+  </button>
+  <div class="footer-divider"></div>
+  <button class="footer-btn logout" id="logoutBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Log Out
+  </button>
+</div>
+
+<!-- Bottom sheet menu -->
+<div class="sheet-backdrop" id="sheetBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetHeading">
+    <div class="sheet-handle"></div>
+    <h3 id="sheetHeading">Menu Siswa</h3>
+    <div class="menu-grid">
+      <a class="menu-item" href="daftarnilaisiswa.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16"/><path d="M9 10v10"/></svg>
+        Daftar Nilaiku
+      </a>
+      <a class="menu-item current" href="pelajaranku.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h5"/></svg>
+        Materi Pelajaran
+      </a>
+      <a class="menu-item" href="#" id="menuUjianBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+        Ujian
+      </a>
+      <a class="menu-item" href="absensiku.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M9 14l2 2 4-4"/></svg>
+        Riwayat Kehadiranku
+      </a>
+      <a class="menu-item logout-item" href="#" id="sheetLogout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const TABLE_MATERIAJAR = "materiajar";
+
+  const sbHeaders = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY
+  };
+
+  // ---------- Auth guard ----------
+  function getSiswaSession(){
+    try{
+      const raw = localStorage.getItem('siswa_session');
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){
+      return null;
+    }
+  }
+
+  const siswaSession = getSiswaSession();
+  if(!siswaSession){
+    window.location.href = 'siswa.html';
+  }
+
+  function getInitials(nama){
+    return String(nama || '')
+      .split(' ').filter(Boolean).slice(0, 2)
+      .map(w => w[0].toUpperCase()).join('');
+  }
+
+  function esc(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+  }
+
+  (function renderSiswaAccount(){
+    if(!siswaSession) return;
+    const nama = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+    document.getElementById('siswaName').textContent = nama;
+    document.getElementById('siswaAvatar').textContent = getInitials(nama) || 'SW';
+  })();
+
+  // ---------- Profil sekolah ----------
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran&limit=1`, { headers: sbHeaders });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+
+      if(profil.nama_sekolah){
+        document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      }
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          const termBadge = document.getElementById('termBadge');
+          if(termBadge) termBadge.style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){
+      console.error('Gagal memuat profil sekolah:', err);
+    }
+  })();
+
+  // ================= Util materi =================
+  const pageRoot = document.getElementById('pageRoot');
+  const materiId = new URLSearchParams(window.location.search).get('id');
+
+  let siswaKelas = (siswaSession && siswaSession.kelas) ? String(siswaSession.kelas).trim() : '';
+  let materiRow = null;
+  let materiSemapel = [];
+
+  function kelasCocok(kelasMateri, kelasSiswa){
+    if(!kelasSiswa) return false;
+    const daftar = String(kelasMateri || '').split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+    return daftar.includes(kelasSiswa.trim().toLowerCase());
+  }
+
+  function jenisClass(jenis){
+    switch(jenis){
+      case 'Video': return 'video';
+      case 'Tautan': return 'tautan';
+      case 'Teks Bacaan': return 'teks';
+      default: return '';
+    }
+  }
+
+  function formatTanggal(v){
+    if(!v) return '-';
+    try{
+      return new Date(v).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    }catch(e){ return v; }
+  }
+
+  function ikonJenis(jenis){
+    switch(jenis){
+      case 'Video':
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>';
+      case 'Tautan':
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
+      case 'Teks Bacaan':
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h5"/></svg>';
+      default:
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/></svg>';
+    }
+  }
+
+  // Ubah URL video jadi URL yang bisa di-embed (YouTube, Vimeo, Google Drive)
+  function toVideoEmbed(url){
+    try{
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      if(host === 'youtu.be'){
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        return id ? 'https://www.youtube.com/embed/' + id : null;
+      }
+      if(host.endsWith('youtube.com')){
+        if(u.pathname.startsWith('/embed/')) return url;
+        if(u.pathname.startsWith('/shorts/')){
+          const id = u.pathname.split('/').filter(Boolean)[1];
+          return id ? 'https://www.youtube.com/embed/' + id : null;
+        }
+        const v = u.searchParams.get('v');
+        return v ? 'https://www.youtube.com/embed/' + v : null;
+      }
+      if(host === 'vimeo.com'){
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        return id ? 'https://player.vimeo.com/video/' + id : null;
+      }
+      if(host === 'drive.google.com'){
+        const m = u.pathname.match(/\/file\/d\/([^/]+)/);
+        return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : null;
+      }
+      return null;
+    }catch(e){ return null; }
+  }
+
+  // Ubah URL dokumen jadi URL preview (PDF langsung, Drive/Docs preview, sisanya gview)
+  function toDocEmbed(url){
+    try{
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      if(host === 'drive.google.com'){
+        const m = u.pathname.match(/\/file\/d\/([^/]+)/);
+        if(m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+      }
+      if(host === 'docs.google.com'){
+        const m = u.pathname.match(/\/(document|presentation|spreadsheets)\/d\/([^/]+)/);
+        if(m) return 'https://docs.google.com/' + m[1] + '/d/' + m[2] + '/preview';
+      }
+      if(/\.pdf($|\?)/i.test(u.pathname + u.search)){
+        return url + '#view=FitH';
+      }
+      return 'https://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(url);
+    }catch(e){ return null; }
+  }
+
+  // Teks bacaan -> paragraf & daftar poin
+  function renderIsiTeks(teks){
+    const blok = String(teks).replace(/\r\n/g, '\n').split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+    if(blok.length === 0) return '<p>Belum ada isi teks untuk materi ini.</p>';
+
+    return blok.map(b => {
+      const baris = b.split('\n').map(x => x.trim()).filter(Boolean);
+      const semuaPoin = baris.length > 0 && baris.every(x => /^([-*•]|\d+[.)])\s+/.test(x));
+      if(semuaPoin){
+        const li = baris.map(x => '<li>' + esc(x.replace(/^([-*•]|\d+[.)])\s+/, '')) + '</li>').join('');
+        return '<ul>' + li + '</ul>';
+      }
+      return '<p>' + baris.map(esc).join('<br>') + '</p>';
+    }).join('');
+  }
+
+  function hitungKata(teks){
+    return String(teks || '').trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  // ---------- Progres belajar (lokal per perangkat) ----------
+  const PROGRESS_KEY = 'materi_progress';
+  function getProgress(){
+    try{ return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function setProgress(obj){
+    try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(obj)); }catch(e){}
+  }
+  function isSelesai(id){
+    const p = getProgress();
+    return !!(p[String(id)] && p[String(id)].selesai);
+  }
+
+  // ================= Muat data =================
+  async function loadKelasSiswa(){
+    if(!siswaSession) return;
+    try{
+      let url;
+      if(siswaSession.id){
+        url = `${SUPABASE_URL}/datasiswa?id=eq.${encodeURIComponent(siswaSession.id)}&select=nama_siswa,nisn,kelas&limit=1`;
+      } else {
+        const nama = siswaSession.nama_siswa || siswaSession.nama || '';
+        url = `${SUPABASE_URL}/datasiswa?nama_siswa=eq.${encodeURIComponent(nama)}&select=nama_siswa,nisn,kelas&limit=1`;
+      }
+      const res = await fetch(url, { headers: sbHeaders });
+      if(res.ok){
+        const rows = await res.json();
+        const siswa = rows && rows[0];
+        if(siswa && siswa.kelas) siswaKelas = String(siswa.kelas).trim();
+      }
+    }catch(err){
+      console.error('Gagal memuat data kelas siswa:', err);
+    }
+  }
+
+  function tampilkanState(judul, pesan){
+    pageRoot.innerHTML = `<div class="state-box">
+      <strong>${esc(judul)}</strong>
+      ${esc(pesan)}
+      <div style="margin-top:18px;"><a class="btn" href="pelajaranku.html">Lihat daftar materi</a></div>
+    </div>`;
+  }
+
+  async function loadMateri(){
+    if(!materiId){
+      tampilkanState('Materi belum dipilih', 'Pilih salah satu materi dari daftar untuk mulai belajar.');
+      return;
+    }
+
+    await loadKelasSiswa();
+
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE_MATERIAJAR}?id=eq.${encodeURIComponent(materiId)}&select=*&limit=1`, { headers: sbHeaders });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      materiRow = rows && rows[0];
+
+      if(!materiRow){
+        tampilkanState('Materi tidak ditemukan', 'Materi ini mungkin sudah dihapus gurumu. Kembali ke daftar untuk melihat materi terbaru.');
+        return;
+      }
+      if(materiRow.status && materiRow.status !== 'Aktif'){
+        tampilkanState('Materi sedang ditutup', 'Gurumu menonaktifkan materi ini untuk sementara. Coba lagi nanti.');
+        return;
+      }
+      if(!kelasCocok(materiRow.kelas, siswaKelas)){
+        tampilkanState('Materi bukan untuk kelasmu', 'Materi ini dibagikan untuk kelas lain. Buka daftar materi untuk melihat yang sesuai kelasmu.');
+        return;
+      }
+
+      renderHalaman();
+      loadMateriSemapel();
+    }catch(err){
+      console.error('Gagal memuat materi:', err);
+      tampilkanState('Materi gagal dimuat', 'Periksa koneksi internetmu, lalu muat ulang halaman ini.');
+    }
+  }
+
+  async function loadMateriSemapel(){
+    try{
+      const url = `${SUPABASE_URL}/${TABLE_MATERIAJAR}?select=id,judul_materi,jenis_materi,kelas,created_at&status=eq.Aktif&mata_pelajaran=eq.${encodeURIComponent(materiRow.mata_pelajaran || '')}&order=created_at.desc`;
+      const res = await fetch(url, { headers: sbHeaders });
+      if(!res.ok) return;
+      const rows = await res.json();
+      materiSemapel = (Array.isArray(rows) ? rows : []).filter(r => kelasCocok(r.kelas, siswaKelas));
+      renderDaftarLain();
+      renderPager();
+    }catch(err){
+      console.error('Gagal memuat materi lain:', err);
+    }
+  }
+
+  // ================= Render halaman =================
+  function panelKonten(){
+    const jenis = materiRow.jenis_materi;
+    const url = materiRow.url_konten;
+
+    if(jenis === 'Teks Bacaan'){
+      const isi = materiRow.isi_teks;
+      const linkRow = url
+        ? `<div class="btn-row"><a class="btn ghost" href="${esc(url)}" target="_blank" rel="noopener">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+             Buka tautan pendukung</a></div>`
+        : '';
+      return `<div class="content-panel">
+        <div class="panel-head">
+          <h2>Bacaan materi</h2>
+          <div class="font-control" role="group" aria-label="Ukuran teks">
+            <button type="button" data-font="0.94rem" aria-pressed="false" aria-label="Teks kecil">A</button>
+            <button type="button" data-font="1.02rem" aria-pressed="true" aria-label="Teks sedang" style="font-size:1.05rem;">A</button>
+            <button type="button" data-font="1.16rem" aria-pressed="false" aria-label="Teks besar" style="font-size:1.2rem;">A</button>
+          </div>
+        </div>
+        <article class="reading" id="readingArea">${isi ? renderIsiTeks(isi) : '<p>Gurumu belum mengisi teks materi ini.</p>'}</article>
+        ${linkRow}
+      </div>`;
+    }
+
+    if(jenis === 'Video'){
+      const embed = url ? toVideoEmbed(url) : null;
+      if(embed){
+        return `<div class="content-panel">
+          <div class="panel-head"><h2>Tonton video</h2></div>
+          <div class="embed-wrap">
+            <div class="ratio-16x9">
+              <iframe src="${esc(embed)}" title="Video materi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+          </div>
+          <div class="btn-row">
+            <a class="btn ghost" href="${esc(url)}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+              Buka di aplikasi aslinya
+            </a>
+          </div>
+        </div>`;
+      }
+      return panelTautan('Video ini berasal dari layanan yang tidak bisa diputar langsung di sini.');
+    }
+
+    if(jenis === 'Tautan'){
+      return panelTautan('Materi ini berupa tautan ke situs lain. Halaman itu akan terbuka di tab baru.');
+    }
+
+    // Dokumen (dan jenis lain)
+    const embed = url ? toDocEmbed(url) : null;
+    if(embed){
+      return `<div class="content-panel">
+        <div class="panel-head"><h2>Dokumen materi</h2></div>
+        <div class="embed-wrap">
+          <iframe class="doc-frame" src="${esc(embed)}" title="Dokumen materi" loading="lazy"></iframe>
+        </div>
+        <div class="btn-row">
+          <a class="btn ghost" href="${esc(url)}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+            Buka dokumen di tab baru
+          </a>
+          <button type="button" class="btn ghost" id="cetakBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>
+            Cetak halaman
+          </button>
+        </div>
+      </div>`;
+    }
+    return panelTautan('Gurumu belum melampirkan berkas atau tautan untuk materi ini.');
+  }
+
+  function panelTautan(pesan){
+    const url = materiRow.url_konten;
+    if(!url){
+      return `<div class="content-panel">
+        <div class="panel-head"><h2>Konten materi</h2></div>
+        <div class="link-box">
+          <div class="link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg></div>
+          <p>${esc(pesan)} Tanyakan ke gurumu kalau materi ini seharusnya sudah ada.</p>
+        </div>
+      </div>`;
+    }
+    let domain = url;
+    try{ domain = new URL(url).hostname.replace(/^www\./, ''); }catch(e){}
+    return `<div class="content-panel">
+      <div class="panel-head"><h2>Konten materi</h2></div>
+      <div class="link-box">
+        <div class="link-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
+        <p>${esc(pesan)}</p>
+        <span class="url">${esc(domain)}</span>
+        <a class="btn" href="${esc(url)}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+          Buka materi di tab baru
+        </a>
+      </div>
+    </div>`;
+  }
+
+  function sidebarInfo(){
+    const jenis = materiRow.jenis_materi || 'Dokumen';
+    let baris = `<div class="side-stat"><span>Jenis</span><span>${esc(jenis)}</span></div>
+      <div class="side-stat"><span>Mata pelajaran</span><span>${esc(materiRow.mata_pelajaran || '-')}</span></div>
+      <div class="side-stat"><span>Kelas</span><span>${esc(materiRow.kelas || '-')}</span></div>
+      <div class="side-stat"><span>Guru pengampu</span><span>${esc(materiRow.nama_guru || '-')}</span></div>`;
+
+    if(jenis === 'Teks Bacaan' && materiRow.isi_teks){
+      const kata = hitungKata(materiRow.isi_teks);
+      const menit = Math.max(1, Math.round(kata / 200));
+      baris += `<div class="side-stat"><span>Jumlah kata</span><span>${kata}</span></div>
+        <div class="side-stat"><span>Perkiraan baca</span><span>± ${menit} menit</span></div>`;
+    }
+
+    return `<div class="side-card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg> Tentang materi</h3>
+      ${baris}
+      <button type="button" class="btn green full" id="tandaiBtn" style="margin-top:14px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Tandai sudah dipelajari
+      </button>
+      <div class="status-done" id="statusDone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="statusDoneText">Sudah kamu pelajari</span>
+      </div>
+    </div>`;
+  }
+
+  function sidebarCatatan(){
+    return `<div class="side-card">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Catatanku</h3>
+      <textarea class="note-area" id="catatanArea" placeholder="Tulis poin penting atau pertanyaan untuk gurumu di sini."></textarea>
+      <p class="note-status" id="catatanStatus">Catatan tersimpan di perangkat ini saja.</p>
+    </div>`;
+  }
+
+  function renderHalaman(){
+    const jc = jenisClass(materiRow.jenis_materi);
+    const desk = materiRow.deskripsi
+      ? `<p class="materi-desk">${esc(materiRow.deskripsi)}</p>` : '';
+
+    pageRoot.innerHTML = `
+      <div class="layout">
+        <div>
+          <section class="materi-hero ${jc ? 'jenis-' + jc : ''}">
+            <span class="badge-jenis ${jc}">${ikonJenis(materiRow.jenis_materi)} ${esc(materiRow.jenis_materi || 'Dokumen')}</span>
+            <h1 class="materi-title">${esc(materiRow.judul_materi || 'Materi')}</h1>
+            <div class="meta-row">
+              <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/></svg>${esc(materiRow.mata_pelajaran || '-')}</span>
+              <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Kelas ${esc(materiRow.kelas || '-')}</span>
+              <span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>${esc(formatTanggal(materiRow.created_at))}</span>
+              ${materiRow.nama_guru ? `<span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>${esc(materiRow.nama_guru)}</span>` : ''}
+            </div>
+            ${desk}
+          </section>
+
+          ${panelKonten()}
+
+          <div class="pager" id="pagerBox"></div>
+        </div>
+
+        <aside>
+          ${sidebarInfo()}
+          ${sidebarCatatan()}
+          <div class="side-card">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/></svg> Materi lain di mapel ini</h3>
+            <div id="daftarLain"><p style="font-size:0.8rem; color:var(--ink-soft); margin:0;">Memuat...</p></div>
+          </div>
+        </aside>
+      </div>`;
+
+    pasangInteraksi();
+  }
+
+  function renderDaftarLain(){
+    const box = document.getElementById('daftarLain');
+    if(!box) return;
+    const lain = materiSemapel.filter(r => String(r.id) !== String(materiRow.id));
+    if(lain.length === 0){
+      box.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-soft); margin:0;">Baru materi ini yang tersedia untuk mata pelajaran tersebut.</p>';
+      return;
+    }
+    box.innerHTML = lain.slice(0, 8).map(r => {
+      const tanda = isSelesai(r.id) ? ' • sudah dipelajari' : '';
+      return `<a class="other-item" href="ruangmateri.html?id=${encodeURIComponent(r.id)}">
+        <strong>${esc(r.judul_materi || 'Materi')}</strong>
+        <small>${esc(r.jenis_materi || '-')}${esc(tanda)}</small>
+      </a>`;
+    }).join('');
+  }
+
+  function renderPager(){
+    const box = document.getElementById('pagerBox');
+    if(!box) return;
+    const idx = materiSemapel.findIndex(r => String(r.id) === String(materiRow.id));
+    if(idx === -1){ box.innerHTML = ''; return; }
+
+    const sebelum = materiSemapel[idx - 1]; // lebih baru
+    const sesudah = materiSemapel[idx + 1]; // lebih lama
+    let html = '';
+    if(sesudah){
+      html += `<a href="ruangmateri.html?id=${encodeURIComponent(sesudah.id)}"><span class="btn ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Materi sebelumnya</span></a>`;
+    }
+    if(sebelum){
+      html += `<a href="ruangmateri.html?id=${encodeURIComponent(sebelum.id)}"><span class="btn ghost">
+        Materi berikutnya
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span></a>`;
+    }
+    box.innerHTML = html;
+  }
+
+  // ================= Interaksi =================
+  function pasangInteraksi(){
+    // Ukuran teks bacaan
+    const fontBtns = document.querySelectorAll('.font-control button');
+    if(fontBtns.length){
+      const simpan = localStorage.getItem('materi_font');
+      if(simpan){
+        document.documentElement.style.setProperty('--reading-size', simpan);
+        fontBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.font === simpan)));
+      }
+      fontBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.documentElement.style.setProperty('--reading-size', btn.dataset.font);
+          try{ localStorage.setItem('materi_font', btn.dataset.font); }catch(e){}
+          fontBtns.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        });
+      });
+    }
+
+    // Cetak
+    const cetakBtn = document.getElementById('cetakBtn');
+    if(cetakBtn) cetakBtn.addEventListener('click', () => window.print());
+
+    // Tandai selesai
+    const tandaiBtn = document.getElementById('tandaiBtn');
+    const statusDone = document.getElementById('statusDone');
+    const statusDoneText = document.getElementById('statusDoneText');
+
+    function segarkanStatus(){
+      const p = getProgress();
+      const item = p[String(materiRow.id)];
+      if(item && item.selesai){
+        statusDone.classList.add('show');
+        statusDoneText.textContent = 'Sudah dipelajari pada ' + formatTanggal(item.waktu);
+        tandaiBtn.classList.add('ghost');
+        tandaiBtn.classList.remove('green');
+        tandaiBtn.lastChild.textContent = ' Batalkan tanda selesai';
+      } else {
+        statusDone.classList.remove('show');
+        tandaiBtn.classList.remove('ghost');
+        tandaiBtn.classList.add('green');
+        tandaiBtn.lastChild.textContent = ' Tandai sudah dipelajari';
+      }
+    }
+
+    tandaiBtn.addEventListener('click', () => {
+      const p = getProgress();
+      const key = String(materiRow.id);
+      if(p[key] && p[key].selesai){
+        delete p[key];
+      } else {
+        p[key] = { selesai:true, waktu:new Date().toISOString(), judul: materiRow.judul_materi || '' };
+      }
+      setProgress(p);
+      segarkanStatus();
+      renderDaftarLain();
+    });
+    segarkanStatus();
+
+    // Catatan siswa
+    const catatanArea = document.getElementById('catatanArea');
+    const catatanStatus = document.getElementById('catatanStatus');
+    const catatanKey = 'materi_catatan_' + materiRow.id;
+    try{ catatanArea.value = localStorage.getItem(catatanKey) || ''; }catch(e){}
+    let catatanTimer = null;
+    catatanArea.addEventListener('input', () => {
+      clearTimeout(catatanTimer);
+      catatanStatus.textContent = 'Menyimpan...';
+      catatanTimer = setTimeout(() => {
+        try{
+          localStorage.setItem(catatanKey, catatanArea.value);
+          catatanStatus.textContent = 'Catatan tersimpan di perangkat ini.';
+        }catch(e){
+          catatanStatus.textContent = 'Catatan gagal disimpan di perangkat ini.';
+        }
+      }, 500);
+    });
+  }
+
+  // ---------- Progress bar baca ----------
+  const readProgressBar = document.getElementById('readProgressBar');
+  function updateReadProgress(){
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const persen = total > 0 ? Math.min(100, (window.scrollY / total) * 100) : 0;
+    readProgressBar.style.width = persen + '%';
+  }
+  window.addEventListener('scroll', updateReadProgress, { passive:true });
+  window.addEventListener('resize', updateReadProgress);
+
+  // ---------- Bottom sheet menu ----------
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  document.getElementById('openMenuBtn').addEventListener('click', () => {
+    sheetBackdrop.classList.add('open');
+  });
+  sheetBackdrop.addEventListener('click', (e) => {
+    if (e.target === sheetBackdrop) sheetBackdrop.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') sheetBackdrop.classList.remove('open');
+  });
+
+  const menuUjianBtnEl = document.getElementById('menuUjianBtn');
+  if(menuUjianBtnEl){
+    menuUjianBtnEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'adminsiswa.html';
+    });
+  }
+
+  // ---------- Log Out ----------
+  function doLogout(){
+    localStorage.removeItem('siswa_session');
+    window.location.href = 'index.html';
+  }
+  document.getElementById('logoutBtn').addEventListener('click', doLogout);
+  document.getElementById('sheetLogout').addEventListener('click', (e) => {
+    e.preventDefault();
+    doLogout();
+  });
+
+  // ---------- Init ----------
+  loadMateri();
+  updateReadProgress();
+</script>
+
+</body>
+</html>

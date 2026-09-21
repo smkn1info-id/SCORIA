@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identitas Sekolah</title>
+<style>
+  :root{
+    --bg: #f4f6f9;
+    --panel: #ffffff;
+    --panel-2: #f6f8fa;
+    --border: #dde2e8;
+    --text: #1c232c;
+    --text-dim: #6b7684;
+    --accent: #3d6bfd;
+    --accent-hover: #2c56e0;
+    --ok: #1f9d5c;
+    --err: #d64545;
+    --radius: 10px;
+    --navbar-bg: #ffffff;
+    --navbar-text: #1c232c;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height:100vh;
+  }
+  .navbar{
+    background: var(--navbar-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+  }
+  .navbar-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navbar-text);
+    text-decoration:none;
+  }
+  .navbar-brand .brand-icon{
+    width:30px; height:30px;
+    border-radius: 7px;
+    background: var(--accent);
+    color: white;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink:0;
+  }
+  .navbar-links{
+    display:flex;
+    align-items:center;
+    gap: 4px;
+  }
+  .navbar-links a{
+    color: var(--text-dim);
+    text-decoration:none;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 7px;
+    transition: background .15s, color .15s;
+  }
+  .navbar-links a:hover{
+    background: var(--panel-2);
+    color: var(--text);
+  }
+  .navbar-links a.active{
+    color: var(--accent);
+    background: rgba(61,107,253,0.08);
+  }
+  .content{
+    padding: 40px 20px;
+  }
+  .wrap{
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .page-title{
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .page-sub{
+    color: var(--text-dim);
+    font-size: 14px;
+    margin: 0 0 28px;
+  }
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .status-dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--text-dim);
+  }
+  .status-badge.mode-insert .status-dot{ background: #d9a441; }
+  .status-badge.mode-update .status-dot{ background: var(--ok); }
+
+  .grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 20px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.full{ grid-column: 1 / -1; }
+  label{
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  input[type=text], input[type=email], input[type=password], input[type=tel], textarea, select{
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  textarea{ resize: vertical; min-height: 70px; }
+  input:focus, textarea:focus, select:focus{
+    border-color: var(--accent);
+  }
+  select{ appearance: none; cursor:pointer; }
+
+  .pw-row{ position:relative; }
+  .pw-row button{
+    position:absolute;
+    right:8px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color: var(--text-dim);
+    font-size:12px; cursor:pointer; padding:4px 6px;
+  }
+  .pw-row button:hover{ color: var(--text); }
+
+  .logo-field{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .logo-preview{
+    width:72px; height:72px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    border: 1px dashed var(--border);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .logo-preview img{ width:100%; height:100%; object-fit:cover; }
+  .logo-preview span{ font-size:10px; color: var(--text-dim); text-align:center; padding:4px; }
+  .logo-controls{ display:flex; flex-direction:column; gap:8px; }
+  .file-btn{
+    display:inline-block;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor:pointer;
+    width:fit-content;
+  }
+  .file-btn:hover{ border-color: var(--accent); }
+  .logo-controls input[type=file]{ display:none; }
+  .clear-logo{
+    background:none; border:none; color: var(--err);
+    font-size:12px; cursor:pointer; padding:0; text-align:left; width:fit-content;
+  }
+
+  .actions{
+    display:flex;
+    flex-direction: column;
+    gap:12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .actions-buttons{
+    display:flex;
+    gap:14px;
+  }
+  .btn-save, .btn-cancel{
+    flex: 1;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-save{
+    background: var(--accent);
+    color: white;
+    border: none;
+  }
+  .btn-save:hover{ background: var(--accent-hover); }
+  .btn-save:disabled{ background: #c3cbd8; cursor: not-allowed; color: #ffffff; }
+  .btn-cancel{
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-cancel:hover{ background: var(--panel-2); border-color: #c7cedb; }
+  .msg{ font-size: 13px; }
+  .msg.ok{ color: var(--ok); }
+  .msg.err{ color: var(--err); }
+
+  @media (max-width: 620px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="#" class="navbar-brand">
+    <span class="brand-icon">S</span>
+    Sistem Sekolah
+  </a>
+  <div class="navbar-links">
+    <a href="admin.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="content">
+<div class="wrap">
+  <h1 class="page-title">Identitas Sekolah</h1>
+  <p class="page-sub">Data profil sekolah. Formulir ini hanya menyimpan satu baris data — akan otomatis menambah data baru jika belum ada, atau memperbarui data yang sudah ada.</p>
+
+  <div class="card">
+    <span class="status-badge" id="statusBadge">
+      <span class="status-dot"></span>
+      <span id="statusText">Memuat data...</span>
+    </span>
+
+    <form id="formIdentitas">
+      <div class="grid">
+        <div class="field full">
+          <label for="nama_sekolah">Nama Sekolah</label>
+          <input type="text" id="nama_sekolah" required>
+        </div>
+
+        <div class="field">
+          <label for="npsn">NPSN</label>
+          <input type="text" id="npsn">
+        </div>
+
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="">Pilih status</option>
+            <option value="Negeri">Negeri</option>
+            <option value="Swasta">Swasta</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="semester">Semester</label>
+          <select id="semester">
+            <option value="">Pilih semester</option>
+            <option value="Ganjil">Ganjil</option>
+            <option value="Genap">Genap</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="tahun_pelajaran">Tahun Pelajaran</label>
+          <input type="text" id="tahun_pelajaran" placeholder="cth. 2025/2026">
+        </div>
+
+        <div class="field">
+          <label for="nama_kepsek">Nama Kepala Sekolah</label>
+          <input type="text" id="nama_kepsek">
+        </div>
+
+        <div class="field">
+          <label for="nip_kepsek">NIP Kepala Sekolah</label>
+          <input type="text" id="nip_kepsek">
+        </div>
+
+        <div class="field full">
+          <label for="alamat">Alamat Lengkap</label>
+          <textarea id="alamat"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+
+        <div class="field">
+          <label for="tlp">Telepon</label>
+          <input type="tel" id="tlp">
+        </div>
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-row">
+            <input type="password" id="password" autocomplete="new-password">
+            <button type="button" id="togglePw">Tampilkan</button>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Logo Sekolah</label>
+          <div class="logo-field">
+            <div class="logo-preview" id="logoPreview"><span>Belum ada logo</span></div>
+            <div class="logo-controls">
+              <label class="file-btn" for="logoInput">Pilih Gambar</label>
+              <input type="file" id="logoInput" accept="image/*">
+              <button type="button" class="clear-logo" id="clearLogo">Hapus logo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-buttons">
+          <button type="submit" class="btn-save" id="btnSave">Simpan</button>
+          <a href="admin.html" class="btn-cancel">Batal</a>
+        </div>
+        <span class="msg" id="msgText"></span>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+const TABLE = "profil";
+
+const headersBase = {
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+};
+
+let currentId = null; // null = belum ada data -> mode insert
+let currentLogoValue = "";
+
+const form = document.getElementById("formIdentitas");
+const btnSave = document.getElementById("btnSave");
+const msgText = document.getElementById("msgText");
+const statusBadge = document.getElementById("statusBadge");
+const statusText = document.getElementById("statusText");
+const logoPreview = document.getElementById("logoPreview");
+const logoInput = document.getElementById("logoInput");
+const togglePw = document.getElementById("togglePw");
+const passwordInput = document.getElementById("password");
+
+const fields = ["nama_sekolah","npsn","status","semester","tahun_pelajaran","nama_kepsek","nip_kepsek","alamat","email","tlp","username","password"];
+
+function setMsg(text, type){
+  msgText.textContent = text || "";
+  msgText.className = "msg" + (type ? " " + type : "");
+}
+
+function setStatusBadge(mode){
+  statusBadge.classList.remove("mode-insert","mode-update");
+  if(mode === "insert"){
+    statusBadge.classList.add("mode-insert");
+    statusText.textContent = "Belum ada data — Simpan akan menambah data baru";
+  } else if(mode === "update"){
+    statusBadge.classList.add("mode-update");
+    statusText.textContent = "Data ditemukan — Simpan akan memperbarui data";
+  } else {
+    statusText.textContent = "Memuat data...";
+  }
+}
+
+function renderLogoPreview(value){
+  if(value){
+    logoPreview.innerHTML = `<img src="${value}" alt="Logo sekolah">`;
+  } else {
+    logoPreview.innerHTML = `<span>Belum ada logo</span>`;
+  }
+}
+
+async function loadData(){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/${TABLE}?select=*&limit=1`, {
+      headers: headersBase
+    });
+    if(!res.ok) throw new Error("Gagal memuat data (" + res.status + ")");
+    const rows = await res.json();
+
+    if(rows && rows.length > 0){
+      const row = rows[0];
+      currentId = row.id;
+      fields.forEach(f => {
+        const el = document.getElementById(f);
+        if(el) el.value = row[f] ?? "";
+      });
+      currentLogoValue = row.logo ?? "";
+      renderLogoPreview(currentLogoValue);
+      setStatusBadge("update");
+    } else {
+      currentId = null;
+      setStatusBadge("insert");
+    }
+  }catch(err){
+    console.error(err);
+    setStatusBadge(null);
+    setMsg("Tidak dapat memuat data: " + err.message, "err");
+  }
+}
+
+logoInput.addEventListener("change", () => {
+  const file = logoInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentLogoValue = reader.result;
+    renderLogoPreview(currentLogoValue);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("clearLogo").addEventListener("click", () => {
+  currentLogoValue = "";
+  logoInput.value = "";
+  renderLogoPreview("");
+});
+
+togglePw.addEventListener("click", () => {
+  const isPw = passwordInput.type === "password";
+  passwordInput.type = isPw ? "text" : "password";
+  togglePw.textContent = isPw ? "Sembunyikan" : "Tampilkan";
+});
+
+function generateId(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setMsg("", "");
+  btnSave.disabled = true;
+  btnSave.textContent = "Menyimpan...";
+
+  const payload = {};
+  fields.forEach(f => {
+    payload[f] = document.getElementById(f).value.trim();
+  });
+  payload.logo = currentLogoValue || "";
+
+  try{
+    let res;
+    if(currentId){
+      // UPDATE
+      res = await fetch(`${SUPABASE_URL}/${TABLE}?id=eq.${encodeURIComponent(currentId)}`, {
+        method: "PATCH",
+        headers: {
+          ...headersBase,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      // INSERT
+      payload.id = generateId();
+      res = await fetch(`${SUPABASE_URL}/${TABLE}`, {
+        method: "POST",
+        headers: {
+          ...headersBase,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if(!res.ok){
+      const errBody = await res.text();
+      throw new Error(errBody || ("Status " + res.status));
+    }
+
+    const result = await res.json();
+    if(result && result.length > 0){
+      currentId = result[0].id;
+    }
+    setStatusBadge("update");
+    setMsg("Data berhasil disimpan.", "ok");
+  }catch(err){
+    console.error(err);
+    setMsg("Gagal menyimpan: " + err.message, "err");
+  }finally{
+    btnSave.disabled = false;
+    btnSave.textContent = "Simpan";
+  }
+});
+
+loadData();
+</script>
+</body>
+</html>

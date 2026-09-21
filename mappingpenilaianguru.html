@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapping Penilaian — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+    --footer-h:72px;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:20px;
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{width:100%; height:100%; object-fit:cover;}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 24px;
+  }
+
+  /* ---------- Panel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .panel-head-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:7px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:160px;
+  }
+  .panel-search:focus{border-color:var(--brick); outline:none;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    border-radius:6px;
+    padding:9px 16px;
+    cursor:pointer;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand); color:#FFFFFF;}
+  .btn-primary:hover{background:#5A3FCB;}
+  .btn-ghost{background:#fbf8f0; color:var(--ink); border-color:var(--paper-line);}
+  .btn-ghost:hover{border-color:var(--brick); color:var(--brick);}
+  .btn-sm{padding:6px 11px; font-size:0.76rem;}
+
+  /* ---------- Table ---------- */
+  .scroll-hint{
+    display:none;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+  @media (max-width:820px){ .scroll-hint{display:flex;} }
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:var(--brand) var(--paper-deep);
+    border-radius:6px;
+  }
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--brand); border-radius:6px;}
+
+  .preview-table{
+    width:100%;
+    min-width:820px;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  .preview-table th{
+    text-align:left;
+    font-size:0.7rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:2px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .preview-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--paper-line);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .preview-table td.truncate{
+    max-width:200px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .preview-table tbody tr:hover{background:var(--paper-deep);}
+  .preview-table .empty-row td{
+    white-space:normal;
+    text-align:center;
+    color:var(--ink-soft);
+    padding:22px 10px;
+  }
+  .kkm-pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+    background:#EFEAFB;
+    color:var(--brand);
+  }
+
+  .btn-mini{
+    font-family:inherit;
+    font-size:0.72rem;
+    font-weight:600;
+    border:none;
+    border-radius:5px;
+    padding:6px 10px;
+    margin-right:6px;
+    cursor:pointer;
+    color:#FFFFFF;
+  }
+  .btn-edit{background:var(--green);}
+  .btn-edit:hover{background:#146B44;}
+  .btn-del{background:var(--brick);}
+  .btn-del:hover{background:#B32559;}
+
+  .panel-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .pager{display:flex; align-items:center; gap:4px;}
+  .pager button{
+    font-family:inherit;
+    font-size:0.76rem;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:5px 9px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .pager button:disabled{opacity:0.45; cursor:not-allowed;}
+
+  /* ---------- Footer sticky ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    height:var(--footer-h);
+    background:var(--turquoise);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    z-index:30;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-size:0.75rem;
+    font-weight:600;
+    width:140px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-divider{width:1px; background:rgba(59,46,99,0.2); margin:14px 0;}
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+
+  /* ---------- Bottom sheet (menu & form) ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.2s ease;
+    z-index:40;
+  }
+  .sheet-backdrop.open{opacity:1; visibility:visible;}
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    padding:10px 20px calc(20px + var(--footer-h));
+    max-width:640px;
+    margin:0 auto;
+    transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.3,1);
+    z-index:41;
+    max-height:86vh;
+    overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+  .sheet-handle{width:40px; height:4px; background:var(--paper-line); border-radius:2px; margin:8px auto 16px;}
+  .sheet h3{font-family:'Newsreader',serif; font-weight:500; font-size:1.15rem; margin:0 0 16px;}
+
+  .menu-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .menu-item{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; text-align:center;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:16px 8px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:0.78rem;
+    font-weight:500;
+    line-height:1.25;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:hover{border-color:var(--brick); background:#FFE3EE;}
+  .menu-item svg{width:22px; height:22px; color:var(--brick);}
+  .menu-item.current{border-color:var(--brand); background:#EFEAFB;}
+  .menu-item.current svg{color:var(--brand);}
+
+  /* ---------- Form ---------- */
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 16px;
+  }
+  .form-group{display:flex; flex-direction:column; gap:5px;}
+  .form-group.full{grid-column:1 / -1;}
+  .form-group label{
+    font-size:0.74rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea{
+    font-family:inherit;
+    font-size:0.9rem;
+    padding:9px 11px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    width:100%;
+  }
+  .form-group textarea{resize:vertical; min-height:64px;}
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus{border-color:var(--brand); outline:none;}
+  .kode-row{display:flex; gap:8px;}
+  .kode-row input{flex:1; min-width:0;}
+  .form-msg{
+    font-size:0.8rem;
+    margin:12px 0 0;
+    min-height:1.1em;
+  }
+  .form-msg.error{color:var(--brick);}
+  .form-msg.success{color:var(--green);}
+  .form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  @media (max-width:560px){
+    main{padding-left:5px; padding-right:5px;}
+    .navbar{padding-left:5px; padding-right:5px;}
+    .panel{padding:16px 12px;}
+    .form-grid{grid-template-columns:1fr;}
+    .menu-grid{grid-template-columns:repeat(3,1fr);}
+    .school-name{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+    <div class="admin-account">
+      <span class="avatar" id="guruAvatar">GR</span>
+      <span class="admin-name" id="guruName">Guru</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-heading">Mapping Penilaian</h1>
+  <p class="page-sub">Atur pemetaan mata pelajaran, kelas, dan jenis penilaian di sini. Data ini akan menjadi acuan saat membuat soal.</p>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Daftar Mapping Penilaian</h3>
+      <div class="panel-head-actions">
+        <input type="text" class="panel-search" id="searchInput" placeholder="Cari kode / mapel / kelas...">
+        <button type="button" class="btn btn-ghost" id="btnDashboard">Dashboard</button>
+        <button type="button" class="btn btn-primary" id="btnTambah">+ Tambah Mapping</button>
+      </div>
+    </div>
+
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+
+    <div class="table-wrap">
+      <table class="preview-table" id="tableMapping">
+        <thead>
+          <tr>
+            <th>Kode Mapping</th>
+            <th>Mata Pelajaran</th>
+            <th>Kelas</th>
+            <th>Jenis Penilaian</th>
+            <th>KKM</th>
+            <th>Tujuan Pembelajaran</th>
+            <th>Capaian Pembelajaran</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row"><td colspan="8">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel-foot">
+      <span id="entriesInfo">Menampilkan 0 entri</span>
+      <div class="pager">
+        <button type="button" id="btnPrev" disabled>Sebelumnya</button>
+        <button type="button" id="btnNext" disabled>Berikutnya</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+
+<!-- Bottom sheet: Form Tambah/Edit Mapping -->
+<div class="sheet-backdrop" id="formBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="formSheetTitle">
+    <div class="sheet-handle"></div>
+    <h3 id="formSheetTitle">Tambah Mapping Penilaian</h3>
+    <form id="mappingForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="inputMapel">Mata Pelajaran</label>
+          <select id="inputMapel" required>
+            <option value="" disabled selected>Memuat data mapel...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputKelas">Kelas</label>
+          <select id="inputKelas" required>
+            <option value="" disabled selected>Memuat data kelas...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputJenis">Jenis Penilaian</label>
+          <select id="inputJenis" required>
+            <option value="" disabled selected>Pilih jenis penilaian</option>
+            <option value="UH1">UH1</option>
+            <option value="UH2">UH2</option>
+            <option value="UH3">UH3</option>
+            <option value="UH4">UH4</option>
+            <option value="UH5">UH5</option>
+            <option value="UH6">UH6</option>
+            <option value="UTS">UTS</option>
+            <option value="UAS">UAS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputKkm">KKM</label>
+          <input type="number" id="inputKkm" min="0" max="100" step="1" required placeholder="Mis. 75">
+        </div>
+        <div class="form-group">
+          <label for="inputBentukSoal">Bentuk Soal</label>
+          <select id="inputBentukSoal" required>
+            <option value="" disabled selected>Pilih bentuk soal</option>
+            <option value="Essay">Essay</option>
+            <option value="Pilihan Ganda">Pilihan Ganda</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label for="inputKode">Kode Mapping</label>
+          <div class="kode-row">
+            <input type="text" id="inputKode" required placeholder="Mis. MTK-7A-UH1">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnBuatKode">Buat Otomatis</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label for="inputTujuan">Tujuan Pembelajaran</label>
+          <textarea id="inputTujuan" placeholder="Tuliskan tujuan pembelajaran..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label for="inputCapaian">Capaian Pembelajaran</label>
+          <textarea id="inputCapaian" placeholder="Tuliskan capaian pembelajaran..."></textarea>
+        </div>
+      </div>
+      <p class="form-msg" id="formMsg"></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="btnBatal">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btnSimpan">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const TABLE = "mappingpenilaian";
+
+  function sbHeaders(extra){
+    return Object.assign({
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    }, extra || {});
+  }
+
+  // ---------- Auth guard: pastikan ada sesi guru ----------
+  function getGuruSession(){
+    try{
+      const raw = localStorage.getItem('guru_session');
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  const guruSession = getGuruSession();
+  if(!guruSession){
+    window.location.href = 'guru.html';
+  }
+
+  function getInitials(nama){
+    return nama.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  }
+
+  (function renderGuruAccount(){
+    if(!guruSession) return;
+    const nama = guruSession.nama_guru || guruSession.nama || 'Guru';
+    document.getElementById('guruName').textContent = nama;
+    document.getElementById('guruAvatar').textContent = getInitials(nama) || 'GR';
+  })();
+
+  // ---------- Ambil logo & nama sekolah dari tabel "profil" ----------
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo&limit=1`, { headers: sbHeaders() });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+      if(profil.nama_sekolah) document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){ console.error('Gagal memuat profil sekolah:', err); }
+  })();
+
+  // ---------- Ambil daftar Mata Pelajaran yang diampu guru (tabel datamapel) ----------
+  // Dicocokkan lewat NIP guru (lebih unik) dari tabel "dataguru"; fallback ke
+  // nama guru kalau NIP tidak ditemukan. guruMapelList: null = belum dimuat,
+  // [] = tidak ada mapel yang ditugaskan, [...] = daftar mapel yang diampu.
+  let guruMapelList = null;
+
+  async function loadGuruMapelList(){
+    try{
+      let nip = null;
+      let namaGuru = guruSession.nama_guru || guruSession.nama || '';
+
+      try{
+        const guruUrl = guruSession.id
+          ? `${SUPABASE_URL}/dataguru?id=eq.${encodeURIComponent(guruSession.id)}&select=nama_guru,nip&limit=1`
+          : `${SUPABASE_URL}/dataguru?nama_guru=eq.${encodeURIComponent(namaGuru)}&select=nama_guru,nip&limit=1`;
+        const guruRes = await fetch(guruUrl, { headers: sbHeaders() });
+        if(guruRes.ok){
+          const guruRows = await guruRes.json();
+          const guru = guruRows && guruRows[0];
+          if(guru){
+            namaGuru = guru.nama_guru || namaGuru;
+            nip = guru.nip || null;
+          }
+        }
+      }catch(e){
+        console.error('Gagal memuat identitas guru untuk filter mapel:', e);
+      }
+
+      const url = nip
+        ? `${SUPABASE_URL}/datamapel?nip=eq.${encodeURIComponent(nip)}&select=nama_mapel&order=nama_mapel.asc`
+        : `${SUPABASE_URL}/datamapel?guru_pengajar=eq.${encodeURIComponent(namaGuru)}&select=nama_mapel&order=nama_mapel.asc`;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      guruMapelList = rows.map(r => r.nama_mapel).filter(Boolean);
+    }catch(err){
+      console.error('Gagal memuat mata pelajaran yang diampu guru:', err);
+      guruMapelList = []; // gagal ambil -> anggap kosong, supaya tidak bocor mapel guru lain
+    }
+  }
+
+  // Isi dropdown "Mata Pelajaran" di form Tambah/Edit hanya dengan mapel milik guru ini.
+  function loadMapelOptions(){
+    const select = document.getElementById('inputMapel');
+    const list = guruMapelList || [];
+    if(list.length === 0){
+      select.innerHTML = '<option value="" disabled selected>Anda belum memiliki mata pelajaran yang ditugaskan</option>';
+      return;
+    }
+    select.innerHTML = '<option value="" disabled selected>Pilih mata pelajaran</option>' +
+      list.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+  }
+
+  // ---------- Ambil daftar Kelas (tabel rombel) ----------
+  async function loadKelasOptions(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/rombel?select=nama_rombel&order=nama_rombel.asc`, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      const select = document.getElementById('inputKelas');
+      select.innerHTML = '<option value="" disabled selected>Pilih kelas</option>';
+      rows.forEach(row=>{
+        if(!row.nama_rombel) return;
+        const opt = document.createElement('option');
+        opt.value = row.nama_rombel;
+        opt.textContent = row.nama_rombel;
+        select.appendChild(opt);
+      });
+      if(rows.length === 0){
+        select.innerHTML = '<option value="" disabled selected>Belum ada data rombel</option>';
+      }
+    }catch(err){
+      console.error('Gagal memuat data rombel:', err);
+      document.getElementById('inputKelas').innerHTML = '<option value="" disabled selected>Gagal memuat data rombel</option>';
+    }
+  }
+
+  // ================= State & Pagination =================
+  const PAGE_SIZE = 10;
+  let currentPage = 0;
+  let searchTerm = '';
+  let totalRows = 0;
+  let editingKode = null; // kode_mapping yang sedang diedit, null = mode tambah
+
+  const tableBody = document.getElementById('tableBody');
+  const entriesInfo = document.getElementById('entriesInfo');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  function escapeHtml(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  async function fetchMapping(){
+    const list = guruMapelList || [];
+    if(list.length === 0){
+      totalRows = 0;
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Anda belum memiliki mata pelajaran yang ditugaskan.</td></tr>';
+      renderFoot(0, 0);
+      return;
+    }
+
+    tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Memuat data...</td></tr>';
+    const offset = currentPage * PAGE_SIZE;
+    // Batasi hanya mapel yang diampu guru ini, supaya guru tidak melihat
+    // mapping penilaian mata pelajaran lain.
+    const mapelFilter = list.map(m => encodeURIComponent(m)).join(',');
+    let url = `${SUPABASE_URL}/${TABLE}?select=*&order=kode_mapping.asc&mata_pelajaran=in.(${mapelFilter})`;
+    const term = searchTerm.trim();
+    if(term){
+      const q = encodeURIComponent(term);
+      url += `&or=(kode_mapping.ilike.*${q}*,kelas.ilike.*${q}*,jenis_penilaian.ilike.*${q}*)`;
+    }
+    try{
+      const res = await fetch(url, {
+        headers: sbHeaders({
+          "Range-Unit": "items",
+          "Range": `${offset}-${offset + PAGE_SIZE - 1}`,
+          "Prefer": "count=exact"
+        })
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+
+      const range = res.headers.get('content-range'); // format "0-9/42"
+      totalRows = range ? parseInt(range.split('/')[1], 10) || 0 : rows.length;
+
+      renderTable(rows);
+      renderFoot(offset, rows.length);
+    }catch(err){
+      console.error('Gagal memuat mapping penilaian:', err);
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Gagal memuat data. Pastikan tabel "mappingpenilaian" sudah dibuat di Supabase.</td></tr>';
+      entriesInfo.textContent = 'Menampilkan 0 entri';
+      btnPrev.disabled = true;
+      btnNext.disabled = true;
+    }
+  }
+
+  function renderTable(rows){
+    if(!rows || rows.length === 0){
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada data mapping penilaian.</td></tr>';
+      return;
+    }
+    tableBody.innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHtml(row.kode_mapping)}</td>
+        <td>${escapeHtml(row.mata_pelajaran)}</td>
+        <td>${escapeHtml(row.kelas)}</td>
+        <td>${escapeHtml(row.jenis_penilaian)}</td>
+        <td><span class="kkm-pill">${escapeHtml(row.kkm)}</span></td>
+        <td class="truncate" title="${escapeHtml(row.tujuan_pembelajaran)}">${escapeHtml(row.tujuan_pembelajaran) || '-'}</td>
+        <td class="truncate" title="${escapeHtml(row.capaian_pembelajaran)}">${escapeHtml(row.capaian_pembelajaran) || '-'}</td>
+        <td>
+          <button type="button" class="btn-mini btn-edit" data-kode="${escapeHtml(row.kode_mapping)}">Edit</button>
+          <button type="button" class="btn-mini btn-del" data-kode="${escapeHtml(row.kode_mapping)}">Hapus</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tableBody.querySelectorAll('.btn-edit').forEach(btn=>{
+      btn.addEventListener('click', ()=> openEditForm(btn.dataset.kode));
+    });
+    tableBody.querySelectorAll('.btn-del').forEach(btn=>{
+      btn.addEventListener('click', ()=> deleteMapping(btn.dataset.kode));
+    });
+  }
+
+  function renderFoot(offset, countInPage){
+    if(totalRows === 0){
+      entriesInfo.textContent = 'Menampilkan 0 entri';
+    } else {
+      const start = offset + 1;
+      const end = offset + countInPage;
+      entriesInfo.textContent = `Menampilkan ${start} - ${end} dari ${totalRows} entri`;
+    }
+    btnPrev.disabled = currentPage === 0;
+    btnNext.disabled = (offset + countInPage) >= totalRows;
+  }
+
+
+  btnPrev.addEventListener('click', ()=>{
+    if(currentPage > 0){ currentPage--; fetchMapping(); }
+  });
+  btnNext.addEventListener('click', ()=>{
+    currentPage++; fetchMapping();
+  });
+
+  let searchDebounce;
+  document.getElementById('searchInput').addEventListener('input', (e)=>{
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(()=>{
+      searchTerm = e.target.value;
+      currentPage = 0;
+      fetchMapping();
+    }, 350);
+  });
+
+  // ================= Form Tambah / Edit =================
+  const formBackdrop = document.getElementById('formBackdrop');
+  const mappingForm = document.getElementById('mappingForm');
+  const formSheetTitle = document.getElementById('formSheetTitle');
+  const formMsg = document.getElementById('formMsg');
+  const inputKode = document.getElementById('inputKode');
+  const inputMapel = document.getElementById('inputMapel');
+  const inputKelas = document.getElementById('inputKelas');
+  const inputJenis = document.getElementById('inputJenis');
+  const inputKkm = document.getElementById('inputKkm');
+  const inputBentukSoal = document.getElementById('inputBentukSoal');
+  const inputTujuan = document.getElementById('inputTujuan');
+  const inputCapaian = document.getElementById('inputCapaian');
+
+  function setFormMsg(text, type){
+    formMsg.textContent = text || '';
+    formMsg.className = 'form-msg' + (type ? ' ' + type : '');
+  }
+
+  function resetForm(){
+    mappingForm.reset();
+    inputKode.readOnly = false;
+    editingKode = null;
+    setFormMsg('');
+  }
+
+  function openAddForm(){
+    resetForm();
+    formSheetTitle.textContent = 'Tambah Mapping Penilaian';
+    formBackdrop.classList.add('open');
+  }
+
+  function openEditForm(kode){
+    resetForm();
+    formSheetTitle.textContent = 'Edit Mapping Penilaian';
+    formBackdrop.classList.add('open');
+    setFormMsg('Memuat data...', '');
+
+    fetch(`${SUPABASE_URL}/${TABLE}?kode_mapping=eq.${encodeURIComponent(kode)}&select=*&limit=1`, { headers: sbHeaders() })
+      .then(res=>{
+        if(!res.ok) throw new Error('Status ' + res.status);
+        return res.json();
+      })
+      .then(rows=>{
+        const row = rows && rows[0];
+        if(!row){ setFormMsg('Data tidak ditemukan.', 'error'); return; }
+        editingKode = row.kode_mapping;
+        inputKode.value = row.kode_mapping || '';
+        inputKode.readOnly = true; // kode mapping jadi kunci, dikunci saat edit
+        inputMapel.value = row.mata_pelajaran || '';
+        inputKelas.value = row.kelas || '';
+        inputJenis.value = row.jenis_penilaian || '';
+        inputKkm.value = row.kkm ?? '';
+        inputBentukSoal.value = row.bentuk_soal || '';
+        inputTujuan.value = row.tujuan_pembelajaran || '';
+        inputCapaian.value = row.capaian_pembelajaran || '';
+        setFormMsg('');
+      })
+      .catch(err=>{
+        console.error('Gagal memuat data mapping:', err);
+        setFormMsg('Gagal memuat data mapping.', 'error');
+      });
+  }
+
+  function closeForm(){
+    formBackdrop.classList.remove('open');
+    resetForm();
+  }
+
+  document.getElementById('btnDashboard').addEventListener('click', ()=>{
+    window.location.href = 'adminguru.html';
+  });
+  document.getElementById('btnTambah').addEventListener('click', openAddForm);
+  document.getElementById('btnBatal').addEventListener('click', closeForm);
+  formBackdrop.addEventListener('click', (e)=>{
+    if(e.target === formBackdrop) closeForm();
+  });
+
+  // ---------- Buat kode mapping otomatis ----------
+  function abbrJenis(text){
+    // Jenis Penilaian sekarang sudah berupa kode pendek (UH1..UH6, UTS, UAS)
+    return text.trim().toUpperCase().replace(/\s+/g,'');
+  }
+  function abbrMapel(text){
+    const clean = text.trim().toUpperCase().replace(/[^A-Z]/g,'');
+    return clean.slice(0,3) || 'MPL';
+  }
+  document.getElementById('btnBuatKode').addEventListener('click', async ()=>{
+    const mapel = inputMapel.value.trim();
+    const kelas = inputKelas.value.trim();
+    const jenis = inputJenis.value.trim();
+    const bentukSoal = inputBentukSoal.value;
+    if(!mapel || !kelas || !jenis || !bentukSoal){
+      setFormMsg('Pilih Mata Pelajaran, Kelas, Jenis Penilaian, dan Bentuk Soal dahulu untuk membuat kode otomatis.', 'error');
+      return;
+    }
+    const baseKode = [abbrMapel(mapel), kelas.toUpperCase().replace(/\s+/g,''), abbrJenis(jenis)].filter(Boolean).join('-');
+    const suffixBentuk = bentukSoal === 'Pilihan Ganda' ? 'PG' : 'ES';
+
+    const btnBuatKode = document.getElementById('btnBuatKode');
+    btnBuatKode.disabled = true;
+    setFormMsg('Membuat kode unik...', '');
+    try{
+      const kode = await buatKodeMappingUnik(baseKode, suffixBentuk);
+      inputKode.value = kode;
+      setFormMsg('');
+    }catch(err){
+      console.error('Gagal membuat kode mapping unik:', err);
+      // Fallback: tetap beri angka acak walau pengecekan ke server gagal
+      const rand = String(Math.floor(Math.random() * 900 + 100));
+      inputKode.value = `${baseKode}-${rand}-${suffixBentuk}`;
+      setFormMsg('Gagal memeriksa keunikan kode ke server. Periksa kembali sebelum menyimpan.', 'error');
+    }finally{
+      btnBuatKode.disabled = false;
+    }
+  });
+
+  // Buat kode mapping dengan akhiran 3 digit acak + kode bentuk soal
+  // (mis. MTK-7A-UH1-042-PG) yang dipastikan belum pernah dipakai
+  // dengan mengecek ke Supabase.
+  async function buatKodeMappingUnik(baseKode, suffixBentuk){
+    for(let attempt = 0; attempt < 20; attempt++){
+      const rand = String(Math.floor(Math.random() * 900 + 100)); // 3 digit: 100-999
+      const kandidat = `${baseKode}-${rand}-${suffixBentuk}`;
+      const res = await fetch(
+        `${SUPABASE_URL}/${TABLE}?kode_mapping=eq.${encodeURIComponent(kandidat)}&select=kode_mapping&limit=1`,
+        { headers: sbHeaders() }
+      );
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      if(rows.length === 0){
+        return kandidat; // belum dipakai, aman digunakan
+      }
+      // kalau kebetulan sudah dipakai, ulangi dengan angka acak baru
+    }
+    throw new Error('Gagal menemukan kode unik setelah beberapa percobaan.');
+  }
+
+
+  // ---------- Submit form (tambah / edit) ----------
+  mappingForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const payload = {
+      kode_mapping: inputKode.value.trim(),
+      mata_pelajaran: inputMapel.value.trim(),
+      kelas: inputKelas.value.trim(),
+      jenis_penilaian: inputJenis.value.trim(),
+      kkm: inputKkm.value === '' ? null : Number(inputKkm.value),
+      bentuk_soal: inputBentukSoal.value,
+      tujuan_pembelajaran: inputTujuan.value.trim(),
+      capaian_pembelajaran: inputCapaian.value.trim()
+    };
+
+    if(!payload.kode_mapping || !payload.mata_pelajaran || !payload.kelas || !payload.jenis_penilaian || payload.kkm === null || !payload.bentuk_soal){
+      setFormMsg('Mohon lengkapi semua field yang wajib diisi.', 'error');
+      return;
+    }
+
+    const btnSimpan = document.getElementById('btnSimpan');
+    btnSimpan.disabled = true;
+    setFormMsg('Menyimpan...', '');
+
+    try{
+      let res;
+      if(editingKode){
+        res = await fetch(`${SUPABASE_URL}/${TABLE}?kode_mapping=eq.${encodeURIComponent(editingKode)}`, {
+          method: 'PATCH',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch(`${SUPABASE_URL}/${TABLE}`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(payload)
+        });
+      }
+
+      if(!res.ok){
+        const errText = await res.text();
+        console.error('Supabase error:', errText);
+        if(res.status === 409 || /duplicate/i.test(errText)){
+          setFormMsg('Kode Mapping sudah dipakai. Gunakan kode lain.', 'error');
+        } else {
+          setFormMsg('Gagal menyimpan data. Periksa kembali isian Anda.', 'error');
+        }
+        btnSimpan.disabled = false;
+        return;
+      }
+
+      closeForm();
+      fetchMapping();
+    }catch(err){
+      console.error('Gagal menyimpan mapping:', err);
+      if(err.name === 'TypeError' && /fetch/i.test(err.message)){
+        setFormMsg('Koneksi internet terputus/berubah saat menyimpan. Periksa koneksi Anda dan coba lagi.', 'error');
+      } else {
+        setFormMsg('Terjadi kesalahan tak terduga. Coba lagi.', 'error');
+      }
+    }finally{
+      btnSimpan.disabled = false;
+    }
+  });
+
+  // ---------- Hapus mapping ----------
+  async function deleteMapping(kode){
+    if(!confirm(`Hapus mapping penilaian "${kode}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE}?kode_mapping=eq.${encodeURIComponent(kode)}`, {
+        method: 'DELETE',
+        headers: sbHeaders({ 'Prefer': 'return=minimal' })
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      fetchMapping();
+    }catch(err){
+      console.error('Gagal menghapus mapping:', err);
+      alert('Gagal menghapus data. Coba lagi.');
+    }
+  }
+
+  // ---------- Escape key: tutup form ----------
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){
+      closeForm();
+    }
+  });
+
+  // ---------- Init ----------
+  (async function init(){
+    await loadGuruMapelList();
+    loadMapelOptions();
+    loadKelasOptions();
+    fetchMapping();
+  })();
+</script>
+
+</body>
+</html>

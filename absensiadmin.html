@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kehadiran Siswa — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+    --blue:#2F80ED;
+    --orange:#F2994A;
+    --footer-h:72px;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--footer-h) + 20px);
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{width:100%; height:100%; object-fit:cover;}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
+  .school-name{font-size:0.92rem; font-weight:500; color:var(--paper); max-width:32ch;}
+  .term-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem; letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px; border-radius:999px; white-space:nowrap;
+  }
+  .term-badge .dot{width:5px; height:5px; border-radius:50%; background:var(--gold); flex-shrink:0;}
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:var(--gold); color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{font-size:0.92rem; color:var(--ink-soft); margin:0;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Inter',sans-serif;
+    font-size:0.86rem;
+    font-weight:600;
+    border-radius:8px;
+    padding:10px 18px;
+    border:1px solid transparent;
+    cursor:pointer;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:filter 0.15s ease, transform 0.1s ease;
+    flex-shrink:0;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn:active{transform:translateY(1px);}
+  .btn svg{width:16px; height:16px; flex-shrink:0;}
+  .btn-secondary{background:#fffdf7; color:var(--ink); border-color:var(--paper-line);}
+  .btn-primary{background:var(--brick); color:#FFFFFF;}
+  .btn-export{padding:8px 14px; font-size:0.8rem;}
+
+  /* ---------- Ringkasan kehadiran ---------- */
+  .section-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:6px 0 14px;
+  }
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:14px;
+    margin-bottom:24px;
+    min-width:0;
+  }
+  .stat-card{
+    background:var(--stat-bg, var(--brand));
+    border-radius:10px;
+    padding:16px 18px;
+    color:#FFFFFF;
+    box-shadow:0 6px 16px rgba(0,0,0,0.12);
+  }
+  .stat-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+  .stat-value{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:1.9rem;
+    margin:0;
+    line-height:1;
+  }
+  .stat-label{font-size:0.8rem; margin:6px 0 0; color:rgba(255,255,255,0.9);}
+  .stat-icon{
+    width:36px; height:36px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.22);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .stat-icon svg{width:18px; height:18px; color:#FFFFFF;}
+
+  /* ---------- Panel & tabel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .panel-filters{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .panel-search, select.panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:7px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:140px;
+  }
+  .panel-search:focus{border-color:var(--brick); outline:none;}
+  .scroll-hint{
+    display:none;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+  @media (max-width:820px){ .scroll-hint{display:flex;} }
+  .table-wrap{overflow-x:auto;}
+  table.data-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.86rem;
+    min-width:640px;
+  }
+  table.data-table th{
+    text-align:left;
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:0 10px 10px;
+    border-bottom:1px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  table.data-table td{
+    padding:12px 10px;
+    border-bottom:1px solid var(--paper-line);
+    vertical-align:middle;
+    white-space:nowrap;
+  }
+  table.data-table tr:last-child td{border-bottom:none;}
+  .empty-state{
+    text-align:center;
+    padding:36px 12px;
+    color:var(--ink-soft);
+    font-size:0.88rem;
+  }
+  .table-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .id-absensi-mini{font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--ink-soft);}
+  .keterangan-badge{
+    display:inline-block;
+    font-size:0.72rem;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .keterangan-badge.badge-hadir{border-color:var(--green); background:#E4F6EC; color:var(--green);}
+  .keterangan-badge.badge-sakit{border-color:var(--orange); background:#FCEFE3; color:var(--orange);}
+  .keterangan-badge.badge-ijin{border-color:var(--blue); background:#E7F0FE; color:var(--blue);}
+  .keterangan-badge.badge-tanpaketerangan{border-color:var(--brick); background:#FCE4EC; color:var(--brick);}
+
+  /* ---------- Footer sticky ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    height:var(--footer-h);
+    background:var(--turquoise);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    z-index:30;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-size:0.75rem;
+    font-weight:600;
+    width:140px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-divider{width:1px; background:rgba(59,46,99,0.2); margin:14px 0;}
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+
+  /* ---------- Bottom sheet menu ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.28s ease, visibility 0s linear 0.28s;
+    z-index:40;
+  }
+  .sheet-backdrop.open{
+    opacity:1; visibility:visible;
+    transition:opacity 0.28s ease, visibility 0s linear 0s;
+  }
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    padding:10px 20px calc(20px + var(--footer-h));
+    max-width:640px;
+    margin:0 auto;
+    transform:translateY(100%);
+    transition:transform 0.32s cubic-bezier(.32,.72,.33,1);
+    z-index:41;
+    max-height:78vh;
+    overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+  .sheet-handle{width:40px; height:4px; background:var(--paper-line); border-radius:2px; margin:8px auto 16px;}
+  .sheet h3{font-family:'Newsreader',serif; font-weight:500; font-size:1.15rem; margin:0 0 16px;}
+  .menu-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .menu-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-align:center;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:16px 8px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:0.78rem;
+    font-weight:500;
+    line-height:1.25;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:hover{border-color:var(--brick); background:#FFE3EE;}
+  .menu-item svg{width:22px; height:22px; color:var(--brick);}
+  .menu-item.active{border-color:var(--brick); background:#FFE3EE;}
+
+  @media (max-width:520px){
+    .menu-grid{grid-template-columns:repeat(3,1fr);}
+    .nav-schoolinfo{display:none;}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar">AD</span>
+      <span class="admin-name">Admin</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div>
+      <h1 class="page-heading">Kehadiran Siswa</h1>
+      <p class="page-sub">Seluruh data kehadiran siswa dari semua rombel, ditarik dari tabel absensikehadiran.</p>
+    </div>
+    <a class="btn btn-secondary" href="admin.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Dashboard
+    </a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card" style="--stat-bg:var(--brand);">
+      <div class="stat-top">
+        <div>
+          <p class="stat-value" id="statTotal">–</p>
+          <p class="stat-label">Total Catatan</p>
+        </div>
+        <span class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="stat-card" style="--stat-bg:var(--green);">
+      <div class="stat-top">
+        <div>
+          <p class="stat-value" id="statHadir">–</p>
+          <p class="stat-label">Hadir</p>
+        </div>
+        <span class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 15l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="stat-card" style="--stat-bg:var(--orange);">
+      <div class="stat-top">
+        <div>
+          <p class="stat-value" id="statSakit">–</p>
+          <p class="stat-label">Sakit</p>
+        </div>
+        <span class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="stat-card" style="--stat-bg:var(--blue);">
+      <div class="stat-top">
+        <div>
+          <p class="stat-value" id="statIjin">–</p>
+          <p class="stat-label">Ijin</p>
+        </div>
+        <span class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="stat-card" style="--stat-bg:var(--brick);">
+      <div class="stat-top">
+        <div>
+          <p class="stat-value" id="statAlpa">–</p>
+          <p class="stat-label">Tanpa Keterangan</p>
+        </div>
+        <span class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Daftar Kehadiran Semua Rombel</h2>
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Kehadiran</h3>
+      <div class="panel-filters">
+        <select class="panel-search" id="filterKelasAbsensi">
+          <option value="">Semua Kelas</option>
+        </select>
+        <input type="date" class="panel-search" id="filterTanggalAbsensiAdmin">
+        <input type="text" class="panel-search" id="searchAbsensiAdmin" placeholder="Cari nama siswa...">
+        <button class="btn btn-secondary btn-export" id="resetFilterAbsensiAdmin" type="button">Reset</button>
+        <span class="table-count" id="totalAbsensiAdminText">–</span>
+        <button class="btn btn-secondary btn-export" id="exportAbsensiAdminPdfBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 18h4"/></svg>
+          Export PDF
+        </button>
+      </div>
+    </div>
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+    <div class="table-wrap">
+      <table class="data-table" id="tableAbsensiAdmin">
+        <thead>
+          <tr><th>No</th><th>Tanggal</th><th>Kelas</th><th>Nama Siswa</th><th>NISN</th><th>Id Absensi</th><th>Keterangan</th></tr>
+        </thead>
+        <tbody id="tableAbsensiAdminBody">
+          <tr><td class="empty-state">Memuat data kehadiran...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Footer sticky -->
+<div class="footer-bar">
+  <button class="footer-btn" id="openMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    Menu
+  </button>
+  <div class="footer-divider"></div>
+  <button class="footer-btn logout" id="logoutBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Log Out
+  </button>
+</div>
+
+<!-- Bottom sheet menu -->
+<div class="sheet-backdrop" id="sheetBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetHeading">
+    <div class="sheet-handle"></div>
+    <h3 id="sheetHeading">Menu</h3>
+    <div class="menu-grid">
+      <a class="menu-item" href="identitassekolah.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+        Profil Sekolah
+      </a>
+      <a class="menu-item" href="rombel.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Rombongan Belajar
+      </a>
+      <a class="menu-item" href="datasiswa.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        Data Siswa
+      </a>
+      <a class="menu-item" href="dataguru.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3.5"/><path d="M5 21c0-4.5 3.5-7 7-7s7 2.5 7 7"/><path d="M17 4l1.5 1.5L21 3"/></svg>
+        Data Guru
+      </a>
+      <a class="menu-item" href="walikelas.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V6a2 2 0 0 1 2-2h9l5 5v10.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M15 4v5h5"/><circle cx="10" cy="13" r="2"/><path d="M6.5 19c.3-2 1.7-3.3 3.5-3.3s3.2 1.3 3.5 3.3"/></svg>
+        Wali Kelas
+      </a>
+      <a class="menu-item active" href="#" id="menuKehadiranSiswa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>
+        Kehadiran Siswa
+      </a>
+      <a class="menu-item" href="matapelajaran.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h5"/></svg>
+        Mata Pelajaran
+      </a>
+      <a class="menu-item" href="daftarnilairombel.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16"/><path d="M9 10v10"/></svg>
+        Daftar Nilai Per Rombel
+      </a>
+      <a class="menu-item" href="backupreset.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+        Back Up &amp; Reset
+      </a>
+      <a class="menu-item" href="restore.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Restore
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const sbHeaders = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY
+  };
+  const TABLE_ABSENSI = "absensikehadiran";
+
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[c]));
+  }
+
+  function keteranganSlug(value){
+    return String(value || '').toLowerCase().replace(/\s+/g, '');
+  }
+
+  function keteranganBadgeHtml(keterangan){
+    const slug = keteranganSlug(keterangan);
+    return `<span class="keterangan-badge badge-${slug}">${escapeHtml(keterangan || '-')}</span>`;
+  }
+
+  function formatTanggalIndo(iso){
+    if(!iso) return '-';
+    const d = new Date(iso + 'T00:00:00');
+    if(isNaN(d.getTime())) return escapeHtml(iso);
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // ---------- Profil sekolah (navbar + kop surat PDF) ----------
+  let schoolProfil = {};
+
+  async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran,npsn,status,alamat,tlp,email&limit=1`, { headers: sbHeaders });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+      schoolProfil = profil;
+
+      if(profil.nama_sekolah){
+        document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      }
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          document.getElementById('termBadge').style.display = 'none';
+        }
+      }
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){
+      console.error('Gagal memuat profil sekolah:', err);
+    }
+  }
+  loadSchoolProfile();
+
+  function getImageFormatFromDataUri(dataUri){
+    const m = /^data:image\/(png|jpe?g|webp);base64,/i.exec(String(dataUri || ''));
+    if(!m) return null;
+    const ext = m[1].toLowerCase();
+    if(ext === 'jpg' || ext === 'jpeg') return 'JPEG';
+    if(ext === 'webp') return 'WEBP';
+    return 'PNG';
+  }
+
+  function addKopSurat(doc, judul){
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginLeft = 14;
+    const logoSize = 20;
+    let textX = marginLeft;
+
+    if(schoolProfil.logo){
+      const fmt = getImageFormatFromDataUri(schoolProfil.logo);
+      if(fmt){
+        try{
+          doc.addImage(schoolProfil.logo, fmt, marginLeft, 10, logoSize, logoSize);
+          textX = marginLeft + logoSize + 6;
+        }catch(err){
+          console.warn('Gagal menambahkan logo ke PDF:', err);
+        }
+      }
+    }
+
+    let y = 15;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(13);
+    doc.text(schoolProfil.nama_sekolah || 'Nama Sekolah', textX, y);
+    y += 5;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    const maxWidth = pageWidth - textX - marginLeft;
+
+    const baris1 = [];
+    if(schoolProfil.npsn) baris1.push(`NPSN: ${schoolProfil.npsn}`);
+    if(schoolProfil.status) baris1.push(schoolProfil.status);
+    if(baris1.length){
+      doc.text(baris1.join('  •  '), textX, y);
+      y += 4.5;
+    }
+
+    if(schoolProfil.alamat){
+      const alamatLines = doc.splitTextToSize(schoolProfil.alamat, maxWidth);
+      doc.text(alamatLines, textX, y);
+      y += alamatLines.length * 4.5;
+    }
+
+    const kontak = [];
+    if(schoolProfil.tlp) kontak.push(`Telp: ${schoolProfil.tlp}`);
+    if(schoolProfil.email) kontak.push(`Email: ${schoolProfil.email}`);
+    if(kontak.length){
+      doc.text(kontak.join('  •  '), textX, y);
+      y += 4.5;
+    }
+
+    const lineY = Math.max(y, 10 + logoSize) + 2;
+    doc.setDrawColor(108, 79, 224);
+    doc.setLineWidth(0.6);
+    doc.line(marginLeft, lineY, pageWidth - marginLeft, lineY);
+
+    const titleY = lineY + 7;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text(judul, marginLeft, titleY);
+    doc.setFont(undefined, 'normal');
+
+    return titleY + 5;
+  }
+
+  // ---------- Data kehadiran (semua rombel) ----------
+  const tableAbsensiAdminBodyEl = document.getElementById('tableAbsensiAdminBody');
+  const totalAbsensiAdminTextEl = document.getElementById('totalAbsensiAdminText');
+  const searchAbsensiAdminEl = document.getElementById('searchAbsensiAdmin');
+  const filterTanggalAbsensiAdminEl = document.getElementById('filterTanggalAbsensiAdmin');
+  const filterKelasAbsensiEl = document.getElementById('filterKelasAbsensi');
+  const resetFilterAbsensiAdminBtn = document.getElementById('resetFilterAbsensiAdmin');
+  const exportAbsensiAdminPdfBtn = document.getElementById('exportAbsensiAdminPdfBtn');
+
+  const statTotalEl = document.getElementById('statTotal');
+  const statHadirEl = document.getElementById('statHadir');
+  const statSakitEl = document.getElementById('statSakit');
+  const statIjinEl = document.getElementById('statIjin');
+  const statAlpaEl = document.getElementById('statAlpa');
+
+  let absensiRows = [];
+
+  function populateKelasFilter(rows){
+    const kelasList = Array.from(new Set(rows.map(r => r.kelas).filter(Boolean))).sort();
+    const currentValue = filterKelasAbsensiEl.value;
+    filterKelasAbsensiEl.innerHTML = '<option value="">Semua Kelas</option>' +
+      kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
+    if(kelasList.includes(currentValue)) filterKelasAbsensiEl.value = currentValue;
+  }
+
+  function getFilteredAbsensiRows(){
+    const q = searchAbsensiAdminEl.value.trim().toLowerCase();
+    const tgl = filterTanggalAbsensiAdminEl.value;
+    const kelas = filterKelasAbsensiEl.value;
+    let filtered = absensiRows;
+    if(kelas){
+      filtered = filtered.filter(row => row.kelas === kelas);
+    }
+    if(tgl){
+      filtered = filtered.filter(row => row.tanggal === tgl);
+    }
+    if(q){
+      filtered = filtered.filter(row => String(row.nama_siswa ?? '').toLowerCase().includes(q));
+    }
+    return filtered;
+  }
+
+  function renderStats(rows){
+    statTotalEl.textContent = rows.length;
+    statHadirEl.textContent = rows.filter(r => keteranganSlug(r.keterangan) === 'hadir').length;
+    statSakitEl.textContent = rows.filter(r => keteranganSlug(r.keterangan) === 'sakit').length;
+    statIjinEl.textContent = rows.filter(r => keteranganSlug(r.keterangan) === 'ijin').length;
+    statAlpaEl.textContent = rows.filter(r => keteranganSlug(r.keterangan) === 'tanpaketerangan').length;
+  }
+
+  function renderAbsensiAdminTable(rows){
+    if(!rows || rows.length === 0){
+      tableAbsensiAdminBodyEl.innerHTML = '<tr><td class="empty-state">Belum ada data kehadiran tercatat.</td></tr>';
+      totalAbsensiAdminTextEl.textContent = '0 catatan';
+      renderStats(rows || []);
+      return;
+    }
+    tableAbsensiAdminBodyEl.innerHTML = rows.map((row, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${formatTanggalIndo(row.tanggal)}</td>
+        <td>${escapeHtml(row.kelas)}</td>
+        <td>${escapeHtml(row.nama_siswa)}</td>
+        <td>${escapeHtml(row.nisn)}</td>
+        <td class="id-absensi-mini">${escapeHtml(row.id_absensi)}</td>
+        <td>${keteranganBadgeHtml(row.keterangan)}</td>
+      </tr>
+    `).join('');
+    totalAbsensiAdminTextEl.textContent = rows.length + ' catatan';
+    renderStats(rows);
+  }
+
+  function applyAbsensiAdminFilters(){
+    renderAbsensiAdminTable(getFilteredAbsensiRows());
+  }
+
+  async function loadAbsensiAll(){
+    tableAbsensiAdminBodyEl.innerHTML = '<tr><td class="empty-state">Memuat data kehadiran...</td></tr>';
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE_ABSENSI}?select=*&order=tanggal.desc`, { headers: sbHeaders });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      absensiRows = Array.isArray(rows) ? rows : [];
+      populateKelasFilter(absensiRows);
+      applyAbsensiAdminFilters();
+    }catch(err){
+      console.error('Gagal memuat data kehadiran:', err);
+      tableAbsensiAdminBodyEl.innerHTML = `<tr><td class="empty-state">Gagal memuat data kehadiran. Pastikan tabel "${TABLE_ABSENSI}" tersedia di Supabase.</td></tr>`;
+      totalAbsensiAdminTextEl.textContent = '– catatan';
+    }
+  }
+
+  searchAbsensiAdminEl.addEventListener('input', applyAbsensiAdminFilters);
+  filterTanggalAbsensiAdminEl.addEventListener('input', applyAbsensiAdminFilters);
+  filterKelasAbsensiEl.addEventListener('change', applyAbsensiAdminFilters);
+
+  resetFilterAbsensiAdminBtn.addEventListener('click', () => {
+    searchAbsensiAdminEl.value = '';
+    filterTanggalAbsensiAdminEl.value = '';
+    filterKelasAbsensiEl.value = '';
+    applyAbsensiAdminFilters();
+  });
+
+  exportAbsensiAdminPdfBtn.addEventListener('click', () => {
+    const rows = getFilteredAbsensiRows();
+    if(!rows || rows.length === 0){
+      alert('Tidak ada data kehadiran untuk diexport.');
+      return;
+    }
+    const kelasFilter = filterKelasAbsensiEl.value;
+    const judul = kelasFilter ? `Daftar Kehadiran Rombel ${kelasFilter}` : 'Daftar Kehadiran Seluruh Rombel';
+    const head = [['No', 'Tanggal', 'Kelas', 'Nama Siswa', 'NISN', 'Id Absensi', 'Keterangan']];
+    const body = rows.map((row, i) => [
+      i + 1,
+      formatTanggalIndo(row.tanggal),
+      row.kelas ?? '',
+      row.nama_siswa ?? '',
+      row.nisn ?? '',
+      row.id_absensi ?? '',
+      row.keterangan ?? ''
+    ]);
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const startY = addKopSurat(doc, judul);
+    doc.autoTable({ head, body, startY, styles: { fontSize: 8.5 }, headStyles: { fillColor: [108, 79, 224] } });
+    doc.save(`daftar-kehadiran-${(kelasFilter || 'semua_rombel').replace(/\s+/g, '_')}.pdf`);
+  });
+
+  loadAbsensiAll();
+
+  // ---------- Bottom sheet menu ----------
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  document.getElementById('openMenuBtn').addEventListener('click', () => {
+    sheetBackdrop.classList.add('open');
+  });
+  sheetBackdrop.addEventListener('click', (e) => {
+    if (e.target === sheetBackdrop) sheetBackdrop.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') sheetBackdrop.classList.remove('open');
+  });
+  document.getElementById('menuKehadiranSiswa').addEventListener('click', (e) => {
+    e.preventDefault();
+    sheetBackdrop.classList.remove('open');
+  });
+
+  // ---------- Log Out ----------
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Guru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFBF2;
+    --card:#FFFFFF;
+    --ink:#2B2013;
+    --muted:#9C8E77;
+    --line:#EFE4CC;
+
+    --marigold:#F5A623;
+    --marigold-dark:#DB8F14;
+    --teal:#1C8C74;
+    --teal-dark:#146E5B;
+    --coral:#E8552F;
+    --sky:#2E8FB0;
+    --lavender:#7C6FCB;
+    --pink:#D6558C;
+
+    --avatar-1:#F5A623;
+    --avatar-2:#1C8C74;
+    --avatar-3:#E8552F;
+    --avatar-4:#2E8FB0;
+    --avatar-5:#7C6FCB;
+    --avatar-6:#D6558C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    background:
+      radial-gradient(circle at 14% 25%, rgba(245,166,35,0.20), transparent 42%),
+      radial-gradient(circle at 88% 12%, rgba(232,85,47,0.16), transparent 45%),
+      radial-gradient(circle at 70% 90%, rgba(28,140,116,0.14), transparent 45%),
+      var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:52px 24px 40px;
+  }
+  .hero-inner{
+    max-width:1080px;
+    margin:0 auto;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--teal-dark);
+    background:#E4F3EE;
+    border:1px solid #CDE9DF;
+    padding:6px 14px 6px 10px;
+    border-radius:100px;
+    margin-bottom:16px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:44px;
+    line-height:1.05;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .hero p{
+    margin:0;
+    color:#6B5F49;
+    font-size:15.5px;
+    max-width:48ch;
+  }
+  .hero-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .btn-add{
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(135deg, var(--marigold), var(--coral));
+    border:none;
+    padding:14px 26px;
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:0 8px 20px -8px rgba(232,85,47,0.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-add:hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(232,85,47,0.6);}
+  .btn-add:active{transform:translateY(0);}
+
+  .btn-dashboard{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--teal-dark);
+    background:#fff;
+    border:1.5px solid #CDE9DF;
+    padding:13px 22px;
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
+    text-decoration:none;
+    transition:background .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .btn-dashboard:hover{background:#E4F3EE; border-color:var(--teal); transform:translateY(-1px);}
+  .btn-dashboard:active{transform:translateY(0);}
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:36px 24px 80px;
+  }
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+  }
+  .count{
+    font-size:13.5px;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .count b{color:var(--teal-dark);}
+  .search-wrap{position:relative;}
+  .search-wrap svg{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    color:var(--muted);
+  }
+  .search{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    padding:10px 14px 10px 36px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--card);
+    color:var(--ink);
+    outline:none;
+    width:260px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .search:focus{border-color:var(--marigold); box-shadow:0 0 0 3px rgba(245,166,35,0.15);}
+
+  /* ---------- card grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:16px;
+  }
+  .gcard{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .gcard::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:5px;
+    background:var(--stripe, var(--marigold));
+  }
+  .gcard:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px -18px rgba(43,32,19,0.35);
+    border-color:#E6D8B8;
+  }
+  .gcard-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .avatar{
+    width:48px; height:48px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color:#fff;
+    flex-shrink:0;
+    background:var(--stripe, var(--marigold));
+  }
+  .avatar img{width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;}
+  .gcard-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:16.5px;
+    line-height:1.25;
+    margin:0;
+  }
+  .gcard-nip{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .chips{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .chip{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    font-size:13px;
+    color:#5A5040;
+    line-height:1.4;
+  }
+  .chip .ico{
+    flex-shrink:0;
+    margin-top:1px;
+    color:var(--stripe, var(--marigold));
+  }
+
+  .empty-state{
+    grid-column:1 / -1;
+    padding:64px 24px;
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:14px;
+  }
+  .empty-state b{
+    display:block;
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    color:var(--ink);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(43,32,19,0.45);
+    backdrop-filter:blur(2px);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:48px 20px;
+    overflow-y:auto;
+    z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:18px;
+    width:100%;
+    max-width:680px;
+    padding:0;
+    position:relative;
+    overflow:hidden;
+  }
+  .modal-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    padding:28px 36px 22px;
+    background:linear-gradient(135deg, #FFF3DC, #FDEAE3);
+    border-bottom:1px solid var(--line);
+  }
+  .modal-head h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:25px;
+    margin:0 0 4px;
+  }
+  .modal-head p{
+    margin:0;
+    font-size:13.5px;
+    color:#7A6C52;
+  }
+  .modal-close{
+    background:#fff;
+    border:1px solid var(--line);
+    width:32px;height:32px;
+    border-radius:50%;
+    font-size:18px;
+    line-height:1;
+    color:var(--muted);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .modal-close:hover{color:var(--coral); border-color:var(--coral);}
+
+  .modal-body{padding:28px 36px 30px;}
+
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Fraunces', serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0 0 16px;
+  }
+  .section-title .dot{width:8px;height:8px;border-radius:50%;background:var(--marigold); flex-shrink:0;}
+  .section-title.teal .dot{background:var(--teal);}
+  .section-title.coral .dot{background:var(--coral);}
+  .section-title.sky .dot{background:var(--sky);}
+  .section-title:not(:first-child){
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px 20px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:16px;
+  }
+  .field.full{grid-column:1 / -1;}
+  label{font-size:13px; font-weight:600; color:var(--ink);}
+  label .opt{color:var(--muted); font-weight:400;}
+  input[type=text], input[type=password], input[type=date], input[type=tel], textarea{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    padding:10px 12px;
+    border:1.5px solid var(--line);
+    border-radius:9px;
+    background:#FFFDF8;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    width:100%;
+  }
+  input:focus, textarea:focus{
+    border-color:var(--marigold);
+    box-shadow:0 0 0 3px rgba(245,166,35,0.15);
+    background:#fff;
+  }
+  textarea{resize:vertical; min-height:70px; font-family:inherit;}
+
+  .pass-wrap{position:relative;}
+  .pass-toggle{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--sky);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    padding:4px 6px;
+  }
+  .pass-toggle:hover{color:var(--teal-dark);}
+
+  .photo-field{display:flex; align-items:center; gap:16px;}
+  .photo-preview{
+    width:72px; height:72px;
+    border-radius:50%;
+    border:2px dashed var(--line);
+    background:#FFFDF8;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:10.5px; text-align:center;
+    overflow:hidden; flex-shrink:0;
+  }
+  .photo-preview img{width:100%;height:100%;object-fit:cover;}
+  .photo-controls{display:flex; flex-direction:column; gap:8px;}
+  .file-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13.5px; font-weight:600; color:var(--teal-dark);
+    background:#E4F3EE; border:1px solid #CDE9DF;
+    padding:8px 15px; border-radius:9px; cursor:pointer; width:fit-content;
+  }
+  .file-btn:hover{background:#D8EEE5;}
+  input[type=file]{display:none;}
+  .file-hint{font-size:12px; color:var(--muted);}
+
+  .modal-actions{
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  button.submit{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px; font-weight:700; color:#fff;
+    background:linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border:none;
+    padding:12px 26px; border-radius:10px; cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(28,140,116,0.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  button.submit:hover{transform:translateY(-1px);}
+  button.submit:disabled{background:var(--muted); box-shadow:none; cursor:not-allowed; transform:none;}
+  .status{font-size:13.5px; flex:1; font-weight:500;}
+  .status.ok{color:var(--teal-dark);}
+  .status.err{color:var(--coral);}
+
+  .btn-cancel{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px; font-weight:600; color:#6B5F49;
+    background:#fff; border:1.5px solid var(--line);
+    padding:11px 22px; border-radius:10px; cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .btn-cancel:hover{border-color:#D8C9A0; color:var(--ink);}
+
+  .btn-delete{
+    font-family:'Inter', sans-serif;
+    font-size:14px; font-weight:600; color:var(--coral);
+    background:#FDECE6; border:1.5px solid #F7CFC0;
+    padding:10px 18px; border-radius:10px; cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn-delete:hover{background:#FADED1;}
+  .btn-delete:disabled{opacity:.6; cursor:not-allowed;}
+
+  .field-hint{font-size:12px; color:var(--muted); margin-top:-2px;}
+
+  .gcard{cursor:pointer;}
+  .gcard:active{transform:translateY(0); box-shadow:none;}
+
+  @media (max-width:860px){
+    .grid{grid-template-columns:repeat(2, 1fr);}
+  }
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr;}
+    .hero{padding:40px 20px 32px;}
+    .hero h1{font-size:32px;}
+    .hero-actions{width:100%;}
+    .hero-actions .btn-add, .hero-actions .btn-dashboard{flex:1; justify-content:center;}
+    .modal-head, .modal-body{padding-left:22px; padding-right:22px;}
+    .grid2{grid-template-columns:1fr;}
+    .toolbar{flex-direction:column; align-items:stretch;}
+    .search{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Sistem data sekolah</span>
+      <h1>Data Guru</h1>
+      <p>Kelola dan lihat data pokok seluruh guru dalam satu tempat yang rapi.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn-dashboard" href="admin.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <button class="btn-add" id="btnOpenModal">+ Tambah guru</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="toolbar">
+    <span class="count" id="countLabel">Memuat data...</span>
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" class="search" id="searchInput" placeholder="Cari nama atau NIP...">
+    </div>
+  </div>
+
+  <div class="grid" id="listBody"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle">Tambah guru</h2>
+        <p id="modalDesc">Isi data pokok guru, lalu simpan.</p>
+      </div>
+      <button class="modal-close" id="btnCloseModal" type="button">&times;</button>
+    </div>
+
+    <div class="modal-body">
+    <form id="formGuru" autocomplete="off">
+
+      <div class="section-title"><span class="dot"></span>Identitas</div>
+      <div class="grid2">
+        <div class="field full">
+          <label for="nama_guru">Nama guru</label>
+          <input type="text" id="nama_guru" name="nama_guru" required placeholder="cth. Siti Rahayu, S.Pd.">
+        </div>
+        <div class="field">
+          <label for="nip">NIP / NIY <span class="opt">(opsional)</span></label>
+          <input type="text" id="nip" name="nip" placeholder="cth. 198501012010012001">
+        </div>
+        <div class="field"></div>
+        <div class="field">
+          <label for="tempat_lahir">Tempat lahir</label>
+          <input type="text" id="tempat_lahir" name="tempat_lahir" required placeholder="cth. Bandung">
+        </div>
+        <div class="field">
+          <label for="tanggal_lahir">Tanggal lahir</label>
+          <input type="date" id="tanggal_lahir" name="tanggal_lahir" required>
+        </div>
+      </div>
+
+      <div class="section-title teal"><span class="dot"></span>Kontak</div>
+      <div class="grid2">
+        <div class="field full">
+          <label for="alamat">Alamat</label>
+          <textarea id="alamat" name="alamat" required placeholder="Alamat tempat tinggal saat ini"></textarea>
+        </div>
+        <div class="field">
+          <label for="tlp">Telepon</label>
+          <input type="tel" id="tlp" name="tlp" required placeholder="cth. 081234567890">
+        </div>
+      </div>
+
+      <div class="section-title coral"><span class="dot"></span>Akun login</div>
+      <div class="grid2">
+        <div class="field">
+          <label for="password">Password login</label>
+          <div class="pass-wrap">
+            <input type="password" id="password" name="password" required placeholder="Minimal 6 karakter">
+            <button type="button" class="pass-toggle" id="togglePass">Tampilkan</button>
+          </div>
+          <span class="field-hint" id="passwordHint" style="display:none;">Kosongkan jika password tidak ingin diubah.</span>
+        </div>
+      </div>
+
+      <div class="section-title sky"><span class="dot"></span>Foto profil</div>
+      <div class="field full">
+        <div class="photo-field">
+          <div class="photo-preview" id="photoPreview">Belum ada foto</div>
+          <div class="photo-controls">
+            <label class="file-btn" for="photo">Pilih foto</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
+            <span class="file-hint" id="fileHint">JPG atau PNG, maksimal 2MB.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-delete" id="btnDelete" style="display:none;">Hapus guru</button>
+        <span class="status" id="statusMsg"></span>
+        <button type="button" class="btn-cancel" id="btnCancel">Batal</button>
+        <button type="submit" class="submit" id="btnSubmit">Simpan data guru</button>
+      </div>
+
+    </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co";
+  const SUPABASE_REST = SUPABASE_URL + "/rest/v1/";
+  const SUPABASE_STORAGE = SUPABASE_URL + "/storage/v1/";
+  const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const BUCKET = "aset";
+  const TABLE = "dataguru";
+  const AVATAR_COLORS = ["var(--avatar-1)","var(--avatar-2)","var(--avatar-3)","var(--avatar-4)","var(--avatar-5)","var(--avatar-6)"];
+
+  const overlay = document.getElementById("overlay");
+  const btnOpenModal = document.getElementById("btnOpenModal");
+  const btnCloseModal = document.getElementById("btnCloseModal");
+  const btnCancel = document.getElementById("btnCancel");
+  const btnDelete = document.getElementById("btnDelete");
+  const form = document.getElementById("formGuru");
+  const btnSubmit = document.getElementById("btnSubmit");
+  const statusMsg = document.getElementById("statusMsg");
+  const photoInput = document.getElementById("photo");
+  const photoPreview = document.getElementById("photoPreview");
+  const fileHint = document.getElementById("fileHint");
+  const togglePass = document.getElementById("togglePass");
+  const passInput = document.getElementById("password");
+  const passwordHint = document.getElementById("passwordHint");
+  const listBody = document.getElementById("listBody");
+  const countLabel = document.getElementById("countLabel");
+  const searchInput = document.getElementById("searchInput");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+
+  let allGuru = [];
+  let selectedFile = null;
+  let editingGuru = null; // null = mode tambah, object = mode edit
+
+  /* ---------- modal open/close ---------- */
+  function openModal() {
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeModal() {
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    form.reset();
+    photoPreview.innerHTML = "Belum ada foto";
+    fileHint.textContent = "JPG atau PNG, maksimal 2MB.";
+    fileHint.style.color = "";
+    selectedFile = null;
+    editingGuru = null;
+    setStatus("", "");
+  }
+
+  function openAddModal() {
+    editingGuru = null;
+    modalTitle.textContent = "Tambah guru";
+    modalDesc.textContent = "Isi data pokok guru, lalu simpan.";
+    btnSubmit.textContent = "Simpan data guru";
+    btnDelete.style.display = "none";
+    passInput.required = true;
+    passInput.placeholder = "Minimal 6 karakter";
+    passwordHint.style.display = "none";
+    openModal();
+  }
+
+  function openEditModal(guru) {
+    editingGuru = guru;
+    modalTitle.textContent = "Edit guru";
+    modalDesc.textContent = "Perbarui data guru, atau hapus jika sudah tidak aktif.";
+    btnSubmit.textContent = "Simpan perubahan";
+    btnDelete.style.display = "inline-block";
+    passInput.required = false;
+    passInput.placeholder = "Kosongkan jika tidak diubah";
+    passwordHint.style.display = "block";
+
+    document.getElementById("nama_guru").value = guru.nama_guru || "";
+    document.getElementById("nip").value = guru.nip || "";
+    document.getElementById("tempat_lahir").value = guru.tempat_lahir || "";
+    document.getElementById("tanggal_lahir").value = guru.tanggal_lahir || "";
+    document.getElementById("alamat").value = guru.alamat || "";
+    document.getElementById("tlp").value = guru.tlp || "";
+    passInput.value = "";
+
+    if (guru.photo) {
+      photoPreview.innerHTML = `<img src="${guru.photo}" alt="Foto ${escapeHtml(guru.nama_guru || '')}">`;
+      fileHint.textContent = "Pilih file baru untuk mengganti foto.";
+    } else {
+      photoPreview.innerHTML = "Belum ada foto";
+      fileHint.textContent = "JPG atau PNG, maksimal 2MB.";
+    }
+    fileHint.style.color = "";
+    selectedFile = null;
+
+    openModal();
+  }
+
+  btnOpenModal.addEventListener("click", openAddModal);
+  btnCloseModal.addEventListener("click", closeModal);
+  btnCancel.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+  });
+
+  btnDelete.addEventListener("click", async () => {
+    if (!editingGuru) return;
+    const ok = confirm(`Hapus data guru "${editingGuru.nama_guru}"? Tindakan ini tidak dapat dibatalkan.`);
+    if (!ok) return;
+
+    btnDelete.disabled = true;
+    btnDelete.textContent = "Menghapus...";
+    try {
+      await deleteGuru(editingGuru.id);
+      allGuru = allGuru.filter(g => g.id !== editingGuru.id);
+      renderList();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      setStatus(err.message || "Gagal menghapus data.", "err");
+    } finally {
+      btnDelete.disabled = false;
+      btnDelete.textContent = "Hapus guru";
+    }
+  });
+
+  togglePass.addEventListener("click", () => {
+    const isPass = passInput.type === "password";
+    passInput.type = isPass ? "text" : "password";
+    togglePass.textContent = isPass ? "Sembunyikan" : "Tampilkan";
+  });
+
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      fileHint.textContent = "Ukuran file melebihi 2MB, pilih file lain.";
+      fileHint.style.color = "#E8552F";
+      photoInput.value = "";
+      selectedFile = null;
+      return;
+    }
+    fileHint.textContent = file.name;
+    fileHint.style.color = "";
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => { photoPreview.innerHTML = `<img src="${e.target.result}" alt="Pratinjau foto">`; };
+    reader.readAsDataURL(file);
+  });
+
+  function setStatus(text, type) {
+    statusMsg.textContent = text;
+    statusMsg.className = "status" + (type ? " " + type : "");
+  }
+
+  function genId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  async function uploadPhoto(id, file) {
+    const ext = file.name.split(".").pop();
+    const path = `guru/${id}.${ext}`;
+    const res = await fetch(SUPABASE_STORAGE + "object/" + BUCKET + "/" + path, {
+      method: "POST",
+      headers: {
+        "apikey": ANON_KEY,
+        "Authorization": "Bearer " + ANON_KEY,
+        "Content-Type": file.type || "application/octet-stream",
+        "x-upsert": "true"
+      },
+      body: file
+    });
+    if (!res.ok) throw new Error("Gagal mengunggah foto: " + (await res.text()));
+    return SUPABASE_STORAGE + "object/public/" + BUCKET + "/" + path;
+  }
+
+  async function insertGuru(data) {
+    const res = await fetch(SUPABASE_REST + TABLE, {
+      method: "POST",
+      headers: {
+        "apikey": ANON_KEY,
+        "Authorization": "Bearer " + ANON_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("Gagal menyimpan data: " + (await res.text()));
+    return res.json();
+  }
+
+  async function updateGuru(id, data) {
+    const res = await fetch(SUPABASE_REST + TABLE + "?id=eq." + encodeURIComponent(id), {
+      method: "PATCH",
+      headers: {
+        "apikey": ANON_KEY,
+        "Authorization": "Bearer " + ANON_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("Gagal memperbarui data: " + (await res.text()));
+    return res.json();
+  }
+
+  async function deleteGuru(id) {
+    const res = await fetch(SUPABASE_REST + TABLE + "?id=eq." + encodeURIComponent(id), {
+      method: "DELETE",
+      headers: {
+        "apikey": ANON_KEY,
+        "Authorization": "Bearer " + ANON_KEY
+      }
+    });
+    if (!res.ok) throw new Error("Gagal menghapus data: " + (await res.text()));
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setStatus("", "");
+    btnSubmit.disabled = true;
+    const originalLabel = btnSubmit.textContent;
+    const isEdit = !!editingGuru;
+
+    try {
+      const id = isEdit ? editingGuru.id : genId();
+      let photoUrl = isEdit ? (editingGuru.photo || "") : "";
+
+      if (selectedFile) {
+        btnSubmit.textContent = "Mengunggah foto...";
+        photoUrl = await uploadPhoto(id, selectedFile);
+      }
+
+      btnSubmit.textContent = isEdit ? "Menyimpan perubahan..." : "Menyimpan data...";
+
+      const payload = {
+        nama_guru: document.getElementById("nama_guru").value.trim(),
+        nip: document.getElementById("nip").value.trim() || null,
+        tempat_lahir: document.getElementById("tempat_lahir").value.trim(),
+        tanggal_lahir: document.getElementById("tanggal_lahir").value,
+        alamat: document.getElementById("alamat").value.trim(),
+        tlp: document.getElementById("tlp").value.trim(),
+        photo: photoUrl || null
+      };
+
+      if (!isEdit) {
+        payload.id = id;
+        payload.password = passInput.value;
+        const inserted = await insertGuru(payload);
+        if (Array.isArray(inserted) && inserted.length) {
+          allGuru.unshift(inserted[0]);
+        } else {
+          allGuru.unshift(payload);
+        }
+      } else {
+        if (passInput.value) payload.password = passInput.value;
+        const updated = await updateGuru(id, payload);
+        const newData = (Array.isArray(updated) && updated.length) ? updated[0] : { ...editingGuru, ...payload };
+        const idx = allGuru.findIndex(g => g.id === id);
+        if (idx !== -1) allGuru[idx] = newData;
+      }
+
+      renderList();
+      setStatus(isEdit ? "Perubahan berhasil disimpan." : "Data guru berhasil disimpan.", "ok");
+      setTimeout(closeModal, 700);
+
+    } catch (err) {
+      console.error(err);
+      setStatus(err.message || "Terjadi kesalahan, coba lagi.", "err");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = originalLabel;
+    }
+  });
+
+  /* ---------- list rendering ---------- */
+  function formatTanggal(iso) {
+    if (!iso) return "-";
+    const d = new Date(iso + "T00:00:00");
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] || "";
+    const second = parts.length > 1 ? parts[1][0] : "";
+    return (first + second).toUpperCase();
+  }
+
+  function colorFor(str) {
+    let hash = 0;
+    for (let i = 0; i < (str || "").length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[s]));
+  }
+
+  function renderList() {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = q
+      ? allGuru.filter(g => (g.nama_guru || "").toLowerCase().includes(q) || (g.nip || "").toLowerCase().includes(q))
+      : allGuru;
+
+    countLabel.innerHTML = allGuru.length === 0
+      ? "Belum ada data guru"
+      : `<b>${filtered.length}</b> dari ${allGuru.length} guru`;
+
+    if (allGuru.length === 0) {
+      listBody.innerHTML = `<div class="empty-state"><b>Belum ada data</b>Tambahkan guru pertama lewat tombol "Tambah guru".</div>`;
+      return;
+    }
+    if (filtered.length === 0) {
+      listBody.innerHTML = `<div class="empty-state">Tidak ada guru yang cocok dengan pencarian.</div>`;
+      return;
+    }
+
+    listBody.innerHTML = filtered.map(g => {
+      const color = colorFor(g.nama_guru || g.id || "");
+      return `
+      <div class="gcard" style="--stripe:${color}" data-id="${escapeHtml(g.id)}">
+        <div class="gcard-top">
+          <div class="avatar">
+            ${g.photo ? `<img src="${g.photo}" alt="Foto ${escapeHtml(g.nama_guru || '')}">` : initials(g.nama_guru)}
+          </div>
+          <div>
+            <p class="gcard-name">${escapeHtml(g.nama_guru || "-")}</p>
+            <div class="gcard-nip">${g.nip ? "NIP/NIY " + escapeHtml(g.nip) : "Tanpa NIP/NIY"}</div>
+          </div>
+        </div>
+        <div class="chips">
+          <div class="chip">
+            <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>${escapeHtml(g.tempat_lahir || "-")}, ${formatTanggal(g.tanggal_lahir)}</span>
+          </div>
+          <div class="chip">
+            <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.79.63 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.2a2 2 0 0 1 2.11-.45c.86.3 1.75.51 2.65.63A2 2 0 0 1 22 16.92z"/></svg>
+            <span>${escapeHtml(g.tlp || "-")}</span>
+          </div>
+          <div class="chip">
+            <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>${escapeHtml(g.alamat || "-")}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+    listBody.querySelectorAll(".gcard").forEach(card => {
+      card.addEventListener("click", () => {
+        const id = card.getAttribute("data-id");
+        const guru = allGuru.find(g => String(g.id) === id);
+        if (guru) openEditModal(guru);
+      });
+    });
+  }
+
+  searchInput.addEventListener("input", renderList);
+
+  async function loadGuru() {
+    try {
+      const res = await fetch(SUPABASE_REST + TABLE + "?select=*&order=tanggal_lahir.desc", {
+        headers: {
+          "apikey": ANON_KEY,
+          "Authorization": "Bearer " + ANON_KEY
+        }
+      });
+      if (!res.ok) throw new Error(await res.text());
+      allGuru = await res.json();
+      renderList();
+    } catch (err) {
+      console.error(err);
+      countLabel.textContent = "Gagal memuat data guru";
+      listBody.innerHTML = `<div class="empty-state">Tidak dapat memuat data. Periksa koneksi atau pengaturan Supabase.</div>`;
+    }
+  }
+
+  loadGuru();
+</script>
+
+</body>
+</html>

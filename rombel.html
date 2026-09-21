@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rombongan Belajar — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .back-link{
+    color:#FFFFFF;
+    text-decoration:none;
+    font-size:0.9rem;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    opacity:0.9;
+    transition:opacity 0.15s ease;
+  }
+  .back-link:hover{opacity:1;}
+  .navbar-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    letter-spacing:0.02em;
+    color:rgba(255,255,255,0.75);
+  }
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:900px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 60px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+
+  .card{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:24px clamp(18px,3vw,28px);
+    margin-bottom:24px;
+  }
+  .card h2{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:0 0 18px;
+  }
+
+  form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px 18px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .label-hint{
+    font-weight:400;
+    color:var(--ink-soft);
+    opacity:0.75;
+    font-size:0.78rem;
+  }
+  .id-row{
+    display:flex;
+    gap:8px;
+  }
+  .id-row input{flex:1;}
+  .btn-regen{
+    padding:10px 14px;
+    font-size:0.8rem;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  label{
+    font-size:0.82rem;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  input{
+    font-family:inherit;
+    font-size:0.95rem;
+    padding:10px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    width:100%;
+  }
+  input:focus{border-color:var(--brick);}
+  input:disabled{background:var(--paper-deep); color:var(--ink-soft); cursor:not-allowed;}
+
+  .form-actions{
+    grid-column:1 / -1;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:4px;
+  }
+  .form-buttons{
+    display:flex;
+    gap:12px;
+  }
+  .form-buttons > *{
+    flex:1;
+    text-align:center;
+    justify-content:center;
+  }
+  .btn-primary{
+    background:var(--gold);
+    color:#2E2308;
+    border:none;
+    border-radius:5px;
+    padding:11px 24px;
+    font-size:0.92rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .btn-primary:hover{background:#F0B62E;}
+  .btn-primary:disabled{background:#e8dfc4; color:#9a916f; cursor:not-allowed;}
+  .btn-ghost{
+    background:none;
+    border:1px solid var(--paper-line);
+    color:var(--ink-soft);
+    border-radius:5px;
+    padding:10px 18px;
+    font-size:0.88rem;
+    font-weight:500;
+    cursor:pointer;
+    transition:border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn-ghost:hover{border-color:var(--ink); color:var(--ink);}
+  a.btn-ghost{
+    display:inline-flex;
+    align-items:center;
+    text-decoration:none;
+  }
+  .form-msg{font-size:0.85rem;}
+  .form-msg.ok{color:var(--green);}
+  .form-msg.err{color:var(--brick);}
+
+  /* ---------- Table ---------- */
+  .table-header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .table-header h2{margin:0;}
+  .table-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .table-wrap{overflow-x:auto;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.92rem;
+  }
+  thead th{
+    text-align:left;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    font-weight:700;
+    padding:0 10px 10px;
+    border-bottom:1px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:12px 10px;
+    border-bottom:1px solid var(--paper-line);
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  td.id-col{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.85rem;
+    color:var(--brick);
+  }
+  td.num-col{font-variant-numeric:tabular-nums;}
+  .row-actions{display:flex; gap:8px; justify-content:flex-end;}
+  .icon-btn{
+    background:none;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:0.8rem;
+    font-weight:500;
+    cursor:pointer;
+    color:var(--ink-soft);
+    transition:border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .icon-btn.edit:hover{border-color:var(--purple); color:var(--purple);}
+  .icon-btn.delete:hover{border-color:var(--brick); color:var(--brick); background:#FFE3EE;}
+
+  .empty-state{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+    padding:30px 0;
+  }
+
+  @media (max-width:560px){
+    form{grid-template-columns:1fr;}
+    .row-actions{flex-direction:column; align-items:flex-end;}
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <span class="navbar-title">ROMBONGAN BELAJAR</span>
+</header>
+
+<main>
+  <h1 class="page-heading">Rombongan Belajar</h1>
+  <p class="page-sub">Tambah, ubah, atau hapus data rombongan belajar (rombel) yang digunakan di seluruh sistem SCORIA.</p>
+
+  <div class="card">
+    <h2 id="formHeading">Tambah Rombel Baru</h2>
+    <form id="rombelForm">
+      <div class="field">
+        <label for="rombelId">ID Rombel <span class="label-hint">(otomatis)</span></label>
+        <div class="id-row">
+          <input type="text" id="rombelId" required autocomplete="off" disabled>
+          <button type="button" class="btn-ghost btn-regen" id="btnRegenId">Acak Ulang</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="namaRombel">Nama Rombongan Belajar</label>
+        <input type="text" id="namaRombel" placeholder="Contoh: Kelas X IPA 1" required autocomplete="off">
+      </div>
+      <div class="field full">
+        <label for="jumlahSiswa">Jumlah Siswa</label>
+        <input type="number" id="jumlahSiswa" min="0" step="1" required>
+      </div>
+      <div class="form-actions">
+        <div class="form-buttons">
+          <button type="submit" class="btn-primary" id="btnSubmit">Simpan</button>
+          <a href="admin.html" class="btn-ghost btn-dashboard">Dashboard</a>
+          <button type="button" class="btn-ghost" id="btnCancelEdit" hidden>Batal Ubah</button>
+        </div>
+        <span class="form-msg" id="formMsg"></span>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-header">
+      <h2>Daftar Rombel</h2>
+      <span class="table-count" id="tableCount">0 rombel</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama Rombongan Belajar</th>
+            <th>Jumlah Siswa</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rombelBody"></tbody>
+      </table>
+    </div>
+    <p class="empty-state" id="emptyState" hidden>Belum ada data rombel. Tambahkan lewat formulir di atas.</p>
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const TABLE = "rombel";
+
+  const headersBase = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY
+  };
+
+  const form = document.getElementById('rombelForm');
+  const rombelIdInput = document.getElementById('rombelId');
+  const namaRombelInput = document.getElementById('namaRombel');
+  const jumlahSiswaInput = document.getElementById('jumlahSiswa');
+  const formHeading = document.getElementById('formHeading');
+  const btnSubmit = document.getElementById('btnSubmit');
+  const btnCancelEdit = document.getElementById('btnCancelEdit');
+  const btnRegenId = document.getElementById('btnRegenId');
+  const formMsg = document.getElementById('formMsg');
+  const rombelBody = document.getElementById('rombelBody');
+  const emptyState = document.getElementById('emptyState');
+  const tableCount = document.getElementById('tableCount');
+
+  let editingId = null; // null = mode tambah, terisi = mode ubah
+
+  function setFormMsg(text, type){
+    formMsg.textContent = text || '';
+    formMsg.className = 'form-msg' + (type ? ' ' + type : '');
+  }
+
+  function generateRombelId(){
+    const num = Math.floor(10000 + Math.random() * 90000); // 5 digit
+    return 'id-' + num;
+  }
+
+  function enterAddMode(){
+    editingId = null;
+    formHeading.textContent = 'Tambah Rombel Baru';
+    btnSubmit.textContent = 'Simpan';
+    btnCancelEdit.hidden = true;
+    btnRegenId.hidden = false;
+    form.reset();
+    rombelIdInput.value = generateRombelId();
+    rombelIdInput.disabled = true;
+  }
+
+  btnRegenId.addEventListener('click', () => {
+    rombelIdInput.value = generateRombelId();
+  });
+
+  function enterEditMode(row){
+    editingId = row.id;
+    formHeading.textContent = 'Ubah Data Rombel';
+    btnSubmit.textContent = 'Simpan Perubahan';
+    btnCancelEdit.hidden = false;
+    btnRegenId.hidden = true;
+    rombelIdInput.value = row.id;
+    rombelIdInput.disabled = true; // id tidak diubah saat edit
+    namaRombelInput.value = row.nama_rombel ?? '';
+    jumlahSiswaInput.value = row.jumlah_siswa ?? '';
+    setFormMsg('', '');
+    namaRombelInput.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  btnCancelEdit.addEventListener('click', () => {
+    enterAddMode();
+    setFormMsg('', '');
+  });
+
+  function renderRows(rows){
+    rombelBody.innerHTML = '';
+    tableCount.textContent = rows.length + (rows.length === 1 ? ' rombel' : ' rombel');
+
+    if(rows.length === 0){
+      emptyState.hidden = false;
+      return;
+    }
+    emptyState.hidden = true;
+
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="id-col">${escapeHtml(row.id)}</td>
+        <td>${escapeHtml(row.nama_rombel ?? '')}</td>
+        <td class="num-col">${row.jumlah_siswa ?? 0}</td>
+        <td>
+          <div class="row-actions">
+            <button type="button" class="icon-btn edit">Ubah</button>
+            <button type="button" class="icon-btn delete">Hapus</button>
+          </div>
+        </td>
+      `;
+      tr.querySelector('.edit').addEventListener('click', () => enterEditMode(row));
+      tr.querySelector('.delete').addEventListener('click', () => deleteRombel(row));
+      rombelBody.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadRombel(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE}?select=*&order=nama_rombel.asc`, {
+        headers: headersBase
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      renderRows(rows);
+    }catch(err){
+      console.error(err);
+      setFormMsg('Gagal memuat daftar rombel: ' + err.message, 'err');
+    }
+  }
+
+  async function deleteRombel(row){
+    const ok = confirm(`Hapus rombel "${row.nama_rombel}" (${row.id})? Tindakan ini tidak bisa dibatalkan.`);
+    if(!ok) return;
+
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE}?id=eq.${encodeURIComponent(row.id)}`, {
+        method: 'DELETE',
+        headers: headersBase
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+
+      if(editingId === row.id) enterAddMode();
+      await loadRombel();
+    }catch(err){
+      console.error(err);
+      alert('Gagal menghapus data: ' + err.message);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setFormMsg('', '');
+
+    const id = rombelIdInput.value.trim();
+    const nama_rombel = namaRombelInput.value.trim();
+    const jumlah_siswa = parseInt(jumlahSiswaInput.value, 10);
+
+    if(!id || !nama_rombel || isNaN(jumlah_siswa)){
+      setFormMsg('Semua kolom wajib diisi dengan benar.', 'err');
+      return;
+    }
+
+    btnSubmit.disabled = true;
+    const originalLabel = btnSubmit.textContent;
+    btnSubmit.textContent = 'Menyimpan...';
+
+    try{
+      let res;
+      if(editingId){
+        // UPDATE — id tidak berubah
+        res = await fetch(`${SUPABASE_URL}/${TABLE}?id=eq.${encodeURIComponent(editingId)}`, {
+          method: 'PATCH',
+          headers: {
+            ...headersBase,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ nama_rombel, jumlah_siswa })
+        });
+      } else {
+        // INSERT
+        res = await fetch(`${SUPABASE_URL}/${TABLE}`, {
+          method: 'POST',
+          headers: {
+            ...headersBase,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ id, nama_rombel, jumlah_siswa })
+        });
+      }
+
+      if(!res.ok){
+        const errBody = await res.text();
+        if(res.status === 409 || errBody.includes('duplicate')){
+          throw new Error('ID rombel tersebut sudah digunakan.');
+        }
+        throw new Error(errBody || ('Status ' + res.status));
+      }
+
+      setFormMsg(editingId ? 'Perubahan berhasil disimpan.' : 'Rombel baru berhasil ditambahkan.', 'ok');
+      enterAddMode();
+      await loadRombel();
+    }catch(err){
+      console.error(err);
+      setFormMsg('Gagal menyimpan: ' + err.message, 'err');
+    }finally{
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = editingId ? 'Simpan Perubahan' : 'Simpan';
+    }
+  });
+
+  enterAddMode();
+  loadRombel();
+</script>
+
+</body>
+</html>

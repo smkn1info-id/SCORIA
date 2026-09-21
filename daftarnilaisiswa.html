@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Nilai Saya — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+    --blue:#2F80ED;
+    --orange:#F2994A;
+    --footer-h:72px;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--footer-h) + 20px);
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar (identik dengan adminsiswa.html) ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .term-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .term-badge .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-heading-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .page-heading-row .page-heading{margin:0;}
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 24px;
+  }
+  .btn-dashboard svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
+
+  /* ---------- Kartu identitas siswa ---------- */
+  .profile-card{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    background:linear-gradient(135deg, var(--brand) 0%, #8A6FF0 55%, var(--purple) 100%);
+    border-radius:14px;
+    padding:24px clamp(18px,3vw,32px);
+    margin-bottom:28px;
+    box-shadow:0 10px 30px rgba(108,79,224,0.28);
+    position:relative;
+    overflow:hidden;
+  }
+  .profile-card::after{
+    content:"";
+    position:absolute;
+    top:-40%; right:-10%;
+    width:220px; height:220px;
+    background:radial-gradient(circle, rgba(255,201,60,0.35) 0%, rgba(255,201,60,0) 70%);
+    pointer-events:none;
+  }
+  .profile-info{
+    position:relative;
+    z-index:1;
+    flex:1;
+    min-width:0;
+  }
+  .profile-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    margin:0 0 4px;
+  }
+  .profile-name{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:clamp(1.2rem,2.4vw,1.5rem);
+    color:#FFFFFF;
+    margin:0 0 14px;
+    line-height:1.2;
+  }
+  .profile-meta{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px 24px;
+  }
+  .profile-meta-item{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .meta-label{
+    font-size:0.68rem;
+    font-weight:600;
+    letter-spacing:0.03em;
+    color:rgba(255,255,255,0.65);
+    text-transform:uppercase;
+  }
+  .meta-value{
+    font-size:0.92rem;
+    color:#FFFFFF;
+    font-weight:500;
+  }
+
+  .section-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:6px 0 14px;
+  }
+
+  /* ---------- Panel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .panel-nilai{
+    background:#EFF6FB;
+    border-left:5px solid var(--turquoise);
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+
+  /* ---------- Toolbar (cari + filter) ---------- */
+  .nilai-toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:9px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:220px;
+    height:38px;
+  }
+  .panel-search:focus{border-color:var(--turquoise); outline:none;}
+  .panel-select{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:9px 30px 9px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:160px;
+    height:38px;
+    cursor:pointer;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    background-size:14px;
+  }
+  .panel-select:focus{border-color:var(--turquoise); outline:none;}
+  .panel-select:disabled{opacity:0.55; cursor:not-allowed;}
+
+  @media (max-width:720px){
+    .nilai-toolbar > *{flex:1 1 auto;}
+  }
+
+  .btn{
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    border-radius:6px;
+    padding:0 16px;
+    height:38px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border:1px solid transparent;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+  .btn-ghost{background:#fbf8f0; color:var(--ink); border-color:var(--paper-line);}
+  .btn-ghost:hover{border-color:var(--brick); color:var(--brick);}
+
+  /* ---------- Table ---------- */
+  .scroll-hint{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:var(--turquoise) var(--paper-deep);
+    border-radius:6px;
+  }
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--turquoise); border-radius:6px;}
+
+  .preview-table{
+    width:100%;
+    min-width:1080px;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  .preview-table th{
+    text-align:left;
+    font-size:0.7rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:2px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .preview-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--paper-line);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .preview-table tbody tr:hover{background:var(--paper-deep);}
+  .preview-table .empty-row td{
+    white-space:normal;
+    text-align:center;
+    color:var(--ink-soft);
+    padding:22px 10px;
+  }
+  .preview-table td.center{text-align:center;}
+
+  .keterangan-pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .keterangan-pill.tuntas{background:#E4F6EC; color:var(--green);}
+  .keterangan-pill.belum{background:#FDE7EE; color:var(--brick);}
+  .keterangan-pill.na{background:#EEEAFB; color:var(--ink-soft);}
+
+  /* ---------- Tooltip alasan Keterangan ---------- */
+  .keterangan-tooltip-wrap{
+    position:relative;
+    display:inline-block;
+    cursor:help;
+  }
+  .keterangan-tooltip-portal{
+    position:fixed;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:max-content;
+    min-width:220px;
+    max-width:280px;
+    background:var(--ink);
+    color:#fffefd;
+    font-size:0.74rem;
+    font-weight:400;
+    line-height:1.5;
+    padding:9px 12px;
+    border-radius:8px;
+    box-shadow:0 12px 28px rgba(59,46,99,0.32);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+    white-space:normal;
+    text-align:left;
+    transform:translate(-50%, calc(-100% + 4px));
+  }
+  .keterangan-tooltip-portal::after{
+    content:'';
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--ink);
+  }
+  .keterangan-tooltip-portal.is-visible{
+    opacity:1;
+    visibility:visible;
+    transform:translate(-50%, -100%);
+  }
+  .keterangan-tooltip-portal.arah-bawah{
+    transform:translate(-50%, -4px);
+  }
+  .keterangan-tooltip-portal.arah-bawah::after{
+    top:auto;
+    bottom:100%;
+    border-top-color:transparent;
+    border-bottom-color:var(--ink);
+  }
+  .keterangan-tooltip-portal.arah-bawah.is-visible{
+    transform:translate(-50%, 0);
+  }
+
+  .panel-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .pager{display:flex; align-items:center; gap:4px;}
+  .pager button{
+    font-family:inherit;
+    font-size:0.76rem;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:5px 9px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .pager button:disabled{opacity:0.45; cursor:not-allowed;}
+
+  @media (max-width:560px){
+    main{padding-left:5px; padding-right:5px;}
+    .navbar{padding-left:5px; padding-right:5px;}
+    .panel{padding:16px 12px;}
+    .profile-card{flex-direction:column; text-align:left; align-items:stretch;}
+    .profile-tag{text-align:center;}
+    .profile-name{text-align:center;}
+    .profile-meta{
+      display:block;
+      background:rgba(0,0,0,0.14);
+      border-radius:10px;
+      padding:4px 12px;
+    }
+    .profile-meta-item{
+      flex-direction:row;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:10px;
+      padding:9px 0;
+      border-bottom:1px solid rgba(255,255,255,0.16);
+    }
+    .profile-meta-item:last-child{border-bottom:none;}
+    .profile-meta-item .meta-label{flex:0 0 auto; white-space:nowrap;}
+    .profile-meta-item .meta-value{text-align:right;}
+    .nav-schoolinfo{display:none;}
+  }
+
+  /* ---------- Footer sticky ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    height:var(--footer-h);
+    background:var(--turquoise);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    z-index:30;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-size:0.75rem;
+    font-weight:600;
+    width:140px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar" id="siswaAvatar">SW</span>
+      <span class="admin-name" id="siswaName">Siswa</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-heading-row">
+    <div>
+      <h1 class="page-heading">Daftar Nilai Saya</h1>
+      <p class="page-sub">Nilai di bawah ini hanya menampilkan nilai milikmu sendiri.</p>
+    </div>
+    <a href="adminsiswa.html" class="btn btn-ghost btn-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Beranda
+    </a>
+  </div>
+
+  <div class="profile-card" id="profileCard">
+    <div class="profile-info">
+      <p class="profile-tag">IDENTITAS SISWA</p>
+      <h2 class="profile-name" id="profileNama">Memuat data...</h2>
+      <div class="profile-meta">
+        <div class="profile-meta-item">
+          <span class="meta-label">NISN</span>
+          <span class="meta-value" id="profileNisn">–</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="meta-label">Kelas</span>
+          <span class="meta-value" id="profileKelas">–</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Rekap Nilai</h2>
+
+  <div class="panel panel-nilai">
+    <div class="panel-head">
+      <h3>Daftar Nilai per Mata Pelajaran</h3>
+    </div>
+
+    <div class="nilai-toolbar">
+      <input type="text" class="panel-search" id="searchInputNilai" placeholder="Cari mata pelajaran...">
+      <select id="filterSemesterNilai" class="panel-select" disabled>
+        <option value="">Semua Semester</option>
+      </select>
+      <select id="filterTahunNilai" class="panel-select" disabled>
+        <option value="">Semua Tahun Pelajaran</option>
+      </select>
+      <select id="filterMapelNilai" class="panel-select" disabled>
+        <option value="">Semua Mata Pelajaran</option>
+      </select>
+    </div>
+
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+
+    <div class="table-wrap">
+      <table class="preview-table" id="tableNilaiSiswa">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Mata Pelajaran</th>
+            <th>Semester</th>
+            <th>Tahun Pelajaran</th>
+            <th>Kelas</th>
+            <th>KKTP/KKM</th>
+            <th>Jumlah UH</th>
+            <th>UH 1</th>
+            <th>UH 2</th>
+            <th>UH 3</th>
+            <th>UH 4</th>
+            <th>UH 5</th>
+            <th>UH 6</th>
+            <th>NH</th>
+            <th>UTS</th>
+            <th>UAS</th>
+            <th>NR</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="tableNilaiSiswaBody">
+          <tr class="empty-row"><td colspan="18">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel-foot">
+      <span id="entriesInfoNilai">Menampilkan 0 entri</span>
+      <div class="pager">
+        <button type="button" id="btnPrevNilai" disabled>Sebelumnya</button>
+        <button type="button" id="btnNextNilai" disabled>Berikutnya</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer sticky -->
+<div class="footer-bar">
+  <button class="footer-btn logout" id="logoutBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Log Out
+  </button>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const TABLE_DAFTARNILAI = "daftarnilai";
+
+  function sbHeaders(extra){
+    return Object.assign({
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    }, extra || {});
+  }
+
+  function escapeHtml(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  // ---------- Auth guard: pastikan ada sesi siswa ----------
+  function getSiswaSession(){
+    try{
+      const raw = localStorage.getItem('siswa_session');
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){
+      return null;
+    }
+  }
+
+  const siswaSession = getSiswaSession();
+  if(!siswaSession){
+    window.location.href = 'siswa.html';
+  }
+
+  function getInitials(nama){
+    return nama
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w[0].toUpperCase())
+      .join('');
+  }
+
+  (function renderSiswaAccount(){
+    if(!siswaSession) return;
+    const nama = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+    document.getElementById('siswaName').textContent = nama;
+    document.getElementById('siswaAvatar').textContent = getInitials(nama) || 'SW';
+  })();
+
+  // ---------- Ambil identitas siswa dari tabel "datasiswa" ----------
+  // Nama & NISN dari sini dipakai sebagai kunci filter yang otoritatif saat
+  // menarik data dari tabel "daftarnilai", supaya hanya nilai milik siswa
+  // yang sedang login yang ditampilkan.
+  let currentSiswaData = null;
+
+  const siswaProfilePromise = (async function loadSiswaProfile(){
+    const profileNama = document.getElementById('profileNama');
+    const profileNisn = document.getElementById('profileNisn');
+    const profileKelas = document.getElementById('profileKelas');
+
+    if(!siswaSession){
+      profileNama.textContent = 'Sesi tidak ditemukan';
+      return null;
+    }
+
+    try{
+      let url;
+      if(siswaSession.id){
+        url = `${SUPABASE_URL}/datasiswa?id=eq.${encodeURIComponent(siswaSession.id)}&select=nama_siswa,nisn,kelas&limit=1`;
+      } else {
+        const nama = siswaSession.nama_siswa || siswaSession.nama || '';
+        url = `${SUPABASE_URL}/datasiswa?nama_siswa=eq.${encodeURIComponent(nama)}&select=nama_siswa,nisn,kelas&limit=1`;
+      }
+
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      const siswa = rows && rows[0];
+
+      if(!siswa){
+        profileNama.textContent = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+        profileNisn.textContent = siswaSession.nisn || '-';
+        profileKelas.textContent = siswaSession.kelas || '-';
+        // Tetap kembalikan data dari sesi supaya query daftarnilai masih bisa jalan
+        return {
+          nama_siswa: siswaSession.nama_siswa || siswaSession.nama || '',
+          nisn: siswaSession.nisn || ''
+        };
+      }
+
+      profileNama.textContent = siswa.nama_siswa || '-';
+      profileNisn.textContent = siswa.nisn || '-';
+      profileKelas.textContent = siswa.kelas || '-';
+
+      currentSiswaData = siswa;
+      return siswa;
+    }catch(err){
+      console.error('Gagal memuat identitas siswa:', err);
+      profileNama.textContent = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+      return {
+        nama_siswa: siswaSession.nama_siswa || siswaSession.nama || '',
+        nisn: siswaSession.nisn || ''
+      };
+    }
+  })();
+
+  // ---------- Ambil logo & nama sekolah dari tabel "profil" ----------
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran&limit=1`, { headers: sbHeaders() });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+
+      if(profil.nama_sekolah){
+        document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      }
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          const termBadge = document.getElementById('termBadge');
+          if(termBadge) termBadge.style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){
+      console.error('Gagal memuat profil sekolah:', err);
+    }
+  })();
+
+  // ================= Daftar Nilai (khusus siswa yang login) =================
+  // Kolom tabel "daftarnilai" yang dipakai: id, nama_siswa, nisn, kelas,
+  // semester, tahun_pelajaran, mata_pelajaran, kkm, jumlah_uh, uh1-uh6, nh,
+  // uts, uas, nr, keterangan. Query selalu difilter nama_siswa + nisn milik
+  // siswa yang sedang login, sehingga siswa lain tidak akan pernah terlihat.
+  const NILAI_PAGE_SIZE = 10;
+  let currentPageNilai = 0;
+  let totalRowsNilai = 0;
+  let searchTermNilai = '';
+  let selectedSemesterNilai = '';
+  let selectedTahunNilai = '';
+  let selectedMapelNilai = '';
+  let lastNilaiRows = [];
+
+  const tableNilaiSiswaBody = document.getElementById('tableNilaiSiswaBody');
+  const entriesInfoNilai = document.getElementById('entriesInfoNilai');
+  const btnPrevNilai = document.getElementById('btnPrevNilai');
+  const btnNextNilai = document.getElementById('btnNextNilai');
+  const searchInputNilai = document.getElementById('searchInputNilai');
+  const filterSemesterNilaiEl = document.getElementById('filterSemesterNilai');
+  const filterTahunNilaiEl = document.getElementById('filterTahunNilai');
+  const filterMapelNilaiEl = document.getElementById('filterMapelNilai');
+
+  function nilaiColCount(){ return 18; }
+
+  function formatAngka(v){
+    if(v === null || v === undefined || v === '') return '-';
+    return String(v);
+  }
+
+  // ---------- NH (Nilai Harian) ----------
+  // Rumus: NH = (UH1 + UH2 + ... + UH-sejumlah "Jumlah UH") : Jumlah UH.
+  // UH yang belum diisi dihitung sebagai 0.
+  function hitungNH(row){
+    const jumlahUh = Number(row.jumlah_uh);
+    if(!jumlahUh || jumlahUh < 1) return null;
+    const kolomUh = ['uh1','uh2','uh3','uh4','uh5','uh6'].slice(0, jumlahUh);
+    let total = 0;
+    kolomUh.forEach(k => {
+      const v = row[k];
+      const n = Number(v);
+      const nilaiValid = !(v === null || v === undefined || v === '' || isNaN(n));
+      total += nilaiValid ? n : 0;
+    });
+    return total / jumlahUh;
+  }
+
+  // ---------- NR (Nilai Rapor) ----------
+  // Rumus: NR = (NH + UTS + UAS) : 3. UTS/UAS yang belum diisi dihitung 0.
+  function hitungNR(row){
+    const nh = hitungNH(row);
+    const nhValid = (nh === null) ? 0 : nh;
+
+    const uts = Number(row.uts);
+    const utsValid = (row.uts === null || row.uts === undefined || row.uts === '' || isNaN(uts)) ? 0 : uts;
+
+    const uas = Number(row.uas);
+    const uasValid = (row.uas === null || row.uas === undefined || row.uas === '' || isNaN(uas)) ? 0 : uas;
+
+    return (nhValid + utsValid + uasValid) / 3;
+  }
+
+  function formatNilaiHitung(v){
+    if(v === null || v === undefined || isNaN(v)) return '-';
+    const dibulatkan = Math.round(v * 100) / 100;
+    let str = dibulatkan.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+    return str.replace('.', ',');
+  }
+
+  // ---------- KETERANGAN otomatis dari NR vs KKTP/KKM ----------
+  function hitungKeterangan(row){
+    const kkm = Number(row.kkm);
+    if(row.kkm === null || row.kkm === undefined || row.kkm === '' || isNaN(kkm)) return null;
+    const nr = hitungNR(row);
+    if(nr === null || isNaN(nr)) return null;
+    return nr < kkm ? 'Belum Tuntas' : 'Tuntas';
+  }
+
+  function buatAlasanKeterangan(row, ket){
+    if(ket === null){
+      return 'KKTP/KKM belum ditetapkan, sehingga Keterangan belum bisa ditentukan.';
+    }
+
+    const kkm = Number(row.kkm);
+    const jumlahUh = Number(row.jumlah_uh) || 0;
+
+    if(ket === 'Tuntas'){
+      return `Keterangan Tuntas. Nilai Rapor (NR) kamu ${formatNilaiHitung(hitungNR(row))} sudah mencapai KKTP/KKM (${formatNilaiHitung(kkm)}).`;
+    }
+
+    const alasan = [];
+    const uhBelum = [];
+    const uhRendah = [];
+    for(let i = 1; i <= jumlahUh; i++){
+      const v = row['uh' + i];
+      if(v === null || v === undefined || v === ''){
+        uhBelum.push('UH ' + i);
+        continue;
+      }
+      const n = Number(v);
+      if(!isNaN(n) && n < kkm) uhRendah.push('UH ' + i);
+    }
+    if(uhBelum.length > 0){
+      alasan.push(`Kamu belum melaksanakan ${uhBelum.join(', ')}.`);
+    }
+    if(uhRendah.length > 0){
+      alasan.push(`Nilai ${uhRendah.join(', ')} belum mencapai KKTP/KKM yang ditetapkan.`);
+    }
+
+    if(row.uts === null || row.uts === undefined || row.uts === ''){
+      alasan.push('Kamu belum melaksanakan UTS.');
+    } else {
+      const utsN = Number(row.uts);
+      if(!isNaN(utsN) && utsN < kkm){
+        alasan.push('Nilai UTS belum mencapai KKTP/KKM yang ditetapkan.');
+      }
+    }
+
+    if(row.uas === null || row.uas === undefined || row.uas === ''){
+      alasan.push('Kamu belum melaksanakan UAS.');
+    } else {
+      const uasN = Number(row.uas);
+      if(!isNaN(uasN) && uasN < kkm){
+        alasan.push('Nilai UAS belum mencapai KKTP/KKM yang ditetapkan.');
+      }
+    }
+
+    if(alasan.length === 0){
+      alasan.push(`Nilai Rapor (NR) kamu ${formatNilaiHitung(hitungNR(row))} masih di bawah KKTP/KKM (${formatNilaiHitung(kkm)}).`);
+    }
+
+    return `Keterangan Belum Tuntas. ${alasan.join(' ')}`;
+  }
+
+  // ---------- Tooltip "portal" untuk badge Keterangan ----------
+  const keteranganTooltipPortal = document.createElement('div');
+  keteranganTooltipPortal.className = 'keterangan-tooltip-portal';
+  keteranganTooltipPortal.setAttribute('role', 'tooltip');
+  document.body.appendChild(keteranganTooltipPortal);
+
+  function posisikanKeteranganTooltip(wrapEl){
+    const rect = wrapEl.getBoundingClientRect();
+    const margin = 8;
+    let left = rect.left + rect.width / 2;
+    left = Math.min(Math.max(left, 150), window.innerWidth - 150);
+
+    const perkiraanTinggi = keteranganTooltipPortal.offsetHeight || 60;
+    const cukupDiAtas = rect.top - perkiraanTinggi - margin > 0;
+
+    keteranganTooltipPortal.classList.toggle('arah-bawah', !cukupDiAtas);
+    keteranganTooltipPortal.style.left = left + 'px';
+    keteranganTooltipPortal.style.top = cukupDiAtas
+      ? (rect.top - margin) + 'px'
+      : (rect.bottom + margin) + 'px';
+  }
+
+  function tampilkanKeteranganTooltip(wrapEl){
+    const alasan = wrapEl.getAttribute('data-alasan');
+    if(!alasan) return;
+    keteranganTooltipPortal.textContent = alasan;
+    keteranganTooltipPortal.classList.remove('is-visible');
+    posisikanKeteranganTooltip(wrapEl);
+    requestAnimationFrame(() => {
+      posisikanKeteranganTooltip(wrapEl);
+      keteranganTooltipPortal.classList.add('is-visible');
+    });
+  }
+
+  function sembunyikanKeteranganTooltip(){
+    keteranganTooltipPortal.classList.remove('is-visible');
+  }
+
+  document.addEventListener('mouseover', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) tampilkanKeteranganTooltip(wrapEl);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl && !wrapEl.contains(e.relatedTarget)) sembunyikanKeteranganTooltip();
+  });
+  document.addEventListener('focusin', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) tampilkanKeteranganTooltip(wrapEl);
+  });
+  document.addEventListener('focusout', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) sembunyikanKeteranganTooltip();
+  });
+  document.addEventListener('scroll', () => {
+    if(keteranganTooltipPortal.classList.contains('is-visible')){
+      sembunyikanKeteranganTooltip();
+    }
+  }, true);
+  window.addEventListener('resize', () => {
+    if(keteranganTooltipPortal.classList.contains('is-visible')){
+      sembunyikanKeteranganTooltip();
+    }
+  });
+
+  function keteranganBadge(ket, alasan){
+    let kelas = 'na';
+    if(ket === 'Tuntas') kelas = 'tuntas';
+    else if(ket === 'Belum Tuntas') kelas = 'belum';
+    const label = escapeHtml(ket ?? '-');
+    return `<span class="keterangan-tooltip-wrap" tabindex="0" data-alasan="${escapeHtml(alasan)}">` +
+      `<span class="keterangan-pill ${kelas}">${label}</span>` +
+    `</span>`;
+  }
+
+  // Ambil seluruh baris "daftarnilai" milik siswa yang login (filter
+  // nama_siswa + nisn). Ini adalah SATU-SATUNYA sumber data tabel di halaman
+  // ini, jadi siswa lain tidak akan pernah muncul di sini.
+  async function fetchDaftarNilaiSiswa(namaSiswa, nisn){
+    const url = `${SUPABASE_URL}/${TABLE_DAFTARNILAI}` +
+      `?select=*` +
+      `&nama_siswa=eq.${encodeURIComponent(namaSiswa)}` +
+      `&nisn=eq.${encodeURIComponent(nisn)}` +
+      `&order=tahun_pelajaran.desc,semester.desc,mata_pelajaran.asc`;
+    const res = await fetch(url, { headers: sbHeaders() });
+    if(!res.ok) throw new Error('Status ' + res.status);
+    return await res.json();
+  }
+
+  function renderNilaiTable(rows, offset){
+    if(!rows || rows.length === 0){
+      tableNilaiSiswaBody.innerHTML = `<tr class="empty-row"><td colspan="${nilaiColCount()}">Belum ada data nilai untukmu.</td></tr>`;
+      return;
+    }
+    tableNilaiSiswaBody.innerHTML = rows.map((r, idx) => {
+      const ket = hitungKeterangan(r);
+      const alasanKet = buatAlasanKeterangan(r, ket);
+      return `
+      <tr>
+        <td class="center">${offset + idx + 1}</td>
+        <td>${escapeHtml(r.mata_pelajaran ?? '-')}</td>
+        <td>${escapeHtml(r.semester ?? '-')}</td>
+        <td>${escapeHtml(r.tahun_pelajaran ?? '-')}</td>
+        <td>${escapeHtml(r.kelas ?? '-')}</td>
+        <td class="center">${formatAngka(r.kkm)}</td>
+        <td class="center">${formatAngka(r.jumlah_uh)}</td>
+        <td class="center">${formatAngka(r.uh1)}</td>
+        <td class="center">${formatAngka(r.uh2)}</td>
+        <td class="center">${formatAngka(r.uh3)}</td>
+        <td class="center">${formatAngka(r.uh4)}</td>
+        <td class="center">${formatAngka(r.uh5)}</td>
+        <td class="center">${formatAngka(r.uh6)}</td>
+        <td class="center">${formatNilaiHitung(hitungNH(r))}</td>
+        <td class="center">${formatAngka(r.uts)}</td>
+        <td class="center">${formatAngka(r.uas)}</td>
+        <td class="center">${formatNilaiHitung(hitungNR(r))}</td>
+        <td>${keteranganBadge(ket, alasanKet)}</td>
+      </tr>
+    `;
+    }).join('');
+  }
+
+  function renderNilaiFoot(offset, shownCount){
+    if(totalRowsNilai === 0){
+      entriesInfoNilai.textContent = 'Menampilkan 0 entri';
+    } else {
+      entriesInfoNilai.textContent = `Menampilkan ${offset + 1}-${offset + shownCount} dari ${totalRowsNilai} entri`;
+    }
+    btnPrevNilai.disabled = currentPageNilai === 0;
+    btnNextNilai.disabled = offset + shownCount >= totalRowsNilai;
+  }
+
+  // Filter Semester, Tahun Pelajaran & Mata Pelajaran, opsinya dibangun dari
+  // seluruh baris nilai milik siswa ini (sebelum difilter pencarian).
+  function populateNilaiFilterOptions(rows){
+    if(!rows || rows.length === 0){
+      filterSemesterNilaiEl.innerHTML = '<option value="">Semua Semester</option>';
+      filterTahunNilaiEl.innerHTML = '<option value="">Semua Tahun Pelajaran</option>';
+      filterMapelNilaiEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>';
+      filterSemesterNilaiEl.value = '';
+      filterTahunNilaiEl.value = '';
+      filterMapelNilaiEl.value = '';
+      filterSemesterNilaiEl.disabled = true;
+      filterTahunNilaiEl.disabled = true;
+      filterMapelNilaiEl.disabled = true;
+      return;
+    }
+
+    const semesterList = Array.from(new Set(rows.map(r => String(r.semester ?? '')).filter(Boolean))).sort();
+    const tahunList = Array.from(new Set(rows.map(r => String(r.tahun_pelajaran ?? '')).filter(Boolean))).sort();
+    const mapelList = Array.from(new Set(rows.map(r => String(r.mata_pelajaran ?? '')).filter(Boolean))).sort();
+
+    if(!semesterList.includes(selectedSemesterNilai)) selectedSemesterNilai = '';
+    if(!tahunList.includes(selectedTahunNilai)) selectedTahunNilai = '';
+    if(!mapelList.includes(selectedMapelNilai)) selectedMapelNilai = '';
+
+    filterSemesterNilaiEl.innerHTML = '<option value="">Semua Semester</option>' +
+      semesterList.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    filterTahunNilaiEl.innerHTML = '<option value="">Semua Tahun Pelajaran</option>' +
+      tahunList.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+    filterMapelNilaiEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>' +
+      mapelList.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+
+    filterSemesterNilaiEl.value = selectedSemesterNilai;
+    filterTahunNilaiEl.value = selectedTahunNilai;
+    filterMapelNilaiEl.value = selectedMapelNilai;
+    filterSemesterNilaiEl.disabled = false;
+    filterTahunNilaiEl.disabled = false;
+    filterMapelNilaiEl.disabled = false;
+  }
+
+  async function fetchNilaiSiswa(){
+    tableNilaiSiswaBody.innerHTML = `<tr class="empty-row"><td colspan="${nilaiColCount()}">Memuat data...</td></tr>`;
+    try{
+      const siswa = currentSiswaData || await siswaProfilePromise;
+      const namaSiswa = (siswa && siswa.nama_siswa) || siswaSession.nama_siswa || siswaSession.nama || '';
+      const nisn = (siswa && siswa.nisn) || siswaSession.nisn || '';
+
+      if(!namaSiswa || !nisn){
+        lastNilaiRows = [];
+        totalRowsNilai = 0;
+        populateNilaiFilterOptions([]);
+        tableNilaiSiswaBody.innerHTML = `<tr class="empty-row"><td colspan="${nilaiColCount()}">Identitas siswa (nama/NISN) tidak ditemukan, tidak bisa memuat nilai.</td></tr>`;
+        renderNilaiFoot(0, 0);
+        return;
+      }
+
+      const allRows = await fetchDaftarNilaiSiswa(namaSiswa, nisn);
+      lastNilaiRows = allRows.slice();
+      populateNilaiFilterOptions(allRows);
+
+      let rows = allRows;
+      if(selectedSemesterNilai){
+        rows = rows.filter(r => String(r.semester ?? '') === selectedSemesterNilai);
+      }
+      if(selectedTahunNilai){
+        rows = rows.filter(r => String(r.tahun_pelajaran ?? '') === selectedTahunNilai);
+      }
+      if(selectedMapelNilai){
+        rows = rows.filter(r => String(r.mata_pelajaran ?? '') === selectedMapelNilai);
+      }
+
+      const term = searchTermNilai.trim().toLowerCase();
+      if(term){
+        rows = rows.filter(r => String(r.mata_pelajaran ?? '').toLowerCase().includes(term));
+      }
+
+      totalRowsNilai = rows.length;
+      const offset = currentPageNilai * NILAI_PAGE_SIZE;
+      const pageRows = rows.slice(offset, offset + NILAI_PAGE_SIZE);
+
+      renderNilaiTable(pageRows, offset);
+      renderNilaiFoot(offset, pageRows.length);
+    }catch(err){
+      console.error('Gagal memuat data nilai:', err);
+      tableNilaiSiswaBody.innerHTML = `<tr class="empty-row"><td colspan="${nilaiColCount()}">Gagal memuat data. Pastikan tabel "${TABLE_DAFTARNILAI}" sudah dibuat di Supabase.</td></tr>`;
+      renderNilaiFoot(0, 0);
+    }
+  }
+
+  let searchDebounceTimer = null;
+  searchInputNilai.addEventListener('input', (e) => {
+    searchTermNilai = e.target.value;
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      currentPageNilai = 0;
+      fetchNilaiSiswa();
+    }, 300);
+  });
+
+  filterSemesterNilaiEl.addEventListener('change', (e) => {
+    selectedSemesterNilai = e.target.value;
+    currentPageNilai = 0;
+    fetchNilaiSiswa();
+  });
+  filterTahunNilaiEl.addEventListener('change', (e) => {
+    selectedTahunNilai = e.target.value;
+    currentPageNilai = 0;
+    fetchNilaiSiswa();
+  });
+  filterMapelNilaiEl.addEventListener('change', (e) => {
+    selectedMapelNilai = e.target.value;
+    currentPageNilai = 0;
+    fetchNilaiSiswa();
+  });
+
+  btnPrevNilai.addEventListener('click', () => {
+    if(currentPageNilai > 0){
+      currentPageNilai--;
+      fetchNilaiSiswa();
+    }
+  });
+  btnNextNilai.addEventListener('click', () => {
+    const maxPage = Math.floor(Math.max(totalRowsNilai - 1, 0) / NILAI_PAGE_SIZE);
+    if(currentPageNilai < maxPage){
+      currentPageNilai++;
+      fetchNilaiSiswa();
+    }
+  });
+
+  // Muat data nilai setelah identitas siswa selesai dimuat.
+  siswaProfilePromise.then(() => fetchNilaiSiswa());
+
+  // ---------- Log Out ----------
+  function doLogout(){
+    localStorage.removeItem('siswa_session');
+    window.location.href = 'index.html';
+  }
+  document.getElementById('logoutBtn').addEventListener('click', doLogout);
+</script>
+
+</body>
+</html>

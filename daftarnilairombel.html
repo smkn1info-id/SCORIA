@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Nilai Rombel — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#fffefd;
+    --paper-deep:#FFEFD6;
+    --paper-line:#1b1915;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:20px;
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{width:100%; height:100%; object-fit:cover;}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .term-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .term-badge .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  @media (max-width:600px){
+    .navbar{padding-left:5px; padding-right:5px;}
+  }
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-heading-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .page-heading-row .page-heading{margin:0;}
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 24px;
+  }
+  .btn-dashboard svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
+
+  /* ---------- Panel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    margin-bottom:26px;
+  }
+  .panel-kelas{
+    background:#F1EEF9;
+    border-left:5px solid var(--purple);
+  }
+  .panel-semua{
+    background:#EFF6FB;
+    border-left:5px solid var(--turquoise);
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .panel-head p.panel-desc{
+    margin:2px 0 0;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+  }
+  .panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:9px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:220px;
+    height:38px;
+  }
+  .panel-search:focus{border-color:var(--turquoise); outline:none;}
+
+  /* ---------- Toolbar ---------- */
+  .nilai-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .nilai-toolbar-group{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .nilai-toolbar-group-end{margin-left:auto;}
+  .panel-select{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:9px 30px 9px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:160px;
+    height:38px;
+    cursor:pointer;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    background-size:14px;
+  }
+  .panel-select:focus{border-color:var(--turquoise); outline:none;}
+  .panel-select:disabled{opacity:0.55; cursor:not-allowed;}
+
+  @media (max-width:720px){
+    .nilai-toolbar-group{width:100%;}
+    .nilai-toolbar-group > *{flex:1 1 auto;}
+    .nilai-toolbar-group-end{margin-left:0;}
+    .nilai-toolbar-group-end .btn{width:100%;}
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    border-radius:6px;
+    padding:0 16px;
+    height:38px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand); color:#FFFFFF;}
+  .btn-primary:hover{background:#5A3FCB;}
+  .btn-ghost{background:#fbf8f0; color:var(--ink); border-color:var(--paper-line);}
+  .btn-ghost:hover{border-color:var(--brick); color:var(--brick);}
+  .btn-sm{padding:6px 11px; font-size:0.76rem;}
+  .btn svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
+
+  /* ---------- Table ---------- */
+  .scroll-hint{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:var(--turquoise) var(--paper-deep);
+    border-radius:6px;
+  }
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--turquoise); border-radius:6px;}
+
+  .preview-table{
+    width:100%;
+    min-width:1500px;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  .preview-table th{
+    text-align:left;
+    font-size:0.7rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:2px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .preview-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--paper-line);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .preview-table tbody tr:hover{background:var(--paper-deep);}
+  .preview-table .empty-row td{
+    white-space:normal;
+    text-align:center;
+    color:var(--ink-soft);
+    padding:22px 10px;
+  }
+  .preview-table td.center{text-align:center;}
+
+  .keterangan-pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .keterangan-pill.tuntas{background:#EAF6EE; color:var(--green);}
+  .keterangan-pill.belum{background:#FDEAF0; color:var(--brick);}
+  .keterangan-pill.na{background:#F1EEF9; color:var(--ink-soft);}
+
+  .btn-export-rekap{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    padding:9px 14px;
+    border:1px solid var(--green);
+    border-radius:6px;
+    background:var(--green);
+    color:#FFFFFF;
+    height:38px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn-export-rekap:hover{background:#146c43; border-color:#146c43;}
+  .btn-export-rekap:disabled{opacity:0.55; cursor:not-allowed;}
+  .btn-export-rekap svg{width:15px; height:15px; flex-shrink:0;}
+  @media (max-width:600px){
+    .btn-export-rekap{width:100%; justify-content:center;}
+  }
+
+  /* ---------- Tooltip alasan Keterangan ---------- */
+  .keterangan-tooltip-wrap{
+    position:relative;
+    display:inline-block;
+    cursor:help;
+  }
+  .keterangan-tooltip-portal{
+    position:fixed;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:max-content;
+    min-width:220px;
+    max-width:280px;
+    background:var(--ink);
+    color:#fffefd;
+    font-size:0.74rem;
+    font-weight:400;
+    line-height:1.5;
+    padding:9px 12px;
+    border-radius:8px;
+    box-shadow:0 12px 28px rgba(59,46,99,0.32);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity 0.15s ease, transform 0.15s ease;
+    white-space:normal;
+    text-align:left;
+    transform:translate(-50%, calc(-100% + 4px));
+  }
+  .keterangan-tooltip-portal::after{
+    content:'';
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--ink);
+  }
+  .keterangan-tooltip-portal.is-visible{
+    opacity:1;
+    visibility:visible;
+    transform:translate(-50%, -100%);
+  }
+  .keterangan-tooltip-portal.arah-bawah{
+    transform:translate(-50%, -4px);
+  }
+  .keterangan-tooltip-portal.arah-bawah::after{
+    top:auto;
+    bottom:100%;
+    border-top-color:transparent;
+    border-bottom-color:var(--ink);
+  }
+  .keterangan-tooltip-portal.arah-bawah.is-visible{
+    transform:translate(-50%, 0);
+  }
+
+  .panel-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .pager{display:flex; align-items:center; gap:4px;}
+  .pager button{
+    font-family:inherit;
+    font-size:0.76rem;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:5px 9px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .pager button:disabled{opacity:0.45; cursor:not-allowed;}
+
+  /* ---------- Ringkasan kecil per kelas ---------- */
+  .kelas-summary{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:0 0 14px;
+  }
+  .kelas-summary .chip{
+    font-size:0.76rem;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:999px;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    color:var(--ink-soft);
+  }
+  .kelas-summary .chip.tuntas{color:var(--green); border-color:rgba(26,135,84,0.35); background:#EAF6EE;}
+  .kelas-summary .chip.belum{color:var(--brick); border-color:rgba(214,51,108,0.35); background:#FDEAF0;}
+
+  /* ---------- Tab kelas (preview tuntas/belum tuntas) ---------- */
+  .kelas-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 16px;
+  }
+  .tabs-empty{
+    margin:0;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+  }
+  .kelas-tab-btn{
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    padding:8px 16px;
+    border-radius:999px;
+    border:1px solid var(--paper-line);
+    background:#fbf8f0;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .kelas-tab-btn:hover{color:var(--ink);}
+  .kelas-tab-btn.active{
+    background:var(--turquoise);
+    border-color:var(--turquoise);
+    color:#fff;
+  }
+
+  .preview-summary{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+  }
+
+  .preview-columns{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:720px){
+    .preview-columns{grid-template-columns:1fr;}
+  }
+  .preview-col{
+    background:#fffefd;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:14px 16px;
+    min-width:0;
+  }
+  .preview-col h4{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:0.98rem;
+    margin:0 0 12px;
+  }
+  .dot-status{
+    width:9px; height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .dot-tuntas{background:var(--green);}
+  .dot-belum{background:var(--brick);}
+  .count-badge{
+    margin-left:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.74rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    background:#F1EEF9;
+    color:var(--ink-soft);
+  }
+  .siswa-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    max-height:420px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .siswa-item{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:4px 10px;
+    padding:8px 10px;
+    border-radius:6px;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    font-size:0.82rem;
+  }
+  .siswa-nama{font-weight:600; color:var(--ink);}
+  .siswa-mapel{color:var(--ink-soft);}
+  .siswa-nr{
+    margin-left:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.76rem;
+    color:var(--ink-soft);
+  }
+  .siswa-empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.82rem;
+    padding:20px 10px;
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar">AD</span>
+      <span class="admin-name">Admin</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-heading-row">
+    <h1 class="page-heading">Rekap Nilai Rombel</h1>
+    <a href="admin.html" class="btn btn-ghost btn-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Dashboard
+    </a>
+  </div>
+  <p class="page-sub">Rekap nilai seluruh siswa dari semua mata pelajaran, dapat dilihat per rombongan belajar (kelas) maupun sebagai daftar lengkap seluruh siswa.</p>
+
+  <!-- ================= KONTAINER 1: NILAI PER KELAS ================= -->
+  <div class="panel panel-kelas">
+    <div class="panel-head">
+      <div>
+        <h3>Nilai per Kelas</h3>
+        <p class="panel-desc">Pilih kelas untuk melihat rekap nilai seluruh siswa di kelas tersebut.</p>
+      </div>
+    </div>
+
+    <div class="nilai-toolbar">
+      <div class="nilai-toolbar-group">
+        <select id="kelasPilih" class="panel-select">
+          <option value="">Pilih Kelas...</option>
+        </select>
+        <select id="mapelPilihKelas" class="panel-select" disabled>
+          <option value="">Semua Mata Pelajaran</option>
+        </select>
+      </div>
+      <div class="nilai-toolbar-group nilai-toolbar-group-end">
+        <button type="button" class="btn-export-rekap" id="btnExportKelas" disabled title="Export nilai kelas terpilih ke PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6"/><path d="M9.5 14.5 12 17l2.5-2.5"/></svg>
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="kelas-summary" id="kelasSummary" style="display:none;"></div>
+
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+
+    <div class="table-wrap">
+      <table class="preview-table" id="tableNilaiKelas">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama Siswa</th>
+            <th>NISN</th>
+            <th>Kelas</th>
+            <th>Semester</th>
+            <th>Tahun Pelajaran</th>
+            <th>Mata Pelajaran</th>
+            <th>KKTP/KKM</th>
+            <th>Jumlah UH</th>
+            <th>UH 1</th>
+            <th>UH 2</th>
+            <th>UH 3</th>
+            <th>UH 4</th>
+            <th>UH 5</th>
+            <th>UH 6</th>
+            <th>NH</th>
+            <th>UTS</th>
+            <th>UAS</th>
+            <th>NR</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="tableNilaiKelasBody">
+          <tr class="empty-row"><td colspan="20">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= KONTAINER 2: PREVIEW TUNTAS / BELUM TUNTAS PER KELAS ================= -->
+  <div class="panel panel-semua">
+    <div class="panel-head">
+      <div>
+        <h3>Preview Tuntas &amp; Belum Tuntas per Kelas</h3>
+        <p class="panel-desc">Pilih tab kelas untuk melihat siswa yang sudah tuntas dan yang belum tuntas KKTP/KKM.</p>
+      </div>
+    </div>
+
+    <div class="kelas-tabs" id="kelasTabs">
+      <p class="tabs-empty">Memuat daftar kelas...</p>
+    </div>
+
+    <div class="preview-summary" id="previewSummary"></div>
+
+    <div class="preview-columns">
+      <div class="preview-col preview-col-tuntas">
+        <h4><span class="dot-status dot-tuntas"></span>Tuntas <span class="count-badge" id="countTuntas">0</span></h4>
+        <ul class="siswa-list" id="listTuntas">
+          <li class="siswa-empty">Memuat data...</li>
+        </ul>
+      </div>
+      <div class="preview-col preview-col-belum">
+        <h4><span class="dot-status dot-belum"></span>Belum Tuntas <span class="count-badge" id="countBelum">0</span></h4>
+        <ul class="siswa-list" id="listBelum">
+          <li class="siswa-empty">Memuat data...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ================= Konfigurasi Supabase =================
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const TABLE_DAFTARNILAI = "daftarnilai";
+  const TABLE_ROMBEL = "rombel";
+
+  function sbHeaders(extra){
+    return Object.assign({
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    }, extra || {});
+  }
+
+  function escapeHtml(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  function formatAngka(v){
+    if(v === null || v === undefined || v === '') return '-';
+    return String(v);
+  }
+
+  function formatNilaiHitung(v){
+    if(v === null || v === undefined || isNaN(v)) return '-';
+    const dibulatkan = Math.round(v * 100) / 100;
+    let str = dibulatkan.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+    return str.replace('.', ',');
+  }
+
+  // ---------- Ambil logo, nama sekolah, semester & tahun pelajaran aktif ----------
+  let profilAktif = { semester: '', tahun_pelajaran: '' };
+  let profilSekolahCache = null;
+  async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=*&limit=1`, { headers: sbHeaders() });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+      profilSekolahCache = profil;
+      if(profil.nama_sekolah) document.getElementById('schoolName').textContent = profil.nama_sekolah;
+
+      profilAktif.semester = (profil.semester || '').trim();
+      profilAktif.tahun_pelajaran = (profil.tahun_pelajaran || '').trim();
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        if(profilAktif.semester || profilAktif.tahun_pelajaran){
+          termBadgeText.textContent = [profilAktif.semester ? 'Semester ' + profilAktif.semester : '', profilAktif.tahun_pelajaran].filter(Boolean).join(' • ');
+        } else {
+          const termBadge = document.getElementById('termBadge');
+          if(termBadge) termBadge.style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){ console.error('Gagal memuat profil sekolah:', err); }
+  }
+
+  // ================= Perhitungan Nilai (NH, NR, Keterangan) =================
+  function hitungNH(row){
+    const jumlahUh = Number(row.jumlah_uh);
+    if(!jumlahUh || jumlahUh < 1) return null;
+    const kolomUh = ['uh1','uh2','uh3','uh4','uh5','uh6'].slice(0, jumlahUh);
+    let total = 0;
+    kolomUh.forEach(k => {
+      const v = row[k];
+      const n = Number(v);
+      const nilaiValid = !(v === null || v === undefined || v === '' || isNaN(n));
+      total += nilaiValid ? n : 0;
+    });
+    return total / jumlahUh;
+  }
+
+  function hitungNR(row){
+    const nh = hitungNH(row);
+    const nhValid = (nh === null) ? 0 : nh;
+
+    const uts = Number(row.uts);
+    const utsValid = (row.uts === null || row.uts === undefined || row.uts === '' || isNaN(uts)) ? 0 : uts;
+
+    const uas = Number(row.uas);
+    const uasValid = (row.uas === null || row.uas === undefined || row.uas === '' || isNaN(uas)) ? 0 : uas;
+
+    return (nhValid + utsValid + uasValid) / 3;
+  }
+
+  function hitungKeterangan(row){
+    const kkm = Number(row.kkm);
+    if(row.kkm === null || row.kkm === undefined || row.kkm === '' || isNaN(kkm)) return null;
+    const nr = hitungNR(row);
+    if(nr === null || isNaN(nr)) return null;
+    return nr < kkm ? 'Belum Tuntas' : 'Tuntas';
+  }
+
+  function buatAlasanKeterangan(row, ket){
+    if(ket === null){
+      return 'KKTP/KKM belum ditetapkan, sehingga Keterangan belum bisa ditentukan.';
+    }
+    const kkm = Number(row.kkm);
+    const jumlahUh = Number(row.jumlah_uh) || 0;
+
+    if(ket === 'Tuntas'){
+      return `Keterangan Tuntas. Nilai Rapor (NR) siswa ${formatNilaiHitung(hitungNR(row))} sudah mencapai KKTP/KKM (${formatNilaiHitung(kkm)}).`;
+    }
+
+    const alasan = [];
+    const uhBelum = [];
+    const uhRendah = [];
+    for(let i = 1; i <= jumlahUh; i++){
+      const v = row['uh' + i];
+      if(v === null || v === undefined || v === ''){
+        uhBelum.push('UH ' + i);
+        continue;
+      }
+      const n = Number(v);
+      if(!isNaN(n) && n < kkm) uhRendah.push('UH ' + i);
+    }
+    if(uhBelum.length > 0){
+      alasan.push(`Siswa belum melaksanakan ${uhBelum.join(', ')}.`);
+    }
+    if(uhRendah.length > 0){
+      alasan.push(`Nilai ${uhRendah.join(', ')} belum mencapai KKTP/KKM yang ditetapkan.`);
+    }
+
+    if(row.uts === null || row.uts === undefined || row.uts === ''){
+      alasan.push('Siswa belum melaksanakan UTS.');
+    } else {
+      const utsN = Number(row.uts);
+      if(!isNaN(utsN) && utsN < kkm){
+        alasan.push('Nilai UTS belum mencapai KKTP/KKM yang ditetapkan.');
+      }
+    }
+
+    if(row.uas === null || row.uas === undefined || row.uas === ''){
+      alasan.push('Siswa belum melaksanakan UAS.');
+    } else {
+      const uasN = Number(row.uas);
+      if(!isNaN(uasN) && uasN < kkm){
+        alasan.push('Nilai UAS belum mencapai KKTP/KKM yang ditetapkan.');
+      }
+    }
+
+    if(alasan.length === 0){
+      alasan.push(`Nilai Rapor (NR) siswa ${formatNilaiHitung(hitungNR(row))} masih di bawah KKTP/KKM (${formatNilaiHitung(kkm)}).`);
+    }
+
+    return `Keterangan Belum Tuntas. ${alasan.join(' ')}`;
+  }
+
+  function keteranganBadge(ket, alasan){
+    let kelas = 'na';
+    if(ket === 'Tuntas') kelas = 'tuntas';
+    else if(ket === 'Belum Tuntas') kelas = 'belum';
+    const label = escapeHtml(ket ?? '-');
+    return `<span class="keterangan-tooltip-wrap" tabindex="0" data-alasan="${escapeHtml(alasan)}">` +
+      `<span class="keterangan-pill ${kelas}">${label}</span>` +
+    `</span>`;
+  }
+
+  // ---------- Tooltip "portal" untuk badge Keterangan (dipakai kedua tabel) ----------
+  const keteranganTooltipPortal = document.createElement('div');
+  keteranganTooltipPortal.className = 'keterangan-tooltip-portal';
+  keteranganTooltipPortal.setAttribute('role', 'tooltip');
+  document.body.appendChild(keteranganTooltipPortal);
+
+  function posisikanKeteranganTooltip(wrapEl){
+    const rect = wrapEl.getBoundingClientRect();
+    const margin = 8;
+    let left = rect.left + rect.width / 2;
+    left = Math.min(Math.max(left, 150), window.innerWidth - 150);
+
+    const perkiraanTinggi = keteranganTooltipPortal.offsetHeight || 60;
+    const cukupDiAtas = rect.top - perkiraanTinggi - margin > 0;
+
+    keteranganTooltipPortal.classList.toggle('arah-bawah', !cukupDiAtas);
+    keteranganTooltipPortal.style.left = left + 'px';
+    keteranganTooltipPortal.style.top = cukupDiAtas
+      ? (rect.top - margin) + 'px'
+      : (rect.bottom + margin) + 'px';
+  }
+
+  function tampilkanKeteranganTooltip(wrapEl){
+    const alasan = wrapEl.getAttribute('data-alasan');
+    if(!alasan) return;
+    keteranganTooltipPortal.textContent = alasan;
+    keteranganTooltipPortal.classList.remove('is-visible');
+    posisikanKeteranganTooltip(wrapEl);
+    requestAnimationFrame(() => {
+      posisikanKeteranganTooltip(wrapEl);
+      keteranganTooltipPortal.classList.add('is-visible');
+    });
+  }
+
+  function sembunyikanKeteranganTooltip(){
+    keteranganTooltipPortal.classList.remove('is-visible');
+  }
+
+  document.addEventListener('mouseover', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) tampilkanKeteranganTooltip(wrapEl);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl && !wrapEl.contains(e.relatedTarget)) sembunyikanKeteranganTooltip();
+  });
+  document.addEventListener('focusin', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) tampilkanKeteranganTooltip(wrapEl);
+  });
+  document.addEventListener('focusout', (e) => {
+    const wrapEl = e.target.closest('.keterangan-tooltip-wrap');
+    if(wrapEl) sembunyikanKeteranganTooltip();
+  });
+  document.addEventListener('scroll', () => {
+    if(keteranganTooltipPortal.classList.contains('is-visible')) sembunyikanKeteranganTooltip();
+  }, true);
+  window.addEventListener('resize', () => {
+    if(keteranganTooltipPortal.classList.contains('is-visible')) sembunyikanKeteranganTooltip();
+  });
+
+  // Fungsi render generik: rows -> baris <tr> untuk tabel manapun (20 kolom, tanpa kolom Laporan)
+  function renderBarisNilai(rows){
+    return rows.map((r) => {
+      const ket = hitungKeterangan(r);
+      const alasanKet = buatAlasanKeterangan(r, ket);
+      return `
+      <tr>
+        <td>${escapeHtml(r.id ?? '-')}</td>
+        <td>${escapeHtml(r.nama_siswa ?? '-')}</td>
+        <td>${escapeHtml(r.nisn ?? '-')}</td>
+        <td>${escapeHtml(r.kelas ?? '-')}</td>
+        <td>${escapeHtml(r.semester ?? '-')}</td>
+        <td>${escapeHtml(r.tahun_pelajaran ?? '-')}</td>
+        <td>${escapeHtml(r.mata_pelajaran ?? '-')}</td>
+        <td class="center">${formatAngka(r.kkm)}</td>
+        <td class="center">${formatAngka(r.jumlah_uh)}</td>
+        <td class="center">${formatAngka(r.uh1)}</td>
+        <td class="center">${formatAngka(r.uh2)}</td>
+        <td class="center">${formatAngka(r.uh3)}</td>
+        <td class="center">${formatAngka(r.uh4)}</td>
+        <td class="center">${formatAngka(r.uh5)}</td>
+        <td class="center">${formatAngka(r.uh6)}</td>
+        <td class="center">${formatNilaiHitung(hitungNH(r))}</td>
+        <td class="center">${formatAngka(r.uts)}</td>
+        <td class="center">${formatAngka(r.uas)}</td>
+        <td class="center">${formatNilaiHitung(hitungNR(r))}</td>
+        <td>${keteranganBadge(ket, alasanKet)}</td>
+      </tr>
+    `;
+    }).join('');
+  }
+
+  const NILAI_COLSPAN = 20;
+
+  // ================= Ambil seluruh data daftarnilai (semua kelas & mapel) =================
+  let semuaNilaiRows = [];
+
+  async function fetchSemuaNilai(){
+    const res = await fetch(
+      `${SUPABASE_URL}/${TABLE_DAFTARNILAI}?select=*&order=kelas.asc,nama_siswa.asc`,
+      { headers: sbHeaders() }
+    );
+    if(!res.ok) throw new Error('Status ' + res.status);
+    return await res.json();
+  }
+
+  // ================= KONTAINER 1: NILAI PER KELAS =================
+  const kelasPilihEl = document.getElementById('kelasPilih');
+  const mapelPilihKelasEl = document.getElementById('mapelPilihKelas');
+  const tableNilaiKelasBody = document.getElementById('tableNilaiKelasBody');
+  const btnExportKelas = document.getElementById('btnExportKelas');
+  const kelasSummaryEl = document.getElementById('kelasSummary');
+
+  let selectedKelasUtama = '';
+  let selectedMapelKelas = '';
+  let lastFilteredRowsKelas = [];
+
+  async function loadDaftarKelas(){
+    kelasPilihEl.innerHTML = '<option value="">Pilih Kelas...</option>';
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE_ROMBEL}?select=id,nama_rombel&order=nama_rombel.asc`, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      kelasPilihEl.innerHTML = '<option value="">Pilih Kelas...</option>' +
+        rows.map(r => `<option value="${escapeHtml(r.nama_rombel)}">${escapeHtml(r.nama_rombel)}</option>`).join('');
+      daftarKelasNames = rows.map(r => String(r.nama_rombel ?? '')).filter(Boolean);
+    }catch(err){
+      console.error('Gagal memuat daftar rombel:', err);
+      kelasPilihEl.innerHTML = '<option value="">Gagal memuat daftar kelas</option>';
+      daftarKelasNames = [];
+    }
+    renderKelasTabs();
+  }
+
+  function populateMapelKelasOptions(){
+    const rowsKelas = selectedKelasUtama
+      ? semuaNilaiRows.filter(r => String(r.kelas ?? '') === selectedKelasUtama)
+      : semuaNilaiRows;
+    const mapelList = Array.from(new Set(rowsKelas.map(r => String(r.mata_pelajaran ?? '')).filter(Boolean))).sort();
+    if(!mapelList.includes(selectedMapelKelas)) selectedMapelKelas = '';
+    mapelPilihKelasEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>' +
+      mapelList.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+    mapelPilihKelasEl.value = selectedMapelKelas;
+    mapelPilihKelasEl.disabled = mapelList.length === 0;
+  }
+
+  function renderRingkasanKelas(rows){
+    if(rows.length === 0){
+      kelasSummaryEl.style.display = 'none';
+      kelasSummaryEl.innerHTML = '';
+      return;
+    }
+    const siswaUnik = new Set(rows.map(r => String(r.nisn || r.nama_siswa))).size;
+    const tuntas = rows.filter(r => hitungKeterangan(r) === 'Tuntas').length;
+    const belum = rows.filter(r => hitungKeterangan(r) === 'Belum Tuntas').length;
+    kelasSummaryEl.style.display = 'flex';
+    kelasSummaryEl.innerHTML = `
+      <span class="chip">Total Data: ${rows.length}</span>
+      <span class="chip">Siswa: ${siswaUnik}</span>
+      <span class="chip tuntas">Tuntas: ${tuntas}</span>
+      <span class="chip belum">Belum Tuntas: ${belum}</span>
+    `;
+  }
+
+  function renderTabelKelas(){
+    let rows = selectedKelasUtama
+      ? semuaNilaiRows.filter(r => String(r.kelas ?? '') === selectedKelasUtama)
+      : semuaNilaiRows.slice();
+    if(selectedMapelKelas){
+      rows = rows.filter(r => String(r.mata_pelajaran ?? '') === selectedMapelKelas);
+    }
+
+    lastFilteredRowsKelas = rows.slice();
+    btnExportKelas.disabled = rows.length === 0;
+    renderRingkasanKelas(rows);
+
+    if(rows.length === 0){
+      const labelKelas = selectedKelasUtama ? ` untuk kelas "${escapeHtml(selectedKelasUtama)}"` : '';
+      tableNilaiKelasBody.innerHTML = `<tr class="empty-row"><td colspan="${NILAI_COLSPAN}">Belum ada data nilai${labelKelas}.</td></tr>`;
+      return;
+    }
+    tableNilaiKelasBody.innerHTML = renderBarisNilai(rows);
+  }
+
+  kelasPilihEl.addEventListener('change', (e) => {
+    selectedKelasUtama = e.target.value;
+    selectedMapelKelas = '';
+    populateMapelKelasOptions();
+    renderTabelKelas();
+  });
+  mapelPilihKelasEl.addEventListener('change', (e) => {
+    selectedMapelKelas = e.target.value;
+    renderTabelKelas();
+  });
+
+  // ================= KONTAINER 2: PREVIEW TUNTAS / BELUM TUNTAS PER KELAS =================
+  let daftarKelasNames = [];
+  let selectedKelasPreview = '';
+
+  const kelasTabsEl = document.getElementById('kelasTabs');
+  const previewSummaryEl = document.getElementById('previewSummary');
+  const listTuntasEl = document.getElementById('listTuntas');
+  const listBelumEl = document.getElementById('listBelum');
+  const countTuntasEl = document.getElementById('countTuntas');
+  const countBelumEl = document.getElementById('countBelum');
+
+  function renderKelasTabs(){
+    if(daftarKelasNames.length === 0){
+      kelasTabsEl.innerHTML = '<p class="tabs-empty">Belum ada data kelas.</p>';
+      return;
+    }
+    if(!selectedKelasPreview || !daftarKelasNames.includes(selectedKelasPreview)){
+      selectedKelasPreview = daftarKelasNames[0];
+    }
+    kelasTabsEl.innerHTML = daftarKelasNames.map(k => {
+      const aktif = k === selectedKelasPreview ? ' active' : '';
+      return `<button type="button" class="kelas-tab-btn${aktif}" data-kelas="${escapeHtml(k)}">${escapeHtml(k)}</button>`;
+    }).join('');
+  }
+
+  kelasTabsEl.addEventListener('click', (e) => {
+    const btnEl = e.target.closest('.kelas-tab-btn');
+    if(!btnEl) return;
+    selectedKelasPreview = btnEl.getAttribute('data-kelas') || '';
+    renderKelasTabs();
+    renderPreviewKelas();
+  });
+
+  function renderSiswaItem(r){
+    return `<li class="siswa-item">
+      <span class="siswa-nama">${escapeHtml(r.nama_siswa ?? '-')}</span>
+      <span class="siswa-mapel">${escapeHtml(r.mata_pelajaran ?? '-')}</span>
+      <span class="siswa-nr">NR: ${formatNilaiHitung(hitungNR(r))}</span>
+    </li>`;
+  }
+
+  function renderPreviewKelas(){
+    if(!selectedKelasPreview){
+      previewSummaryEl.textContent = '';
+      countTuntasEl.textContent = '0';
+      countBelumEl.textContent = '0';
+      listTuntasEl.innerHTML = '<li class="siswa-empty">Belum ada data kelas.</li>';
+      listBelumEl.innerHTML = '<li class="siswa-empty">Belum ada data kelas.</li>';
+      return;
+    }
+
+    const rows = semuaNilaiRows.filter(r => String(r.kelas ?? '') === selectedKelasPreview);
+    const tuntasRows = [];
+    const belumRows = [];
+    rows.forEach(r => {
+      const ket = hitungKeterangan(r);
+      if(ket === 'Tuntas') tuntasRows.push(r);
+      else if(ket === 'Belum Tuntas') belumRows.push(r);
+    });
+
+    previewSummaryEl.textContent = `Kelas ${selectedKelasPreview} — Total Data: ${rows.length}`;
+    countTuntasEl.textContent = String(tuntasRows.length);
+    countBelumEl.textContent = String(belumRows.length);
+
+    listTuntasEl.innerHTML = tuntasRows.length
+      ? tuntasRows.map(renderSiswaItem).join('')
+      : '<li class="siswa-empty">Tidak ada siswa tuntas.</li>';
+    listBelumEl.innerHTML = belumRows.length
+      ? belumRows.map(renderSiswaItem).join('')
+      : '<li class="siswa-empty">Tidak ada siswa belum tuntas.</li>';
+  }
+
+  // ================= Export PDF (dipakai kedua kontainer) =================
+  function fmtTanggalIndoLaporan(date){
+    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  function detectImageFormatLaporan(dataUrl){
+    const match = /^data:image\/(\w+);base64,/i.exec(dataUrl || '');
+    if(!match) return 'PNG';
+    const ext = match[1].toLowerCase();
+    if(ext === 'jpg' || ext === 'jpeg') return 'JPEG';
+    if(ext === 'webp') return 'WEBP';
+    return 'PNG';
+  }
+
+  async function exportRekapPDF(rows, judul, infoFilterLines, namaBerkas, btnEl){
+    if(!rows || rows.length === 0){
+      alert('Tidak ada data yang bisa diexport.');
+      return;
+    }
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      alert('Gagal memuat pustaka PDF. Periksa koneksi internet Anda.');
+      return;
+    }
+
+    const originalHtml = btnEl ? btnEl.innerHTML : '';
+    if(btnEl){ btnEl.disabled = true; btnEl.textContent = 'Menyiapkan PDF...'; }
+
+    try{
+      const profil = profilSekolahCache || {};
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 12;
+      let y = 14;
+
+      let textX = marginX;
+      if(profil.logo){
+        try{
+          doc.addImage(profil.logo, detectImageFormatLaporan(profil.logo), marginX, y - 2, 18, 18);
+          textX = marginX + 23;
+        }catch(err){
+          console.error('Gagal menambahkan logo sekolah:', err);
+        }
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text((profil.nama_sekolah || 'Nama Sekolah').toUpperCase(), textX, y + 4.5);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      let kopY = y + 9.5;
+      const alamatLine = [profil.alamat, profil.tlp ? `Telp. ${profil.tlp}` : '', profil.email || ''].filter(Boolean).join('  |  ');
+      if(alamatLine){
+        const alamatWrapped = doc.splitTextToSize(alamatLine, pageWidth - textX - marginX);
+        doc.text(alamatWrapped, textX, kopY);
+        kopY += 4 * alamatWrapped.length;
+      }
+      const npsnLine = [profil.npsn ? `NPSN: ${profil.npsn}` : '', profil.status ? `Status: ${profil.status}` : ''].filter(Boolean).join('     ');
+      if(npsnLine){ doc.text(npsnLine, textX, kopY); }
+
+      y += 20;
+      doc.setLineWidth(0.7);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, y + 0.8, pageWidth - marginX, y + 0.8);
+      y += 8;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text(judul, pageWidth / 2, y, { align: 'center' });
+      y += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text((infoFilterLines || []).join('      '), marginX, y);
+      y += 6;
+
+      let maxUh = 0;
+      rows.forEach(r => {
+        const ju = Number(r.jumlah_uh) || 0;
+        if(ju > maxUh) maxUh = ju;
+        if(ju === 0){
+          for(let i = 6; i >= 1; i--){
+            if(r['uh' + i] !== null && r['uh' + i] !== undefined && r['uh' + i] !== ''){
+              if(i > maxUh) maxUh = i;
+              break;
+            }
+          }
+        }
+      });
+      if(maxUh > 6) maxUh = 6;
+
+      const head = ['No', 'Nama Siswa', 'NISN', 'Kelas', 'Mata Pelajaran', 'KKTP/KKM'];
+      for(let i = 1; i <= maxUh; i++){ head.push('UH' + i); }
+      head.push('NH', 'UTS', 'UAS', 'NR', 'Keterangan');
+
+      const body = rows.map((r, idx) => {
+        const row = [
+          String(idx + 1),
+          r.nama_siswa || '-',
+          r.nisn || '-',
+          r.kelas || '-',
+          r.mata_pelajaran || '-',
+          formatAngka(r.kkm)
+        ];
+        for(let i = 1; i <= maxUh; i++){ row.push(formatAngka(r['uh' + i])); }
+        row.push(formatNilaiHitung(hitungNH(r)));
+        row.push(formatAngka(r.uts));
+        row.push(formatAngka(r.uas));
+        row.push(formatNilaiHitung(hitungNR(r)));
+        row.push(hitungKeterangan(r) || '-');
+        return row;
+      });
+
+      const numericCols = {};
+      for(let c = 5; c < head.length - 1; c++){ numericCols[c] = { halign: 'center' }; }
+
+      doc.autoTable({
+        startY: y,
+        head: [head],
+        body,
+        margin: { left: marginX, right: marginX },
+        tableWidth: pageWidth - marginX * 2,
+        styles: { fontSize: 7.6, cellPadding: 1.8, valign: 'middle', overflow: 'linebreak' },
+        headStyles: { fillColor: [61, 107, 253], textColor: 255, fontStyle: 'bold', fontSize: 7.6 },
+        columnStyles: {
+          0: { cellWidth: 8, halign: 'center' },
+          ...numericCols
+        },
+        didParseCell: (data) => {
+          if(data.section === 'body' && data.column.index === head.length - 1){
+            const val = String(data.cell.raw || '');
+            if(val === 'Tuntas'){ data.cell.styles.textColor = [26, 135, 84]; data.cell.styles.fontStyle = 'bold'; }
+            else if(val === 'Belum Tuntas'){ data.cell.styles.textColor = [214, 51, 108]; data.cell.styles.fontStyle = 'bold'; }
+          }
+        }
+      });
+
+      let afterY = doc.lastAutoTable.finalY + 8;
+
+      const jumlahTuntas = rows.filter(r => hitungKeterangan(r) === 'Tuntas').length;
+      const jumlahBelumTuntas = rows.filter(r => hitungKeterangan(r) === 'Belum Tuntas').length;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`Tuntas: ${jumlahTuntas}      Belum Tuntas: ${jumlahBelumTuntas}      Total: ${rows.length}`, marginX, afterY);
+      afterY += 16;
+
+      if(afterY > pageHeight - 40){
+        doc.addPage('a4', 'landscape');
+        afterY = 20;
+      }
+      const tanggalLaporan = fmtTanggalIndoLaporan(new Date());
+      const kotaSekolah = 'Simpang Teritip';
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const rightX = pageWidth - marginX - 60;
+      doc.text(`${kotaSekolah}, ${tanggalLaporan}`, rightX, afterY);
+      doc.text('Mengetahui,', rightX, afterY + 5);
+      doc.text('Administrator', rightX, afterY + 30);
+
+      doc.save(namaBerkas);
+    }catch(err){
+      console.error('Gagal membuat PDF:', err);
+      alert('Gagal membuat PDF: ' + err.message);
+    }finally{
+      if(btnEl){
+        btnEl.disabled = (btnEl === btnExportKelas) ? lastFilteredRowsKelas.length === 0 : false;
+        btnEl.innerHTML = originalHtml;
+      }
+    }
+  }
+
+  btnExportKelas.addEventListener('click', () => {
+    const safeKelas = String(selectedKelasUtama || 'kelas').replace(/[^a-z0-9]+/gi, '_');
+    const safeMapel = String(selectedMapelKelas || 'semua_mapel').replace(/[^a-z0-9]+/gi, '_');
+    exportRekapPDF(
+      lastFilteredRowsKelas,
+      'REKAP NILAI KELAS ' + (selectedKelasUtama ? selectedKelasUtama.toUpperCase() : 'SEMUA KELAS'),
+      [
+        `Kelas: ${selectedKelasUtama || 'Semua Kelas'}`,
+        selectedMapelKelas ? `Mata Pelajaran: ${selectedMapelKelas}` : 'Mata Pelajaran: Semua Mata Pelajaran',
+        `Total Data: ${lastFilteredRowsKelas.length}`
+      ],
+      `Rekap_Nilai_${safeKelas}_${safeMapel}.pdf`,
+      btnExportKelas
+    );
+  });
+
+  // ================= Inisialisasi =================
+  async function muatSemuaData(){
+    listTuntasEl.innerHTML = '<li class="siswa-empty">Memuat data...</li>';
+    listBelumEl.innerHTML = '<li class="siswa-empty">Memuat data...</li>';
+    try{
+      semuaNilaiRows = await fetchSemuaNilai();
+      renderTabelKelas();
+      renderPreviewKelas();
+    }catch(err){
+      console.error('Gagal memuat data nilai:', err);
+      tableNilaiKelasBody.innerHTML = `<tr class="empty-row"><td colspan="${NILAI_COLSPAN}">Gagal memuat data.</td></tr>`;
+      listTuntasEl.innerHTML = `<li class="siswa-empty">Gagal memuat data. Pastikan tabel "${TABLE_DAFTARNILAI}" sudah dibuat di Supabase.</li>`;
+      listBelumEl.innerHTML = '<li class="siswa-empty">Gagal memuat data.</li>';
+    }
+  }
+
+  (async function init(){
+    await loadSchoolProfile();
+    await loadDaftarKelas();
+    await muatSemuaData();
+  })();
+</script>
+
+</body>
+</html>

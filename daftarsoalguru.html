@@ -1,0 +1,3844 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Soal — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#fffefd;
+    --paper-deep:#FFEFD6;
+    --paper-line:#1b1915;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:20px;
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{width:100%; height:100%; object-fit:cover;}
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .term-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .term-badge .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 24px;
+  }
+
+  /* ---------- Panel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .panel-soal{
+    background:#FFF9EC;
+    border-left:5px solid var(--brand);
+  }
+  .panel-jawaban{
+    background:#FBEFF3;
+    border-left:5px solid var(--brick);
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .panel-head-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:7px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:160px;
+  }
+  .panel-search:focus{border-color:var(--brick); outline:none;}
+
+  /* ---------- Filter bertingkat (Kelas & Mata Pelajaran) ---------- */
+  .jawaban-filter-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:12px 0 4px;
+  }
+  .jawaban-filter-row label{
+    font-size:0.78rem;
+    color:var(--ink-soft, #6b6355);
+    font-weight:600;
+  }
+  .jawaban-filter-row .btn svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
+  .panel-select{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:7px 28px 7px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:150px;
+    cursor:pointer;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 8px center;
+    background-size:14px;
+  }
+  .panel-select:focus{border-color:var(--brick); outline:none;}
+  .panel-select:disabled{opacity:0.55; cursor:not-allowed;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    border-radius:6px;
+    padding:9px 16px;
+    cursor:pointer;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand); color:#FFFFFF;}
+  .btn-primary:hover{background:#5A3FCB;}
+  .btn-ghost{background:#fbf8f0; color:var(--ink); border-color:var(--paper-line);}
+  .btn-ghost:hover{border-color:var(--brick); color:var(--brick);}
+  .btn-sm{padding:6px 11px; font-size:0.76rem;}
+
+  /* ---------- Tabs ---------- */
+  .tab-bar{
+    display:flex;
+    gap:6px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  .tab-btn{
+    font-family:inherit;
+    font-size:0.85rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    border-bottom:2px solid transparent;
+    padding:8px 6px 10px;
+    cursor:pointer;
+    margin-bottom:-1px;
+  }
+  .tab-btn:hover{color:var(--ink);}
+  .tab-btn.active{color:var(--brand); border-bottom-color:var(--brand);}
+
+  /* ---------- Table ---------- */
+  .scroll-hint{
+    display:none;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+  @media (max-width:820px){ .scroll-hint{display:flex;} }
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:var(--brand) var(--paper-deep);
+    border-radius:6px;
+  }
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--brand); border-radius:6px;}
+
+  .preview-table{
+    width:100%;
+    min-width:820px;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  .preview-table th{
+    text-align:left;
+    font-size:0.7rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:2px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .preview-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--paper-line);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .preview-table td.truncate{
+    max-width:220px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .preview-table tbody tr:hover{background:var(--paper-deep);}
+  .preview-table .empty-row td{
+    white-space:normal;
+    text-align:center;
+    color:var(--ink-soft);
+    padding:22px 10px;
+  }
+  .jenis-pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+  }
+  .jenis-pill.essay{background:#EAF6EE; color:var(--green);}
+  .jenis-pill.pg{background:#EFEAFB; color:var(--brand);}
+
+  .status-pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+  }
+  .status-pill.aktif{background:#EAF6EE; color:var(--green);}
+  .status-pill.nonaktif{background:#FDEAF0; color:var(--brick);}
+
+  .status-switch-wrap{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-right:10px;
+    vertical-align:middle;
+  }
+  .status-switch{
+    position:relative;
+    display:inline-block;
+    width:34px;
+    height:18px;
+    flex-shrink:0;
+  }
+  .status-switch input{
+    opacity:0;
+    width:0;
+    height:0;
+  }
+  .status-switch .slider{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background-color:#d8d2c4;
+    transition:background-color 0.18s ease;
+    border-radius:20px;
+  }
+  .status-switch .slider::before{
+    position:absolute;
+    content:"";
+    height:14px;
+    width:14px;
+    left:2px;
+    top:2px;
+    background-color:#FFFFFF;
+    transition:transform 0.18s ease;
+    border-radius:50%;
+    box-shadow:0 1px 2px rgba(0,0,0,0.25);
+  }
+  .status-switch input:checked + .slider{background-color:var(--green);}
+  .status-switch input:checked + .slider::before{transform:translateX(16px);}
+  .status-switch input:focus-visible + .slider{outline:2px solid var(--gold); outline-offset:2px;}
+  .status-switch-label{
+    font-size:0.72rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  .btn-mini{
+    font-family:inherit;
+    font-size:0.72rem;
+    font-weight:600;
+    border:none;
+    border-radius:5px;
+    padding:6px 10px;
+    margin-right:6px;
+    cursor:pointer;
+    color:#FFFFFF;
+  }
+  .btn-edit{background:var(--green);}
+  .btn-edit:hover{background:#146B44;}
+  .btn-del{background:var(--brick);}
+  .btn-del:hover{background:#B32559;}
+  .btn-koreksi{background:var(--brand); white-space:nowrap;}
+  .btn-koreksi:hover{background:#5A3FCB;}
+
+  .panel-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .pager{display:flex; align-items:center; gap:4px;}
+  .pager button{
+    font-family:inherit;
+    font-size:0.76rem;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:5px 9px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .pager button:disabled{opacity:0.45; cursor:not-allowed;}
+
+  /* ---------- Bottom sheet: Jenis Soal ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.2s ease;
+    z-index:40;
+  }
+  .sheet-backdrop.open{opacity:1; visibility:visible;}
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    padding:10px 20px 28px;
+    max-width:640px;
+    margin:0 auto;
+    transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.3,1);
+    z-index:41;
+    max-height:86vh;
+    overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+  .sheet-handle{width:40px; height:4px; background:var(--paper-line); border-radius:2px; margin:8px auto 16px;}
+  .sheet h3{font-family:'Newsreader',serif; font-weight:500; font-size:1.15rem; margin:0 0 4px;}
+  .sheet p.sheet-sub{font-size:0.85rem; color:var(--ink-soft); margin:0 0 20px;}
+
+  .jenis-choice-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .jenis-choice{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-align:center;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:12px;
+    padding:26px 14px;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:0.92rem;
+    font-weight:600;
+    color:var(--ink);
+    transition:border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .jenis-choice:hover{border-color:var(--brand); background:#EFEAFB; transform:translateY(-2px);}
+  .jenis-choice svg{width:34px; height:34px; color:var(--brand);}
+  .jenis-choice.pg:hover{border-color:var(--brick); background:#FFE3EE;}
+  .jenis-choice.pg:hover svg{color:var(--brick);}
+  .jenis-choice-desc{font-size:0.74rem; font-weight:400; color:var(--ink-soft);}
+
+  /* ---------- Modal (center) ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.2s ease;
+    z-index:40;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop.open{opacity:1; visibility:visible;}
+  .modal-box{
+    background:var(--paper);
+    border-radius:14px;
+    padding:22px 24px;
+    max-width:640px;
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    transform:scale(0.94);
+    opacity:0;
+    transition:transform 0.2s ease, opacity 0.2s ease;
+    box-shadow:0 20px 50px rgba(59,46,99,0.35);
+  }
+  .modal-backdrop.open .modal-box{transform:scale(1); opacity:1;}
+  .modal-box h3{font-family:'Newsreader',serif; font-weight:500; font-size:1.15rem; margin:0 0 16px;}
+
+  /* ---------- Modal Koreksi Jawaban Siswa ---------- */
+  .koreksi-modal-box{max-width:760px;}
+  .koreksi-info{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 18px;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:16px;
+    font-size:0.82rem;
+  }
+  .koreksi-info span b{color:var(--ink);}
+  .koreksi-info span{color:var(--ink-soft);}
+  .koreksi-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-height:52vh;
+    overflow-y:auto;
+    padding-right:4px;
+    margin-bottom:16px;
+  }
+  .koreksi-card{
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:14px 16px;
+    background:var(--paper);
+  }
+  .koreksi-card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .koreksi-card-head b{font-size:0.88rem; color:var(--ink);}
+  .koreksi-card-head .bobot{font-size:0.72rem; color:var(--ink-soft);}
+  .koreksi-soal-text{font-size:0.88rem; color:var(--ink); margin:0 0 10px; white-space:pre-wrap;}
+  .koreksi-jawaban-box{
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:0.85rem;
+    color:var(--ink);
+    white-space:pre-wrap;
+    margin-bottom:10px;
+  }
+  .koreksi-nilai-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .koreksi-nilai-row label{
+    font-size:0.74rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .koreksi-nilai-row input{
+    width:100px;
+    padding:8px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    font-family:inherit;
+    font-size:0.9rem;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .koreksi-nilai-row input:focus{border-color:var(--brand); outline:none;}
+
+  /* ---------- Modal Upload Nilai Kolektif ---------- */
+  .upload-nilai-modal-box{max-width:880px;}
+  .upload-nilai-table-wrap{
+    max-height:46vh;
+    overflow-y:auto;
+    margin-bottom:6px;
+  }
+  .upload-nilai-table-wrap th.center,
+  .upload-nilai-table-wrap td.center{text-align:center;}
+  .upload-nilai-check{
+    width:16px; height:16px;
+    cursor:pointer;
+  }
+  .upload-nilai-input{
+    width:80px;
+    padding:6px 8px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    font-family:inherit;
+    font-size:0.85rem;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .upload-nilai-input:focus{border-color:var(--brand); outline:none;}
+  .koreksi-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#EFEAFB;
+    border:1px solid var(--brand);
+    border-radius:10px;
+    padding:12px 16px;
+    font-weight:700;
+    color:var(--brand);
+    margin-bottom:16px;
+  }
+  .koreksi-total span:last-child{font-size:1.15rem;}
+
+  /* ---------- Dark mode khusus modal Koreksi Jawaban Siswa ---------- */
+  .koreksi-modal-box{
+    background:#1E1B2E;
+    box-shadow:0 20px 50px rgba(0,0,0,0.55);
+  }
+  .koreksi-modal-box h3{color:#F3F1FF;}
+  .koreksi-info{
+    background:#262341;
+    border-color:#3A355C;
+  }
+  .koreksi-info span{color:#A79FD1;}
+  .koreksi-info span b{color:#F3F1FF;}
+  .koreksi-list::-webkit-scrollbar{width:8px;}
+  .koreksi-list::-webkit-scrollbar-track{background:#262341; border-radius:6px;}
+  .koreksi-list::-webkit-scrollbar-thumb{background:#6C4FE0; border-radius:6px;}
+  .koreksi-card{
+    background:#262341;
+    border-color:#3A355C;
+  }
+  .koreksi-card-head b{color:#F3F1FF;}
+  .koreksi-card-head .bobot{color:#A79FD1;}
+  .koreksi-soal-text{color:#DCD8F7;}
+  .koreksi-jawaban-box{
+    background:#1E1B2E;
+    border-color:#3A355C;
+    color:#DCD8F7;
+  }
+  .koreksi-nilai-row label{color:#A79FD1;}
+  .koreksi-nilai-row input{
+    background:#1E1B2E;
+    border-color:#3A355C;
+    color:#F3F1FF;
+  }
+  .koreksi-nilai-row input:focus{border-color:#9C8CFF;}
+  .koreksi-total{
+    background:#2E2853;
+    border-color:#9C8CFF;
+    color:#C9BEFF;
+  }
+  .koreksi-modal-box .scroll-hint{color:#A79FD1;}
+  .koreksi-modal-box .form-msg.success{color:#7FE0A8;}
+  .koreksi-modal-box .form-msg.error{color:#FF8FAE;}
+  .koreksi-modal-box .btn-ghost{
+    background:#262341;
+    color:#DCD8F7;
+    border-color:#3A355C;
+  }
+  .koreksi-modal-box .btn-ghost:hover{border-color:#9C8CFF; color:#C9BEFF;}
+  #koreksiBackdrop{background:rgba(10,8,20,0.7);}
+
+  /* ---------- Modal "Lihat Detail" jawaban Pilihan Ganda (read-only) ---------- */
+  .detail-pilgan-summary{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .detail-pilgan-summary-item{
+    flex:1;
+    min-width:110px;
+    background:#262341;
+    border:1px solid #3A355C;
+    border-radius:10px;
+    padding:10px 14px;
+    text-align:center;
+  }
+  .detail-pilgan-summary-item .num{font-weight:700; font-size:1.25rem; display:block; margin-bottom:2px;}
+  .detail-pilgan-summary-item .lbl{font-size:0.72rem; color:#A79FD1;}
+  .detail-pilgan-summary-item.benar .num{color:#7FE0A8;}
+  .detail-pilgan-summary-item.salah .num{color:#FF8FAE;}
+  .detail-pilgan-summary-item.nilai .num{color:#C9BEFF;}
+
+  .detail-pilgan-badge{
+    font-size:0.72rem;
+    font-weight:700;
+    border-radius:20px;
+    padding:2px 10px;
+    white-space:nowrap;
+  }
+  .detail-pilgan-badge.benar{background:rgba(127,224,168,0.15); color:#7FE0A8;}
+  .detail-pilgan-badge.salah{background:rgba(255,143,174,0.15); color:#FF8FAE;}
+  .detail-pilgan-badge.kosong{background:rgba(167,159,209,0.15); color:#A79FD1;}
+
+  .detail-pilgan-jawaban{font-size:0.85rem; color:#DCD8F7; margin-top:8px;}
+  .detail-pilgan-jawaban b{color:#F3F1FF;}
+  .btn-detail-pilgan{background:var(--brand); white-space:nowrap;}
+  .btn-detail-pilgan:hover{background:#5A3FCB;}
+
+  /* ---------- Form ---------- */
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 16px;
+  }
+  .form-group{display:flex; flex-direction:column; gap:5px;}
+  .form-group.full{grid-column:1 / -1;}
+  .form-group label{
+    font-size:0.74rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea{
+    font-family:inherit;
+    font-size:0.9rem;
+    padding:9px 11px;
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    background:#fbf8f0;
+    color:var(--ink);
+    width:100%;
+  }
+  .form-group textarea{resize:vertical; min-height:64px;}
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus{border-color:var(--brand); outline:none;}
+  .form-group input[readonly]{background:var(--paper-deep); color:var(--ink-soft);}
+  .kode-row{display:flex; gap:8px;}
+  .kode-row input{flex:1; min-width:0;}
+  .form-msg{
+    font-size:0.8rem;
+    margin:12px 0 0;
+    min-height:1.1em;
+  }
+  .form-msg.error{color:var(--brick);}
+  .form-msg.success{color:var(--green);}
+  .form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  /* ---------- Excel Import/Export (khusus Essay) ---------- */
+  .excel-actions-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .excel-actions-row .btn svg{width:14px; height:14px; vertical-align:-2px; margin-right:5px;}
+  .excel-hint{font-size:0.72rem; color:var(--ink-soft); margin:6px 0 0; font-weight:400; text-transform:none; letter-spacing:0;}
+
+  /* ---------- Kode Soal per butir ---------- */
+  .f-kode-soal{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.8rem !important;
+    background:var(--paper-deep) !important;
+    color:var(--brand) !important;
+    font-weight:600;
+  }
+
+  /* ---------- Kontainer Butir Soal ---------- */
+  .soal-items-wrap{grid-column:1 / -1; display:flex; flex-direction:column; gap:5px;}
+  #soalItemsContainer{display:flex; flex-direction:column; gap:5px;}
+  .soal-item-card{
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:14px 14px 16px;
+    margin-bottom:5px;
+    position:relative;
+  }
+  .soal-item-card:last-child{margin-bottom:0;}
+  .soal-item-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .soal-item-head span{
+    font-size:0.78rem; font-weight:700; color:var(--brand);
+    text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .btn-icon-remove{
+    background:none; border:none; cursor:pointer;
+    color:var(--brick); font-size:0.72rem; font-weight:600;
+    display:flex; align-items:center; gap:4px;
+    padding:2px 4px;
+  }
+  .btn-icon-remove svg{width:14px; height:14px;}
+  .soal-item-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 12px;
+  }
+  .soal-item-grid .form-group.full{grid-column:1 / -1;}
+  .pilihan-grid{
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px 12px;
+  }
+  .btn-add-soal{
+    align-self:flex-start;
+    display:flex; align-items:center; gap:6px;
+    background:var(--brand);
+    color:#FFFFFF;
+    border:none;
+    border-radius:20px;
+    padding:7px 14px 7px 10px;
+    font-family:inherit;
+    font-size:0.78rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-add-soal:hover{background:#5A3FCB;}
+  .btn-add-soal svg{width:16px; height:16px;}
+
+  @media (max-width:560px){
+    .soal-item-grid{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:560px){
+    main{padding-left:5px; padding-right:5px;}
+    .navbar{padding-left:5px; padding-right:5px;}
+    .panel{padding:16px 12px;}
+    .nav-schoolinfo{display:none;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar" id="guruAvatar">GR</span>
+      <span class="admin-name" id="guruName">Guru</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-heading">Daftar Soal</h1>
+  <p class="page-sub">Kelola soal-soal yang sudah Anda buat, baik Essay maupun Pilihan Ganda.</p>
+
+  <div class="panel panel-soal">
+    <div class="panel-head">
+      <h3>Daftar Soal Tersimpan</h3>
+      <div class="panel-head-actions">
+        <input type="text" class="panel-search" id="searchInput" placeholder="Cari kode / mapel / kelas...">
+        <button type="button" class="btn btn-ghost" id="btnDashboard">Dashboard</button>
+        <button type="button" class="btn btn-primary" id="btnTambahSoal">+ Tambah Soal</button>
+      </div>
+    </div>
+
+    <div class="tab-bar" id="tabBarSoal" role="tablist">
+      <button type="button" class="tab-btn active" id="tabEssay" data-tab="essay" role="tab" aria-selected="true">Essay</button>
+      <button type="button" class="tab-btn" id="tabPilgan" data-tab="pilgan" role="tab" aria-selected="false">Pilihan Ganda</button>
+    </div>
+
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+
+    <div class="table-wrap">
+      <table class="preview-table" id="tableSoal">
+        <thead id="tableHead">
+          <!-- diisi dinamis sesuai tab aktif -->
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row"><td colspan="7">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel-foot">
+      <span id="entriesInfo">Menampilkan 0 entri</span>
+      <div class="pager">
+        <button type="button" id="btnPrev" disabled>Sebelumnya</button>
+        <button type="button" id="btnNext" disabled>Berikutnya</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-jawaban" style="margin-top:15px;">
+    <div class="panel-head">
+      <h3>Daftar Jawaban Siswa</h3>
+      <div class="panel-head-actions">
+        <input type="text" class="panel-search" id="searchInputJawaban" placeholder="Cari nama siswa / NISN / kode / kelas...">
+      </div>
+    </div>
+
+    <div class="tab-bar" id="tabBarJawaban" role="tablist">
+      <button type="button" class="tab-btn active" id="tabJawabanEssay" data-tab="essay" role="tab" aria-selected="true">Essay</button>
+      <button type="button" class="tab-btn" id="tabJawabanPilgan" data-tab="pilgan" role="tab" aria-selected="false">Pilihan Ganda</button>
+    </div>
+
+    <div class="jawaban-filter-row">
+      <label for="filterKelasJawaban">Kelas</label>
+      <select id="filterKelasJawaban" class="panel-select">
+        <option value="">Semua Kelas</option>
+      </select>
+      <label for="filterMapelJawaban">Mata Pelajaran</label>
+      <select id="filterMapelJawaban" class="panel-select">
+        <option value="">Semua Mata Pelajaran</option>
+      </select>
+      <button type="button" class="btn btn-ghost btn-sm" id="btnUploadNilaiKolektif">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/></svg>Upload Nilai Kolektif
+      </button>
+    </div>
+
+    <p class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+      Geser tabel ke samping untuk melihat kolom lainnya
+    </p>
+
+    <div class="table-wrap">
+      <table class="preview-table" id="tableJawaban">
+        <thead id="tableJawabanHead">
+          <!-- diisi dinamis sesuai tab aktif -->
+        </thead>
+        <tbody id="tableJawabanBody">
+          <tr class="empty-row"><td colspan="9">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel-foot">
+      <span id="entriesInfoJawaban">Menampilkan 0 entri</span>
+      <div class="pager">
+        <button type="button" id="btnPrevJawaban" disabled>Sebelumnya</button>
+        <button type="button" id="btnNextJawaban" disabled>Berikutnya</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Bottom sheet: Pilih Jenis Soal -->
+<div class="sheet-backdrop" id="jenisBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="jenisSheetTitle">
+    <div class="sheet-handle"></div>
+    <h3 id="jenisSheetTitle">Jenis Soal</h3>
+    <p class="sheet-sub">Pilih jenis soal yang ingin Anda buat.</p>
+    <div class="jenis-choice-grid">
+      <button type="button" class="jenis-choice essay" id="btnJenisEssay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
+        Essay
+        <span class="jenis-choice-desc">Soal jawaban uraian</span>
+      </button>
+      <button type="button" class="jenis-choice pg" id="btnJenisPG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+        Pilihan Ganda
+        <span class="jenis-choice-desc">Soal dengan opsi jawaban</span>
+      </button>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="btnBatalJenis">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal center: Tambah Soal -->
+<div class="modal-backdrop" id="formBackdrop">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <h3 id="formTitle">Tambah Soal</h3>
+    <form id="soalForm">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="inputKodeSoal">Kode Soal</label>
+          <div class="kode-row">
+            <input type="text" id="inputKodeSoal" required placeholder="Mis. MTK-7A-UH1-01">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnBuatKodeSoal">Buat Otomatis</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label for="inputKodeMapping">Kode Mapping</label>
+          <select id="inputKodeMapping" required>
+            <option value="" disabled selected>Memuat data mapping...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="inputMapel">Mata Pelajaran</label>
+          <input type="text" id="inputMapel" readonly placeholder="Terisi otomatis dari Kode Mapping">
+        </div>
+        <div class="form-group">
+          <label for="inputKelas">Kelas</label>
+          <input type="text" id="inputKelas" readonly placeholder="Terisi otomatis dari Kode Mapping">
+        </div>
+        <div class="form-group">
+          <label for="inputJenisPenilaian">Jenis Penilaian</label>
+          <input type="text" id="inputJenisPenilaian" readonly placeholder="Terisi otomatis dari Kode Mapping">
+        </div>
+        <div class="form-group">
+          <label for="inputKkm">KKM</label>
+          <input type="text" id="inputKkm" readonly placeholder="Terisi otomatis dari Kode Mapping">
+        </div>
+        <div class="form-group full">
+          <label for="inputTujuan">Tujuan Pembelajaran</label>
+          <textarea id="inputTujuan" readonly placeholder="Terisi otomatis dari Kode Mapping"></textarea>
+        </div>
+        <div class="form-group full">
+          <label for="inputCapaian">Capaian Pembelajaran</label>
+          <textarea id="inputCapaian" readonly placeholder="Terisi otomatis dari Kode Mapping"></textarea>
+        </div>
+        <div class="form-group full">
+          <label for="inputJenisSoal">Jenis Soal</label>
+          <input type="text" id="inputJenisSoal" readonly placeholder="Dipilih lewat langkah sebelumnya">
+        </div>
+        <div class="form-group full" id="soalExcelActions" style="display:none;">
+          <label>Template Soal Excel</label>
+          <div class="excel-actions-row">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnExportTemplateSoal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Export Template Soal (Excel)
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnImportSoalExcel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/></svg>Import Soal (Excel)
+            </button>
+            <input type="file" id="inputImportSoalExcel" accept=".xlsx,.xls" style="display:none;">
+          </div>
+          <p class="excel-hint">Unduh template, isi soal-soal di Excel, lalu impor kembali di sini. Setiap soal akan otomatis ditambahkan sebagai kartu di bawah.</p>
+        </div>
+        <div class="soal-items-wrap" id="soalItemsWrap">
+          <div id="soalItemsContainer"></div>
+          <button type="button" class="btn-add-soal" id="btnAddSoalItem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Soal
+          </button>
+        </div>
+      </div>
+      <p class="form-msg" id="formMsg"></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="btnBatalForm">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btnSimpanSoal">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal center: Pengaturan Ujian (muncul saat mengaktifkan soal via tombol slider) -->
+<div class="modal-backdrop" id="examSettingBackdrop">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="examSettingTitle">
+    <h3 id="examSettingTitle">Pengaturan Ujian</h3>
+    <form id="examSettingForm">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="esId">Id</label>
+          <input type="text" id="esId" readonly>
+        </div>
+        <div class="form-group full">
+          <label for="esKodeMapping">Kode Mapping</label>
+          <input type="text" id="esKodeMapping" readonly>
+        </div>
+        <div class="form-group">
+          <label for="esMapel">Mata Pelajaran</label>
+          <input type="text" id="esMapel" placeholder="Mata pelajaran">
+        </div>
+        <div class="form-group">
+          <label for="esKelas">Kelas</label>
+          <input type="text" id="esKelas" placeholder="Kelas">
+        </div>
+        <div class="form-group">
+          <label for="esJenisPenilaian">Jenis Penilaian</label>
+          <input type="text" id="esJenisPenilaian" placeholder="Jenis penilaian">
+        </div>
+        <div class="form-group">
+          <label for="esKkm">KKM</label>
+          <input type="text" id="esKkm" placeholder="Mis. 75">
+        </div>
+        <div class="form-group full">
+          <label for="esTujuan">Tujuan Pembelajaran</label>
+          <textarea id="esTujuan" placeholder="Tujuan pembelajaran"></textarea>
+        </div>
+        <div class="form-group full">
+          <label for="esCapaian">Capaian Pembelajaran</label>
+          <textarea id="esCapaian" placeholder="Capaian pembelajaran"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="esWaktuMulai">Waktu Mulai</label>
+          <input type="time" id="esWaktuMulai" required>
+        </div>
+        <div class="form-group">
+          <label for="esWaktuSelesai">Waktu Selesai</label>
+          <input type="time" id="esWaktuSelesai" required>
+        </div>
+      </div>
+      <p class="form-msg" id="examSettingMsg"></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="btnBatalExamSetting">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btnKonfirmasiExamSetting">Konfirmasi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="koreksiBackdrop">
+  <div class="modal-box koreksi-modal-box" role="dialog" aria-modal="true" aria-labelledby="koreksiTitle">
+    <h3 id="koreksiTitle">Koreksi Jawaban Siswa</h3>
+    <div class="koreksi-info">
+      <span>Nama: <b id="koreksiNamaSiswa">-</b></span>
+      <span>NISN: <b id="koreksiNisn">-</b></span>
+      <span>Kelas: <b id="koreksiKelas">-</b></span>
+      <span>Mapel: <b id="koreksiMapel">-</b></span>
+      <span>Kode Mapping: <b id="koreksiKodeMapping">-</b></span>
+    </div>
+    <div class="koreksi-list" id="koreksiList">
+      <p class="scroll-hint">Memuat jawaban siswa...</p>
+    </div>
+    <div class="koreksi-total">
+      <span>Total Nilai Akhir</span>
+      <span id="koreksiTotalNilai">0</span>
+    </div>
+    <p class="form-msg" id="koreksiMsg"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="btnBatalKoreksi">Batal</button>
+      <button type="button" class="btn btn-primary" id="btnSimpanKoreksi">Simpan Nilai</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="detailPilganBackdrop">
+  <div class="modal-box koreksi-modal-box" role="dialog" aria-modal="true" aria-labelledby="detailPilganTitle">
+    <h3 id="detailPilganTitle">Detail Jawaban Pilihan Ganda</h3>
+    <div class="koreksi-info">
+      <span>Nama: <b id="detailPilganNamaSiswa">-</b></span>
+      <span>NISN: <b id="detailPilganNisn">-</b></span>
+      <span>Kelas: <b id="detailPilganKelas">-</b></span>
+      <span>Mapel: <b id="detailPilganMapel">-</b></span>
+      <span>Kode Mapping: <b id="detailPilganKodeMapping">-</b></span>
+    </div>
+    <div class="detail-pilgan-summary" id="detailPilganSummary"></div>
+    <div class="koreksi-list" id="detailPilganList">
+      <p class="scroll-hint">Memuat jawaban siswa...</p>
+    </div>
+    <p class="form-msg" id="detailPilganExportMsg"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="btnTutupDetailPilgan">Tutup</button>
+      <button type="button" class="btn btn-primary" id="btnExportDetailPilgan">Export Laporan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="uploadNilaiBackdrop">
+  <div class="modal-box upload-nilai-modal-box" role="dialog" aria-modal="true" aria-labelledby="uploadNilaiTitle">
+    <h3 id="uploadNilaiTitle">Upload Nilai Kolektif</h3>
+    <p class="excel-hint" style="margin-bottom:12px;">
+      Menampilkan siswa tab <b id="uploadNilaiTabLabel">Essay</b> sesuai filter yang sedang aktif: <b id="uploadNilaiFilterInfo">Semua Kelas, Semua Mata Pelajaran</b>. Pilih jenis penilaian, ubah nilai langsung di tabel, centang siswa yang nilainya ingin dikirim, lalu klik "Kirim Nilai".
+    </p>
+
+    <div class="table-wrap upload-nilai-table-wrap">
+      <table class="preview-table" id="tableUploadNilai">
+        <thead>
+          <tr>
+            <th class="center"><input type="checkbox" id="checkAllUploadNilai" title="Pilih Semua"></th>
+            <th>Kode Mapping</th>
+            <th>Nama Siswa</th>
+            <th>NISN</th>
+            <th>Kelas</th>
+            <th>Mata Pelajaran</th>
+            <th>Waktu Pengiriman</th>
+            <th>Nilai</th>
+          </tr>
+        </thead>
+        <tbody id="tableUploadNilaiBody">
+          <tr class="empty-row"><td colspan="8">Tidak ada data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="excel-hint" id="uploadNilaiCountInfo">Menampilkan 0 siswa.</p>
+
+    <div class="form-group full" style="margin-top:10px;">
+      <label for="selectPenilaianNilai">Pilih Penilaian</label>
+      <select class="form-control" id="selectPenilaianNilai">
+        <option value="">-- Pilih Penilaian --</option>
+        <option value="UH1">UH1</option>
+        <option value="UH2">UH2</option>
+        <option value="UH3">UH3</option>
+        <option value="UH4">UH4</option>
+        <option value="UH5">UH5</option>
+        <option value="UH6">UH6</option>
+        <option value="UTS">UTS</option>
+        <option value="UAS">UAS</option>
+      </select>
+    </div>
+
+    <p class="form-msg" id="uploadNilaiMsg"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="btnTutupUploadNilai">Tutup</button>
+      <button type="button" class="btn btn-primary" id="btnSimpanTabelNilai" disabled>Kirim Nilai</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="mappingWarningBackdrop">
+  <div class="modal-box" style="max-width:480px;" role="dialog" aria-modal="true" aria-labelledby="mappingWarningTitle">
+    <h3 id="mappingWarningTitle">Mapping Siswa Belum Ditemukan</h3>
+    <p style="font-size:0.88rem; color:var(--ink); line-height:1.55; margin:0 0 14px;">
+      Maaf, Anda belum me-mapping Penilaian Siswa di menu Daftar Nilai Siswa. Silahkan lakukan Mapping Siswa untuk dinilai terlebih dahulu.
+    </p>
+    <div id="mappingWarningList" style="font-size:0.78rem; color:var(--ink-soft); background:#fbf8f0; border:1px solid var(--paper-line); border-radius:8px; padding:10px 12px; max-height:180px; overflow-y:auto;"></div>
+    <div class="form-actions" style="margin-top:14px;">
+      <button type="button" class="btn btn-primary" id="btnTutupMappingWarning">Mengerti</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  // Nama tabel soal di Supabase — sesuaikan jika nama tabel Anda berbeda.
+  const TABLE = "soal";
+  // Tabel tujuan penyimpanan saat "Simpan" ditekan, tergantung jenis soal.
+  const TABLE_ESSAY = "daftar_soal_essay";
+  const TABLE_PILGAN = "daftar_soal_pilgan";
+  // Tabel rekap nilai siswa (diisi guru lewat menu Daftar Nilai Siswa >
+  // Mapping Peserta). "Kirim Nilai" pada modal Upload Nilai Kolektif akan
+  // menulis skor ke kolom UH1..UH6/UTS/UAS pada tabel ini, dicocokkan
+  // berdasarkan Nama Siswa + NISN + Kelas + Mata Pelajaran.
+  const TABLE_DAFTARNILAI = "daftarnilai";
+
+  function sbHeaders(extra){
+    return Object.assign({
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    }, extra || {});
+  }
+
+  // ---------- Auth guard: pastikan ada sesi guru ----------
+  function getGuruSession(){
+    try{
+      const raw = localStorage.getItem('guru_session');
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  const guruSession = getGuruSession();
+  if(!guruSession){
+    window.location.href = 'guru.html';
+  }
+
+  function getInitials(nama){
+    return nama.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  }
+
+  (function renderGuruAccount(){
+    if(!guruSession) return;
+    const nama = guruSession.nama_guru || guruSession.nama || 'Guru';
+    document.getElementById('guruName').textContent = nama;
+    document.getElementById('guruAvatar').textContent = getInitials(nama) || 'GR';
+  })();
+
+  // ---------- Ambil logo & nama sekolah dari tabel "profil" ----------
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran&limit=1`, { headers: sbHeaders() });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+      if(profil.nama_sekolah) document.getElementById('schoolName').textContent = profil.nama_sekolah;
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          const termBadge = document.getElementById('termBadge');
+          if(termBadge) termBadge.style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){ console.error('Gagal memuat profil sekolah:', err); }
+  })();
+
+  // ---------- Ambil daftar Mata Pelajaran yang diampu guru (tabel datamapel) ----------
+  // Dicocokkan lewat NIP guru (lebih unik) dari tabel "dataguru"; fallback ke
+  // nama guru kalau NIP tidak ditemukan. guruMapelList: null = belum dimuat,
+  // [] = tidak ada mapel yang ditugaskan, [...] = daftar mapel yang diampu.
+  let guruMapelList = null;
+
+  async function loadGuruMapelList(){
+    try{
+      let nip = null;
+      let namaGuru = guruSession.nama_guru || guruSession.nama || '';
+
+      try{
+        const guruUrl = guruSession.id
+          ? `${SUPABASE_URL}/dataguru?id=eq.${encodeURIComponent(guruSession.id)}&select=nama_guru,nip&limit=1`
+          : `${SUPABASE_URL}/dataguru?nama_guru=eq.${encodeURIComponent(namaGuru)}&select=nama_guru,nip&limit=1`;
+        const guruRes = await fetch(guruUrl, { headers: sbHeaders() });
+        if(guruRes.ok){
+          const guruRows = await guruRes.json();
+          const guru = guruRows && guruRows[0];
+          if(guru){
+            namaGuru = guru.nama_guru || namaGuru;
+            nip = guru.nip || null;
+          }
+        }
+      }catch(e){
+        console.error('Gagal memuat identitas guru untuk filter mapel:', e);
+      }
+
+      const url = nip
+        ? `${SUPABASE_URL}/datamapel?nip=eq.${encodeURIComponent(nip)}&select=nama_mapel&order=nama_mapel.asc`
+        : `${SUPABASE_URL}/datamapel?guru_pengajar=eq.${encodeURIComponent(namaGuru)}&select=nama_mapel&order=nama_mapel.asc`;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      guruMapelList = rows.map(r => r.nama_mapel).filter(Boolean);
+    }catch(err){
+      console.error('Gagal memuat mata pelajaran yang diampu guru:', err);
+      guruMapelList = []; // gagal ambil -> anggap kosong, supaya tidak bocor mapel guru lain
+    }
+  }
+
+  // Bentuk fragmen filter PostgREST "mata_pelajaran=in.(...)" dari guruMapelList.
+  // Mengembalikan null jika guru tidak memiliki mapel (supaya pemanggil tahu
+  // untuk tidak menampilkan data apapun).
+  function guruMapelFilterParam(){
+    const list = guruMapelList || [];
+    if(list.length === 0) return null;
+    return `mata_pelajaran=in.(${list.map(m => encodeURIComponent(m)).join(',')})`;
+  }
+
+  // ================= State & Pagination =================
+  const PAGE_SIZE = 10;
+  let currentPage = 0;
+  let searchTerm = '';
+  let totalRows = 0;
+  let activeTab = 'essay'; // 'essay' | 'pilgan'
+
+  // Konfigurasi tiap tab: tabel sumber & kolom yang ditampilkan di tabel.
+  // Daftar Soal ditampilkan per Kode Mapping (1 baris = 1 Kode Mapping),
+  // walaupun di Supabase satu Kode Mapping bisa punya banyak baris butir soal.
+  const TAB_CONFIG = {
+    essay: {
+      table: TABLE_ESSAY,
+      columns: [
+        { key: 'kode_mapping', label: 'Kode Mapping' },
+        { key: 'mata_pelajaran', label: 'Mata Pelajaran' },
+        { key: 'kelas', label: 'Kelas' },
+        { key: 'jenis_penilaian', label: 'Jenis Penilaian' },
+        { key: 'jumlah_soal', label: 'Jumlah Soal' },
+        { key: 'status', label: 'Status' }
+      ]
+    },
+    pilgan: {
+      table: TABLE_PILGAN,
+      columns: [
+        { key: 'kode_mapping', label: 'Kode Mapping' },
+        { key: 'mata_pelajaran', label: 'Mata Pelajaran' },
+        { key: 'kelas', label: 'Kelas' },
+        { key: 'jenis_penilaian', label: 'Jenis Penilaian' },
+        { key: 'jumlah_soal', label: 'Jumlah Soal' },
+        { key: 'status', label: 'Status' }
+      ]
+    }
+  };
+
+  const tableHead = document.getElementById('tableHead');
+  const tableBody = document.getElementById('tableBody');
+  const entriesInfo = document.getElementById('entriesInfo');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const tabButtons = document.querySelectorAll('#tabBarSoal .tab-btn');
+
+  function currentConfig(){
+    return TAB_CONFIG[activeTab];
+  }
+  function colCount(){
+    return currentConfig().columns.length + 1; // +1 kolom Aksi
+  }
+
+  function escapeHtml(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  function renderTableHead(){
+    const ths = currentConfig().columns.map(c => `<th>${escapeHtml(c.label)}</th>`).join('');
+    tableHead.innerHTML = `<tr>${ths}<th>Aksi</th></tr>`;
+  }
+
+  tabButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.tab;
+      if(tab === activeTab) return;
+      activeTab = tab;
+      tabButtons.forEach(b=>{
+        b.classList.toggle('active', b.dataset.tab === activeTab);
+        b.setAttribute('aria-selected', b.dataset.tab === activeTab ? 'true' : 'false');
+      });
+      currentPage = 0;
+      renderTableHead();
+      fetchSoal();
+    });
+  });
+
+  // Kolom "status" bertipe TEXT di Supabase, berisi string "Aktif" atau
+  // "Non Aktif". Nilai lain/kosong dianggap Aktif secara default.
+  function isStatusAktif(statusVal){
+    return String(statusVal ?? '').trim().toLowerCase() !== 'non aktif';
+  }
+
+  async function fetchSoal(){
+    renderTableHead();
+    const table = currentConfig().table;
+
+    const mapelFilter = guruMapelFilterParam();
+    if(!mapelFilter){
+      totalRows = 0;
+      tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colCount()}">Anda belum memiliki mata pelajaran yang ditugaskan.</td></tr>`;
+      renderFoot(0, 0);
+      return;
+    }
+
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colCount()}">Memuat data...</td></tr>`;
+    try{
+      // Ambil semua baris butir soal dari tabel aktif, lalu dikelompokkan
+      // di sisi client per Kode Mapping — supaya walaupun 1 Kode Mapping
+      // punya banyak baris butir soal di Supabase, tetap muncul sebagai
+      // 1 baris saja di Daftar Soal. Dibatasi hanya mapel yang diampu guru ini.
+      let res = await fetch(
+        `${SUPABASE_URL}/${table}?select=kode_mapping,mata_pelajaran,kelas,jenis_penilaian,status&order=kode_mapping.asc&${mapelFilter}`,
+        { headers: sbHeaders() }
+      );
+
+      // Fallback: jika kolom "status" belum dikenali PostgREST (mis. schema
+      // cache Supabase belum di-reload setelah kolom baru dibuat), coba lagi
+      // tanpa kolom status supaya data tetap tampil. Status akan dianggap
+      // Aktif secara default sampai kolomnya benar-benar terbaca.
+      let statusColumnAvailable = true;
+      if(!res.ok && res.status === 400){
+        console.warn('Kolom "status" gagal dibaca (kemungkinan schema cache Supabase belum di-reload). Memuat ulang tanpa kolom status...');
+        statusColumnAvailable = false;
+        res = await fetch(
+          `${SUPABASE_URL}/${table}?select=kode_mapping,mata_pelajaran,kelas,jenis_penilaian&order=kode_mapping.asc&${mapelFilter}`,
+          { headers: sbHeaders() }
+        );
+      }
+
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const allRows = await res.json();
+
+      // Kelompokkan berdasarkan kode_mapping
+      const groupsMap = new Map();
+      allRows.forEach(row => {
+        if(!row.kode_mapping) return;
+        if(!groupsMap.has(row.kode_mapping)){
+          groupsMap.set(row.kode_mapping, {
+            kode_mapping: row.kode_mapping,
+            mata_pelajaran: row.mata_pelajaran,
+            kelas: row.kelas,
+            jenis_penilaian: row.jenis_penilaian,
+            jumlah_soal: 0,
+            // Kolom "status" bertipe TEXT ("Aktif" / "Non Aktif") di Supabase.
+            // Jika kolom belum ada/bernilai kosong, dianggap Aktif secara default.
+            status: statusColumnAvailable ? isStatusAktif(row.status) : true
+          });
+        }
+        groupsMap.get(row.kode_mapping).jumlah_soal += 1;
+      });
+      let groups = Array.from(groupsMap.values());
+      groups.sort((a, b) => String(a.kode_mapping).localeCompare(String(b.kode_mapping)));
+
+      // Filter pencarian (di sisi client, berdasarkan grup)
+      const term = searchTerm.trim().toLowerCase();
+      if(term){
+        groups = groups.filter(g =>
+          String(g.kode_mapping ?? '').toLowerCase().includes(term) ||
+          String(g.mata_pelajaran ?? '').toLowerCase().includes(term) ||
+          String(g.kelas ?? '').toLowerCase().includes(term)
+        );
+      }
+
+      totalRows = groups.length;
+      const offset = currentPage * PAGE_SIZE;
+      const pageGroups = groups.slice(offset, offset + PAGE_SIZE);
+
+      renderTable(pageGroups);
+      renderFoot(offset, pageGroups.length);
+
+      if(!statusColumnAvailable){
+        entriesInfo.textContent += ' — Kolom status belum terbaca dari Supabase, coba reload schema cache di dashboard.';
+      }
+    }catch(err){
+      console.error('Gagal memuat daftar soal:', err);
+      tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colCount()}">Gagal memuat data. Pastikan tabel "${table}" sudah dibuat di Supabase.</td></tr>`;
+      entriesInfo.textContent = 'Menampilkan 0 entri';
+      btnPrev.disabled = true;
+      btnNext.disabled = true;
+    }
+  }
+
+  function renderTable(rows){
+    if(!rows || rows.length === 0){
+      tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colCount()}">Belum ada soal yang dibuat.</td></tr>`;
+      return;
+    }
+    const columns = currentConfig().columns;
+    tableBody.innerHTML = rows.map(row => {
+      const aktif = row.status !== false;
+      const tds = columns.map(c => {
+        if(c.key === 'status'){
+          return `<td><span class="status-pill ${aktif ? 'aktif' : 'nonaktif'}">${aktif ? 'Aktif' : 'Non Aktif'}</span></td>`;
+        }
+        const val = row[c.key] ?? '-';
+        return `<td${c.truncate ? ' class="truncate"' : ''}>${escapeHtml(val)}</td>`;
+      }).join('');
+      return `
+      <tr>
+        ${tds}
+        <td>
+          <label class="status-switch-wrap" title="${aktif ? 'Nonaktifkan soal ini' : 'Aktifkan soal ini'}">
+            <span class="status-switch">
+              <input type="checkbox" class="status-toggle" data-kode-mapping="${escapeHtml(row.kode_mapping)}"${aktif ? ' checked' : ''}>
+              <span class="slider"></span>
+            </span>
+            <span class="status-switch-label">${aktif ? 'Aktif' : 'Non Aktif'}</span>
+          </label>
+          <button type="button" class="btn-mini btn-edit" data-kode-mapping="${escapeHtml(row.kode_mapping)}">Edit</button>
+          <button type="button" class="btn-mini btn-del" data-kode-mapping="${escapeHtml(row.kode_mapping)}">Hapus</button>
+        </td>
+      </tr>
+    `;
+    }).join('');
+
+    tableBody.querySelectorAll('.btn-edit').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const jenisSoal = activeTab === 'pilgan' ? 'Pilihan Ganda' : 'Essay';
+        openEditForm(btn.dataset.kodeMapping, jenisSoal, currentConfig().table);
+      });
+    });
+    tableBody.querySelectorAll('.btn-del').forEach(btn=>{
+      btn.addEventListener('click', ()=> deleteSoal(btn.dataset.kodeMapping));
+    });
+    tableBody.querySelectorAll('.status-toggle').forEach(sw=>{
+      sw.addEventListener('change', ()=>{
+        const kodeMapping = sw.dataset.kodeMapping;
+        const table = currentConfig().table;
+        if(sw.checked){
+          // Mengaktifkan soal menjadi ujian wajib lewat modal Pengaturan Ujian dahulu
+          sw.checked = false; // tunggu konfirmasi modal sebelum benar-benar aktif
+          openExamSettingModal(sw, kodeMapping, table);
+        } else {
+          toggleStatusSoal(sw, kodeMapping, false);
+        }
+      });
+    });
+  }
+
+  // ---------- Modal: Pengaturan Ujian (sebelum mengaktifkan soal) ----------
+  const examSettingBackdrop = document.getElementById('examSettingBackdrop');
+  const examSettingForm = document.getElementById('examSettingForm');
+  const examSettingMsg = document.getElementById('examSettingMsg');
+  const esId = document.getElementById('esId');
+  const esKodeMapping = document.getElementById('esKodeMapping');
+  const esMapel = document.getElementById('esMapel');
+  const esKelas = document.getElementById('esKelas');
+  const esJenisPenilaian = document.getElementById('esJenisPenilaian');
+  const esKkm = document.getElementById('esKkm');
+  const esTujuan = document.getElementById('esTujuan');
+  const esCapaian = document.getElementById('esCapaian');
+  const esWaktuMulai = document.getElementById('esWaktuMulai');
+  const esWaktuSelesai = document.getElementById('esWaktuSelesai');
+  const btnKonfirmasiExamSetting = document.getElementById('btnKonfirmasiExamSetting');
+
+  let examSettingState = { switchEl: null, kodeMapping: null, table: null };
+
+  // Cari id (Primary Key) di tabel "ujianaktif" berdasarkan kode_mapping,
+  // lalu hapus baris-baris itu lewat id.
+  async function hapusUjianAktifByKodeMapping(kodeMapping){
+    try{
+      const resFind = await fetch(
+        `${SUPABASE_URL}/ujianaktif?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=id`,
+        { headers: sbHeaders() }
+      );
+      if(!resFind.ok) throw new Error('Status ' + resFind.status);
+      const rowsUjian = await resFind.json();
+      const ids = rowsUjian.map(r => r.id).filter(Boolean);
+      if(ids.length === 0) return true;
+
+      const list = ids.map(id => encodeURIComponent(id)).join(',');
+      const resDel = await fetch(`${SUPABASE_URL}/ujianaktif?id=in.(${list})`, {
+        method: 'DELETE',
+        headers: sbHeaders({ 'Prefer': 'return=minimal' })
+      });
+      if(!resDel.ok){
+        console.error('Gagal menghapus data ujianaktif:', await resDel.text());
+        return false;
+      }
+      return true;
+    }catch(err){
+      console.error('Gagal menghapus data ujianaktif:', err);
+      return false;
+    }
+  }
+
+  function setExamSettingMsg(msg, type){
+    examSettingMsg.textContent = msg || '';
+    examSettingMsg.className = 'form-msg' + (type ? ' ' + type : '');
+  }
+
+  // Buat Id unik untuk pengaturan ujian, mis. UJN-20260903-4821
+  function generateUjianId(){
+    const now = new Date();
+    const tanggal = now.getFullYear().toString()
+      + String(now.getMonth() + 1).padStart(2, '0')
+      + String(now.getDate()).padStart(2, '0');
+    const rand = Math.floor(Math.random() * 9000 + 1000); // 4 digit acak
+    return `UJN-${tanggal}-${rand}`;
+  }
+
+  async function openExamSettingModal(switchEl, kodeMapping, table){
+    examSettingState = { switchEl, kodeMapping, table };
+    examSettingForm.reset();
+    setExamSettingMsg('Memuat data mapping...', '');
+    esId.value = generateUjianId();
+    esKodeMapping.value = kodeMapping;
+    esMapel.value = '';
+    esKelas.value = '';
+    esJenisPenilaian.value = '';
+    esKkm.value = '';
+    esTujuan.value = '';
+    esCapaian.value = '';
+    examSettingBackdrop.classList.add('open');
+
+    try{
+      const res = await fetch(
+        `${SUPABASE_URL}/${table}?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=mata_pelajaran,kelas,jenis_penilaian,kkm,tujuan_pembelajaran,capaian_pembelajaran&limit=1`,
+        { headers: sbHeaders() }
+      );
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      const data = rows && rows[0];
+      if(data){
+        esMapel.value = data.mata_pelajaran ?? '';
+        esKelas.value = data.kelas ?? '';
+        esJenisPenilaian.value = data.jenis_penilaian ?? '';
+        esKkm.value = data.kkm ?? '';
+        esTujuan.value = data.tujuan_pembelajaran ?? '';
+        esCapaian.value = data.capaian_pembelajaran ?? '';
+      }
+      setExamSettingMsg('');
+    }catch(err){
+      console.error('Gagal memuat data mapping untuk pengaturan ujian:', err);
+      setExamSettingMsg('Gagal memuat sebagian data otomatis. Lengkapi manual bila perlu.', 'error');
+    }
+  }
+
+  function closeExamSettingModal(){
+    examSettingBackdrop.classList.remove('open');
+    examSettingState = { switchEl: null, kodeMapping: null, table: null };
+  }
+
+  document.getElementById('btnBatalExamSetting').addEventListener('click', closeExamSettingModal);
+  examSettingBackdrop.addEventListener('click', (e)=>{
+    if(e.target === examSettingBackdrop) closeExamSettingModal();
+  });
+
+  examSettingForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+
+    const waktuMulai = esWaktuMulai.value;
+    const waktuSelesai = esWaktuSelesai.value;
+    if(!waktuMulai || !waktuSelesai){
+      setExamSettingMsg('Waktu Mulai dan Waktu Selesai wajib diisi.', 'error');
+      return;
+    }
+
+    const { switchEl, kodeMapping } = examSettingState;
+    if(!kodeMapping){
+      setExamSettingMsg('Data soal tidak valid. Tutup modal ini dan coba lagi.', 'error');
+      return;
+    }
+
+    const payloadUjianAktif = {
+      id: esId.value,
+      kode_mapping: esKodeMapping.value,
+      mata_pelajaran: esMapel.value,
+      kelas: esKelas.value,
+      jenis_penilaian: esJenisPenilaian.value,
+      kkm: esKkm.value === '' ? null : Number(esKkm.value),
+      tujuan_pembelajaran: esTujuan.value,
+      capaian_pembelajaran: esCapaian.value,
+      waktu_mulai: waktuMulai,
+      waktu_selesai: waktuSelesai
+    };
+
+    btnKonfirmasiExamSetting.disabled = true;
+    btnKonfirmasiExamSetting.textContent = 'Menyimpan...';
+    setExamSettingMsg('Menyimpan pengaturan ujian...', '');
+
+    try{
+      // 1) Hapus dulu baris ujianaktif lama untuk Kode Mapping ini
+      // (lewat id, sesuai Primary Key tabel ini).
+      await hapusUjianAktifByKodeMapping(kodeMapping);
+
+      // 2) Simpan pengaturan ujian baru ke tabel "ujianaktif"
+      const resUjian = await fetch(`${SUPABASE_URL}/ujianaktif`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+        body: JSON.stringify(payloadUjianAktif)
+      });
+      if(!resUjian.ok){
+        const errText = await resUjian.text();
+        console.error('Supabase error (ujianaktif):', errText);
+        throw new Error('Gagal menyimpan pengaturan ujian ke tabel "ujianaktif". Periksa kembali isian Anda.');
+      }
+
+      // 3) Aktifkan status soal di tabel daftar_soal_essay/daftar_soal_pilgan
+      const berhasilAktifkan = await toggleStatusSoal(switchEl, kodeMapping, true);
+      if(!berhasilAktifkan){
+        setExamSettingMsg('Pengaturan ujian tersimpan, namun status soal gagal diaktifkan. Coba geser tombol slider lagi.', 'error');
+        btnKonfirmasiExamSetting.disabled = false;
+        btnKonfirmasiExamSetting.textContent = 'Konfirmasi';
+        return;
+      }
+
+      closeExamSettingModal();
+    }catch(err){
+      console.error('Gagal menyimpan pengaturan ujian:', err);
+      setExamSettingMsg(err.message || 'Terjadi kesalahan saat menyimpan pengaturan ujian. Coba lagi.', 'error');
+    }finally{
+      btnKonfirmasiExamSetting.disabled = false;
+      btnKonfirmasiExamSetting.textContent = 'Konfirmasi';
+    }
+  });
+
+  // ---------- Toggle Status Aktif / Non Aktif ----------
+  async function toggleStatusSoal(switchEl, kodeMapping, aktifBaru){
+    switchEl.disabled = true;
+    try{
+      const table = currentConfig().table;
+      const res = await fetch(`${SUPABASE_URL}/${table}?kode_mapping=eq.${encodeURIComponent(kodeMapping)}`, {
+        method: 'PATCH',
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+        body: JSON.stringify({ status: aktifBaru ? 'Aktif' : 'Non Aktif' })
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+
+      // Saat dinonaktifkan, hapus juga pengaturan ujian yang tersimpan
+      // di tabel "ujianaktif" (lewat id, sesuai Primary Key tabel ini).
+      if(!aktifBaru){
+        await hapusUjianAktifByKodeMapping(kodeMapping);
+      }
+
+      fetchSoal();
+      return true;
+    }catch(err){
+      console.error('Gagal mengubah status soal:', err);
+      alert('Gagal mengubah status soal. Pastikan kolom "status" (text) sudah tersedia di tabel Supabase. Coba lagi.');
+      fetchSoal(); // kembalikan tampilan sesuai data asli di database
+      return false;
+    }
+  }
+
+  function renderFoot(offset, countInPage){
+    if(totalRows === 0){
+      entriesInfo.textContent = 'Menampilkan 0 entri';
+    } else {
+      const start = offset + 1;
+      const end = offset + countInPage;
+      entriesInfo.textContent = `Menampilkan ${start} - ${end} dari ${totalRows} entri`;
+    }
+    btnPrev.disabled = currentPage === 0;
+    btnNext.disabled = (offset + countInPage) >= totalRows;
+  }
+
+  btnPrev.addEventListener('click', ()=>{
+    if(currentPage > 0){ currentPage--; fetchSoal(); }
+  });
+  btnNext.addEventListener('click', ()=>{
+    currentPage++; fetchSoal();
+  });
+
+  let searchDebounce;
+  document.getElementById('searchInput').addEventListener('input', (e)=>{
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(()=>{
+      searchTerm = e.target.value;
+      currentPage = 0;
+      fetchSoal();
+    }, 350);
+  });
+
+  // ================= Daftar Jawaban Siswa =================
+  // Menampilkan siswa yang sudah selesai mengerjakan ujian, dikelompokkan
+  // per pengiriman (kode_mapping + nama_siswa + nisn). Untuk tab Essay,
+  // data ditarik dari tabel "jawabanujianessay" (lihat ujianessay.html
+  // untuk struktur kolomnya). Tab Pilihan Ganda ditarik dari tabel
+  // "jawabanujianpilgan" (lihat ujianpilihanganda.html untuk struktur
+  // kolomnya) — satu baris per butir soal, sama seperti Essay.
+  const JAWABAN_PAGE_SIZE = 10;
+  let currentPageJawaban = 0;
+  let searchTermJawaban = '';
+  let totalRowsJawaban = 0;
+  let activeJawabanTab = 'essay'; // 'essay' | 'pilgan'
+  let selectedKelasJawaban = '';
+  let selectedMapelJawaban = '';
+  let lastJawabanGroupsForTemplate = []; // data terfilter (Kelas/Mapel) untuk template Upload Nilai Kolektif
+
+  const JAWABAN_TAB_CONFIG = {
+    essay: {
+      table: 'jawabanujianessay',
+      columns: [
+        { key: 'kode_mapping', label: 'Kode Mapping' },
+        { key: 'nama_siswa', label: 'Nama Siswa' },
+        { key: 'nisn', label: 'NISN' },
+        { key: 'kelas', label: 'Kelas' },
+        { key: 'mata_pelajaran', label: 'Mata Pelajaran' },
+        { key: 'jumlah_jawaban', label: 'Jumlah Jawaban' },
+        { key: 'waktu_pengiriman', label: 'Waktu Pengiriman' },
+        { key: 'nilai', label: 'Nilai' },
+        { key: 'aksi', label: 'Aksi' }
+      ]
+    },
+    pilgan: {
+      table: 'jawabanujianpilgan',
+      columns: [
+        { key: 'kode_mapping', label: 'Kode Mapping' },
+        { key: 'nama_siswa', label: 'Nama Siswa' },
+        { key: 'nisn', label: 'NISN' },
+        { key: 'kelas', label: 'Kelas' },
+        { key: 'mata_pelajaran', label: 'Mata Pelajaran' },
+        { key: 'jumlah_jawaban', label: 'Jumlah Jawaban' },
+        { key: 'waktu_pengiriman', label: 'Waktu Pengiriman' },
+        { key: 'nilai', label: 'Nilai' },
+        { key: 'aksi', label: 'Aksi' }
+      ]
+    }
+  };
+
+  const tableJawabanHead = document.getElementById('tableJawabanHead');
+  const tableJawabanBody = document.getElementById('tableJawabanBody');
+  const entriesInfoJawaban = document.getElementById('entriesInfoJawaban');
+  const btnPrevJawaban = document.getElementById('btnPrevJawaban');
+  const btnNextJawaban = document.getElementById('btnNextJawaban');
+  const tabJawabanButtons = document.querySelectorAll('#tabBarJawaban .tab-btn');
+  const filterKelasJawabanEl = document.getElementById('filterKelasJawaban');
+  const filterMapelJawabanEl = document.getElementById('filterMapelJawaban');
+
+  function currentJawabanConfig(){
+    return JAWABAN_TAB_CONFIG[activeJawabanTab];
+  }
+  function jawabanColCount(){
+    return currentJawabanConfig().columns.length;
+  }
+  function renderJawabanTableHead(){
+    const ths = currentJawabanConfig().columns.map(c => `<th>${escapeHtml(c.label)}</th>`).join('');
+    tableJawabanHead.innerHTML = `<tr>${ths}</tr>`;
+  }
+
+  function formatWaktuJawaban(val){
+    if(!val) return '-';
+    try{
+      const d = new Date(val);
+      if(isNaN(d.getTime())) return val;
+      return d.toLocaleString('id-ID', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) + ' WIB';
+    }catch(e){
+      return val;
+    }
+  }
+
+  tabJawabanButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.tab;
+      if(tab === activeJawabanTab) return;
+      activeJawabanTab = tab;
+      tabJawabanButtons.forEach(b=>{
+        b.classList.toggle('active', b.dataset.tab === activeJawabanTab);
+        b.setAttribute('aria-selected', b.dataset.tab === activeJawabanTab ? 'true' : 'false');
+      });
+      // Reset filter bertingkat saat ganti tab, karena kombinasi kelas/mapel
+      // yang tersedia bisa berbeda antara Essay dan Pilihan Ganda.
+      selectedKelasJawaban = '';
+      selectedMapelJawaban = '';
+      currentPageJawaban = 0;
+      fetchJawaban();
+    });
+  });
+
+  // Filter bertingkat: memilih Kelas akan menyempitkan opsi Mata Pelajaran
+  // yang ditampilkan (begitu juga sebaliknya), karena opsi selalu dibangun
+  // ulang dari data yang sudah dipersempit oleh pilihan lawan filternya.
+  filterKelasJawabanEl.addEventListener('change', (e)=>{
+    selectedKelasJawaban = e.target.value;
+    currentPageJawaban = 0;
+    fetchJawaban();
+  });
+  filterMapelJawabanEl.addEventListener('change', (e)=>{
+    selectedMapelJawaban = e.target.value;
+    currentPageJawaban = 0;
+    fetchJawaban();
+  });
+
+  // Bangun ulang opsi dropdown Kelas & Mata Pelajaran berdasarkan data yang
+  // benar-benar ada (hasil pengelompokan jawaban), saling menyempitkan satu
+  // sama lain. Jika pilihan sebelumnya sudah tidak tersedia lagi di opsi
+  // baru, otomatis dikembalikan ke "Semua".
+  function populateJawabanFilterOptions(groups){
+    const kelasSource = groups.filter(g => !selectedMapelJawaban || String(g.mata_pelajaran ?? '') === selectedMapelJawaban);
+    const mapelSource = groups.filter(g => !selectedKelasJawaban || String(g.kelas ?? '') === selectedKelasJawaban);
+
+    const kelasList = Array.from(new Set(kelasSource.map(g => g.kelas).filter(v => v !== null && v !== undefined && v !== '')))
+      .sort((a, b) => String(a).localeCompare(String(b), 'id', { numeric: true }));
+    const mapelList = Array.from(new Set(mapelSource.map(g => g.mata_pelajaran).filter(v => v !== null && v !== undefined && v !== '')))
+      .sort((a, b) => String(a).localeCompare(String(b), 'id'));
+
+    if(!kelasList.includes(selectedKelasJawaban)) selectedKelasJawaban = '';
+    if(!mapelList.includes(selectedMapelJawaban)) selectedMapelJawaban = '';
+
+    filterKelasJawabanEl.innerHTML = '<option value="">Semua Kelas</option>' +
+      kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
+    filterMapelJawabanEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>' +
+      mapelList.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+
+    filterKelasJawabanEl.value = selectedKelasJawaban;
+    filterMapelJawabanEl.value = selectedMapelJawaban;
+    filterKelasJawabanEl.disabled = false;
+    filterMapelJawabanEl.disabled = false;
+  }
+
+  function resetJawabanFilterOptions(){
+    filterKelasJawabanEl.innerHTML = '<option value="">Semua Kelas</option>';
+    filterMapelJawabanEl.innerHTML = '<option value="">Semua Mata Pelajaran</option>';
+    filterKelasJawabanEl.value = '';
+    filterMapelJawabanEl.value = '';
+    filterKelasJawabanEl.disabled = true;
+    filterMapelJawabanEl.disabled = true;
+  }
+
+  async function fetchJawaban(){
+    renderJawabanTableHead();
+    const config = currentJawabanConfig();
+
+    // Jaga-jaga jika suatu saat ada tab tanpa tabel jawaban yang ditentukan.
+    if(!config.table){
+      resetJawabanFilterOptions();
+      lastJawabanGroupsForTemplate = [];
+      totalRowsJawaban = 0;
+      tableJawabanBody.innerHTML = `<tr class="empty-row"><td colspan="${jawabanColCount()}">Daftar jawaban untuk tab ini belum tersedia.</td></tr>`;
+      renderJawabanFoot(0, 0);
+      return;
+    }
+
+    const mapelFilter = guruMapelFilterParam();
+    if(!mapelFilter){
+      resetJawabanFilterOptions();
+      lastJawabanGroupsForTemplate = [];
+      totalRowsJawaban = 0;
+      tableJawabanBody.innerHTML = `<tr class="empty-row"><td colspan="${jawabanColCount()}">Anda belum memiliki mata pelajaran yang ditugaskan.</td></tr>`;
+      renderJawabanFoot(0, 0);
+      return;
+    }
+
+    tableJawabanBody.innerHTML = `<tr class="empty-row"><td colspan="${jawabanColCount()}">Memuat data...</td></tr>`;
+    try{
+      // Satu pengiriman jawaban essay tersimpan sebagai banyak baris (1 baris
+      // per butir soal) dengan kode_mapping + nama_siswa + nisn yang sama.
+      // Di sini dikelompokkan di sisi client supaya tampil sebagai 1 baris
+      // per siswa yang sudah selesai mengerjakan.
+      const res = await fetch(
+        `${SUPABASE_URL}/${config.table}?select=kode_mapping,nama_siswa,nisn,kelas,mata_pelajaran,waktu_pengiriman,nilai&order=waktu_pengiriman.desc&${mapelFilter}`,
+        { headers: sbHeaders() }
+      );
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const allRows = await res.json();
+
+      const groupsMap = new Map();
+      allRows.forEach(row => {
+        const key = `${row.kode_mapping}|${row.nama_siswa}|${row.nisn}`;
+        if(!groupsMap.has(key)){
+          groupsMap.set(key, {
+            kode_mapping: row.kode_mapping,
+            nama_siswa: row.nama_siswa,
+            nisn: row.nisn,
+            kelas: row.kelas,
+            mata_pelajaran: row.mata_pelajaran,
+            jumlah_jawaban: 0,
+            waktu_pengiriman: row.waktu_pengiriman,
+            nilai: null,
+            adaNilai: false
+          });
+        }
+        const g = groupsMap.get(key);
+        g.jumlah_jawaban += 1;
+        if(row.nilai !== null && row.nilai !== undefined && row.nilai !== ''){
+          g.nilai = (g.nilai || 0) + Number(row.nilai);
+          g.adaNilai = true;
+        }
+        // Simpan waktu pengiriman terbaru (rows sudah diurutkan desc, tapi
+        // dijaga lagi di sini untuk keamanan urutan pengelompokan).
+        if(row.waktu_pengiriman && (!g.waktu_pengiriman || new Date(row.waktu_pengiriman) > new Date(g.waktu_pengiriman))){
+          g.waktu_pengiriman = row.waktu_pengiriman;
+        }
+      });
+
+      let groups = Array.from(groupsMap.values());
+      groups.sort((a, b) => new Date(b.waktu_pengiriman || 0) - new Date(a.waktu_pengiriman || 0));
+
+      // Bangun ulang opsi dropdown Kelas & Mata Pelajaran dari seluruh data
+      // (sebelum difilter kelas/mapel/pencarian), supaya keduanya saling
+      // menyempitkan pilihan satu sama lain (filter bertingkat).
+      populateJawabanFilterOptions(groups);
+
+      if(selectedKelasJawaban){
+        groups = groups.filter(g => String(g.kelas ?? '') === selectedKelasJawaban);
+      }
+      if(selectedMapelJawaban){
+        groups = groups.filter(g => String(g.mata_pelajaran ?? '') === selectedMapelJawaban);
+      }
+
+      // Disimpan (sebelum difilter pencarian teks) sebagai sumber data saat
+      // guru mengunduh template Upload Nilai Kolektif, supaya template
+      // mengikuti filter Kelas/Mata Pelajaran yang sedang aktif.
+      lastJawabanGroupsForTemplate = groups.slice();
+
+      const term = searchTermJawaban.trim().toLowerCase();
+      if(term){
+        groups = groups.filter(g =>
+          String(g.nama_siswa ?? '').toLowerCase().includes(term) ||
+          String(g.nisn ?? '').toLowerCase().includes(term) ||
+          String(g.kode_mapping ?? '').toLowerCase().includes(term) ||
+          String(g.kelas ?? '').toLowerCase().includes(term) ||
+          String(g.mata_pelajaran ?? '').toLowerCase().includes(term)
+        );
+      }
+
+      totalRowsJawaban = groups.length;
+      const offset = currentPageJawaban * JAWABAN_PAGE_SIZE;
+      const pageGroups = groups.slice(offset, offset + JAWABAN_PAGE_SIZE);
+
+      renderJawabanTable(pageGroups);
+      renderJawabanFoot(offset, pageGroups.length);
+    }catch(err){
+      console.error('Gagal memuat daftar jawaban siswa:', err);
+      tableJawabanBody.innerHTML = `<tr class="empty-row"><td colspan="${jawabanColCount()}">Gagal memuat data. Pastikan tabel "${config.table}" sudah dibuat di Supabase.</td></tr>`;
+      entriesInfoJawaban.textContent = 'Menampilkan 0 entri';
+      btnPrevJawaban.disabled = true;
+      btnNextJawaban.disabled = true;
+    }
+  }
+
+  function renderJawabanTable(rows){
+    if(!rows || rows.length === 0){
+      tableJawabanBody.innerHTML = `<tr class="empty-row"><td colspan="${jawabanColCount()}">Belum ada siswa yang menyelesaikan ujian.</td></tr>`;
+      return;
+    }
+    const columns = currentJawabanConfig().columns;
+    tableJawabanBody.innerHTML = rows.map(row => {
+      const tds = columns.map(c => {
+        if(c.key === 'waktu_pengiriman'){
+          return `<td>${escapeHtml(formatWaktuJawaban(row.waktu_pengiriman))}</td>`;
+        }
+        if(c.key === 'nilai'){
+          const nilai = row.adaNilai ? row.nilai : 'Belum dinilai';
+          return `<td>${escapeHtml(nilai)}</td>`;
+        }
+        if(c.key === 'aksi'){
+          if(activeJawabanTab === 'pilgan'){
+            return `<td><button type="button" class="btn-mini btn-detail-pilgan" data-kode-mapping="${escapeHtml(row.kode_mapping)}" data-nama-siswa="${escapeHtml(row.nama_siswa)}" data-nisn="${escapeHtml(row.nisn)}">Lihat Detail</button></td>`;
+          }
+          return `<td><button type="button" class="btn-mini btn-koreksi" data-kode-mapping="${escapeHtml(row.kode_mapping)}" data-nama-siswa="${escapeHtml(row.nama_siswa)}" data-nisn="${escapeHtml(row.nisn)}">Koreksi Jawaban Siswa</button></td>`;
+        }
+        const val = row[c.key] ?? '-';
+        return `<td>${escapeHtml(val)}</td>`;
+      }).join('');
+      return `<tr>${tds}</tr>`;
+    }).join('');
+
+    tableJawabanBody.querySelectorAll('.btn-koreksi').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const kodeMapping = btn.dataset.kodeMapping;
+        const namaSiswa = btn.dataset.namaSiswa;
+        const nisn = btn.dataset.nisn;
+        const rowData = rows.find(r => r.kode_mapping === kodeMapping && r.nama_siswa === namaSiswa && r.nisn === nisn);
+        openKoreksiModal({
+          kodeMapping,
+          namaSiswa,
+          nisn,
+          kelas: rowData ? rowData.kelas : '-',
+          mataPelajaran: rowData ? rowData.mata_pelajaran : '-'
+        });
+      });
+    });
+
+    tableJawabanBody.querySelectorAll('.btn-detail-pilgan').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const kodeMapping = btn.dataset.kodeMapping;
+        const namaSiswa = btn.dataset.namaSiswa;
+        const nisn = btn.dataset.nisn;
+        const rowData = rows.find(r => r.kode_mapping === kodeMapping && r.nama_siswa === namaSiswa && r.nisn === nisn);
+        openDetailPilganModal({
+          kodeMapping,
+          namaSiswa,
+          nisn,
+          kelas: rowData ? rowData.kelas : '-',
+          mataPelajaran: rowData ? rowData.mata_pelajaran : '-'
+        });
+      });
+    });
+  }
+
+  function renderJawabanFoot(offset, countInPage){
+    if(totalRowsJawaban === 0){
+      entriesInfoJawaban.textContent = 'Menampilkan 0 entri';
+    } else {
+      const start = offset + 1;
+      const end = offset + countInPage;
+      entriesInfoJawaban.textContent = `Menampilkan ${start} - ${end} dari ${totalRowsJawaban} entri`;
+    }
+    btnPrevJawaban.disabled = currentPageJawaban === 0;
+    btnNextJawaban.disabled = (offset + countInPage) >= totalRowsJawaban;
+  }
+
+  btnPrevJawaban.addEventListener('click', ()=>{
+    if(currentPageJawaban > 0){ currentPageJawaban--; fetchJawaban(); }
+  });
+  btnNextJawaban.addEventListener('click', ()=>{
+    currentPageJawaban++; fetchJawaban();
+  });
+
+  let searchDebounceJawaban;
+  document.getElementById('searchInputJawaban').addEventListener('input', (e)=>{
+    clearTimeout(searchDebounceJawaban);
+    searchDebounceJawaban = setTimeout(()=>{
+      searchTermJawaban = e.target.value;
+      currentPageJawaban = 0;
+      fetchJawaban();
+    }, 350);
+  });
+
+  // ================= Modal Koreksi Jawaban Siswa =================
+  const koreksiBackdrop = document.getElementById('koreksiBackdrop');
+  const koreksiList = document.getElementById('koreksiList');
+  const koreksiTotalNilai = document.getElementById('koreksiTotalNilai');
+  const koreksiMsg = document.getElementById('koreksiMsg');
+  const btnBatalKoreksi = document.getElementById('btnBatalKoreksi');
+  const btnSimpanKoreksi = document.getElementById('btnSimpanKoreksi');
+  let koreksiContext = null; // { kodeMapping, namaSiswa, nisn, table }
+  let koreksiRows = []; // baris mentah dari Supabase untuk siswa yang sedang dikoreksi
+
+  // Ambil nilai field pertama yang ada isinya dari beberapa kemungkinan nama kolom,
+  // karena nama kolom di tabel Supabase bisa berbeda-beda tergantung struktur guru.
+  function pickField(row, ...keys){
+    for(const k of keys){
+      if(row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
+    }
+    return '';
+  }
+
+  function openKoreksiModal({ kodeMapping, namaSiswa, nisn, kelas, mataPelajaran }){
+    const config = currentJawabanConfig();
+    if(!config.table){
+      alert('Tabel jawaban untuk tipe soal ini belum tersedia.');
+      return;
+    }
+    koreksiContext = { kodeMapping, namaSiswa, nisn, table: config.table };
+    document.getElementById('koreksiNamaSiswa').textContent = namaSiswa || '-';
+    document.getElementById('koreksiNisn').textContent = nisn || '-';
+    document.getElementById('koreksiKelas').textContent = kelas || '-';
+    document.getElementById('koreksiMapel').textContent = mataPelajaran || '-';
+    document.getElementById('koreksiKodeMapping').textContent = kodeMapping || '-';
+    koreksiMsg.textContent = '';
+    koreksiMsg.className = 'form-msg';
+    koreksiList.innerHTML = '<p class="scroll-hint">Memuat jawaban siswa...</p>';
+    koreksiTotalNilai.textContent = '0';
+    koreksiBackdrop.classList.add('open');
+    fetchKoreksiJawaban();
+  }
+
+  function closeKoreksiModal(){
+    koreksiBackdrop.classList.remove('open');
+    koreksiContext = null;
+    koreksiRows = [];
+  }
+  btnBatalKoreksi.addEventListener('click', closeKoreksiModal);
+  koreksiBackdrop.addEventListener('click', (e)=>{
+    if(e.target === koreksiBackdrop) closeKoreksiModal();
+  });
+
+  async function fetchKoreksiJawaban(){
+    if(!koreksiContext) return;
+    const { kodeMapping, namaSiswa, nisn, table } = koreksiContext;
+    try{
+      const params = new URLSearchParams({
+        select: '*',
+        kode_mapping: `eq.${kodeMapping}`,
+        nama_siswa: `eq.${namaSiswa}`,
+        nisn: `eq.${nisn}`,
+        order: 'nomor_soal.asc'
+      });
+      const res = await fetch(`${SUPABASE_URL}/${table}?${params.toString()}`, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rowsData = await res.json();
+      koreksiRows = rowsData;
+      renderKoreksiList();
+    }catch(err){
+      console.error('Gagal memuat jawaban untuk koreksi:', err);
+      koreksiList.innerHTML = '<p class="scroll-hint">Gagal memuat jawaban siswa. Silakan coba lagi.</p>';
+    }
+  }
+
+  function renderKoreksiList(){
+    if(!koreksiRows || koreksiRows.length === 0){
+      koreksiList.innerHTML = '<p class="scroll-hint">Belum ada jawaban yang tersimpan untuk siswa ini.</p>';
+      koreksiTotalNilai.textContent = '0';
+      return;
+    }
+    koreksiList.innerHTML = koreksiRows.map((row, idx) => {
+      const nomor = pickField(row, 'nomor_soal', 'no_soal') || (idx + 1);
+      const soalText = pickField(row, 'soal', 'pertanyaan', 'teks_soal') || '(Teks soal tidak tersedia)';
+      const jawabanText = pickField(row, 'jawaban_siswa', 'jawaban', 'teks_jawaban') || '(Siswa tidak menjawab)';
+      const bobot = pickField(row, 'bobot_nilai', 'bobot', 'bobot_soal');
+      const nilaiAwal = pickField(row, 'nilai', 'skor');
+      return `
+        <div class="koreksi-card" data-idx="${idx}">
+          <div class="koreksi-card-head">
+            <b>Soal No. ${escapeHtml(nomor)}</b>
+            ${bobot !== '' ? `<span class="bobot">Bobot: ${escapeHtml(bobot)}</span>` : ''}
+          </div>
+          <p class="koreksi-soal-text">${escapeHtml(soalText)}</p>
+          <div class="koreksi-jawaban-box">${escapeHtml(jawabanText)}</div>
+          <div class="koreksi-nilai-row">
+            <label for="koreksiNilai-${idx}">Nilai</label>
+            <input type="number" id="koreksiNilai-${idx}" class="koreksi-nilai-input" data-idx="${idx}" min="0" max="100" step="1" value="${escapeHtml(nilaiAwal)}">
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    koreksiList.querySelectorAll('.koreksi-nilai-input').forEach(input=>{
+      input.addEventListener('input', updateKoreksiTotal);
+    });
+    updateKoreksiTotal();
+  }
+
+  function updateKoreksiTotal(){
+    let total = 0;
+    koreksiList.querySelectorAll('.koreksi-nilai-input').forEach(input=>{
+      total += Number(input.value) || 0;
+    });
+    koreksiTotalNilai.textContent = total;
+  }
+
+  btnSimpanKoreksi.addEventListener('click', async ()=>{
+    if(!koreksiContext || koreksiRows.length === 0) return;
+    btnSimpanKoreksi.disabled = true;
+    btnSimpanKoreksi.textContent = 'Menyimpan...';
+    koreksiMsg.textContent = '';
+    koreksiMsg.className = 'form-msg';
+    try{
+      const { table } = koreksiContext;
+      const inputs = koreksiList.querySelectorAll('.koreksi-nilai-input');
+      for(const input of inputs){
+        const idx = Number(input.dataset.idx);
+        const row = koreksiRows[idx];
+        const nilaiBaru = input.value === '' ? null : Number(input.value);
+        // Gunakan kolom "id" jika tersedia sebagai kunci unik per baris jawaban,
+        // jika tidak, gunakan kombinasi kode_mapping + nisn + nomor soal.
+        let filterUrl;
+        if(row.id !== undefined && row.id !== null){
+          filterUrl = `${SUPABASE_URL}/${table}?id=eq.${encodeURIComponent(row.id)}`;
+        } else {
+          const nomor = pickField(row, 'nomor_soal', 'no_soal');
+          filterUrl = `${SUPABASE_URL}/${table}?kode_mapping=eq.${encodeURIComponent(koreksiContext.kodeMapping)}&nisn=eq.${encodeURIComponent(koreksiContext.nisn)}&nomor_soal=eq.${encodeURIComponent(nomor)}`;
+        }
+        const res = await fetch(filterUrl, {
+          method: 'PATCH',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ nilai: nilaiBaru })
+        });
+        if(!res.ok) throw new Error('Gagal menyimpan nilai butir soal (status ' + res.status + ')');
+      }
+      koreksiMsg.textContent = 'Nilai berhasil disimpan.';
+      koreksiMsg.className = 'form-msg success';
+      await fetchJawaban();
+      setTimeout(closeKoreksiModal, 700);
+    }catch(err){
+      console.error('Gagal menyimpan nilai:', err);
+      koreksiMsg.textContent = 'Gagal menyimpan nilai. Silakan coba lagi.';
+      koreksiMsg.className = 'form-msg error';
+    }finally{
+      btnSimpanKoreksi.disabled = false;
+      btnSimpanKoreksi.textContent = 'Simpan Nilai';
+    }
+  });
+
+  // ================= Modal "Lihat Detail" Jawaban Pilihan Ganda (read-only) =================
+  // Berbeda dengan Koreksi Jawaban Siswa (Essay), modal ini hanya menampilkan
+  // identitas siswa, status Benar/Salah tiap butir soal, dan Total Nilai —
+  // tanpa opsi mengubah/mengoreksi nilai, karena Pilihan Ganda sudah dinilai
+  // otomatis oleh sistem saat siswa mengirim jawaban (lihat ujianpilihanganda.html).
+  const detailPilganBackdrop = document.getElementById('detailPilganBackdrop');
+  const detailPilganSummary = document.getElementById('detailPilganSummary');
+  const detailPilganList = document.getElementById('detailPilganList');
+  const btnTutupDetailPilgan = document.getElementById('btnTutupDetailPilgan');
+  let detailPilganContext = null; // { kodeMapping, namaSiswa, nisn }
+  let detailPilganRows = [];
+  let detailPilganSoalMap = new Map(); // nomor_soal -> { kunci_jawaban, pilihan_a, pilihan_b, pilihan_c, pilihan_d, pilihan_e }
+
+  function openDetailPilganModal({ kodeMapping, namaSiswa, nisn, kelas, mataPelajaran }){
+    detailPilganContext = { kodeMapping, namaSiswa, nisn };
+    document.getElementById('detailPilganNamaSiswa').textContent = namaSiswa || '-';
+    document.getElementById('detailPilganNisn').textContent = nisn || '-';
+    document.getElementById('detailPilganKelas').textContent = kelas || '-';
+    document.getElementById('detailPilganMapel').textContent = mataPelajaran || '-';
+    document.getElementById('detailPilganKodeMapping').textContent = kodeMapping || '-';
+    detailPilganSummary.innerHTML = '';
+    detailPilganList.innerHTML = '<p class="scroll-hint">Memuat jawaban siswa...</p>';
+    detailPilganBackdrop.classList.add('open');
+    fetchDetailPilganJawaban();
+  }
+
+  function closeDetailPilganModal(){
+    detailPilganBackdrop.classList.remove('open');
+    detailPilganContext = null;
+    detailPilganRows = [];
+    detailPilganSoalMap = new Map();
+  }
+  btnTutupDetailPilgan.addEventListener('click', closeDetailPilganModal);
+  detailPilganBackdrop.addEventListener('click', (e)=>{
+    if(e.target === detailPilganBackdrop) closeDetailPilganModal();
+  });
+
+  // Ambil kunci jawaban & teks pilihan tiap butir soal dari tabel soal asli
+  // (daftar_soal_pilgan) berdasarkan kode_mapping, supaya kunci jawaban bisa
+  // ditampilkan di modal detail meski tidak disimpan di jawabanujianpilgan.
+  async function fetchDetailPilganSoalMap(kodeMapping){
+    const peta = new Map();
+    try{
+      const url = `${SUPABASE_URL}/${TABLE_PILGAN}?kode_mapping=eq.${encodeURIComponent(kodeMapping)}` +
+        `&select=nomor_soal,kunci_jawaban,pilihan_a,pilihan_b,pilihan_c,pilihan_d,pilihan_e`;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      rows.forEach(r => peta.set(String(r.nomor_soal), r));
+    }catch(err){
+      console.error('Gagal memuat kunci jawaban soal pilihan ganda:', err);
+    }
+    return peta;
+  }
+
+  // Ambil teks pilihan (mis. "Jakarta") untuk huruf tertentu (mis. "B") dari
+  // baris soal asli.
+  function teksPilihanUntukHurufSoal(soalRef, huruf){
+    if(!soalRef || !huruf) return '';
+    const kolom = 'pilihan_' + String(huruf).toLowerCase();
+    return soalRef[kolom] || '';
+  }
+
+  async function fetchDetailPilganJawaban(){
+    if(!detailPilganContext) return;
+    const { kodeMapping, namaSiswa, nisn } = detailPilganContext;
+    try{
+      const params = new URLSearchParams({
+        select: '*',
+        kode_mapping: `eq.${kodeMapping}`,
+        nama_siswa: `eq.${namaSiswa}`,
+        nisn: `eq.${nisn}`,
+        order: 'nomor_soal.asc'
+      });
+      const [resJawaban, soalMap] = await Promise.all([
+        fetch(`${SUPABASE_URL}/jawabanujianpilgan?${params.toString()}`, { headers: sbHeaders() }),
+        fetchDetailPilganSoalMap(kodeMapping)
+      ]);
+      if(!resJawaban.ok) throw new Error('Status ' + resJawaban.status);
+      detailPilganRows = await resJawaban.json();
+      detailPilganSoalMap = soalMap;
+      renderDetailPilganList();
+    }catch(err){
+      console.error('Gagal memuat detail jawaban pilihan ganda:', err);
+      detailPilganList.innerHTML = '<p class="scroll-hint">Gagal memuat jawaban siswa. Silakan coba lagi.</p>';
+    }
+  }
+
+  // Tentukan status Benar/Salah/Tidak Dijawab satu baris jawaban.
+  // Jika kunci jawaban tersedia (dari daftar_soal_pilgan), dibandingkan
+  // langsung. Jika tidak, jatuh kembali ke kolom "nilai" yang sudah dihitung
+  // otomatis oleh sistem saat siswa submit (nilai = bobot_soal jika benar, 0
+  // jika salah).
+  function tentukanStatusPilgan(row, kunci){
+    const jawabanText = pickField(row, 'jawaban_siswa', 'jawaban', 'teks_jawaban');
+    if(!jawabanText) return { status: 'kosong', label: 'Tidak Dijawab', benar: false, terjawab: false };
+
+    if(kunci){
+      const benar = String(jawabanText).trim().toUpperCase() === String(kunci).trim().toUpperCase();
+      return { status: benar ? 'benar' : 'salah', label: benar ? 'Benar' : 'Salah', benar, terjawab: true };
+    }
+
+    const bobotRaw = pickField(row, 'bobot_nilai', 'bobot', 'bobot_soal');
+    const bobot = bobotRaw === '' ? null : Number(bobotRaw);
+    const nilaiRaw = pickField(row, 'nilai', 'skor');
+    const nilai = nilaiRaw === '' ? 0 : Number(nilaiRaw);
+
+    const benar = (bobot !== null && bobot > 0) ? (nilai === bobot) : (nilai > 0);
+    return { status: benar ? 'benar' : 'salah', label: benar ? 'Benar' : 'Salah', benar, terjawab: true };
+  }
+
+  function renderDetailPilganList(){
+    if(!detailPilganRows || detailPilganRows.length === 0){
+      detailPilganSummary.innerHTML = '';
+      detailPilganList.innerHTML = '<p class="scroll-hint">Belum ada jawaban yang tersimpan untuk siswa ini.</p>';
+      return;
+    }
+
+    let totalBenar = 0, totalSalah = 0, totalNilai = 0;
+
+    const cards = detailPilganRows.map((row, idx) => {
+      const nomor = pickField(row, 'nomor_soal', 'no_soal') || (idx + 1);
+      const soalText = pickField(row, 'soal', 'pertanyaan', 'teks_soal') || '(Teks soal tidak tersedia)';
+      const jawabanText = pickField(row, 'jawaban_siswa', 'jawaban', 'teks_jawaban');
+      const bobot = pickField(row, 'bobot_nilai', 'bobot', 'bobot_soal');
+      const nilaiRaw = pickField(row, 'nilai', 'skor');
+      const nilai = nilaiRaw === '' ? 0 : Number(nilaiRaw);
+
+      const soalRef = detailPilganSoalMap.get(String(nomor));
+      const kunci = soalRef ? soalRef.kunci_jawaban : '';
+      const teksKunci = teksPilihanUntukHurufSoal(soalRef, kunci);
+
+      const st = tentukanStatusPilgan(row, kunci);
+      if(st.status === 'benar') totalBenar++;
+      else if(st.status === 'salah') totalSalah++;
+      totalNilai += nilai;
+
+      return `
+        <div class="koreksi-card">
+          <div class="koreksi-card-head">
+            <b>Soal No. ${escapeHtml(nomor)}</b>
+            ${bobot !== '' ? `<span class="bobot">Bobot: ${escapeHtml(bobot)}</span>` : ''}
+            <span class="detail-pilgan-badge ${st.status}">${st.label}</span>
+          </div>
+          <p class="koreksi-soal-text">${escapeHtml(soalText)}</p>
+          <div class="detail-pilgan-jawaban">Jawaban siswa: <b>${jawabanText ? escapeHtml(jawabanText) : '-'}</b></div>
+          <div class="detail-pilgan-jawaban">Kunci Jawaban: <b>${kunci ? escapeHtml(kunci) : '-'}</b>${teksKunci ? `. ${escapeHtml(teksKunci)}` : ''}</div>
+          <div class="detail-pilgan-jawaban">Nilai: <b>${escapeHtml(nilai)}</b>${bobot !== '' ? ` / ${escapeHtml(bobot)}` : ''}</div>
+        </div>
+      `;
+    }).join('');
+
+    detailPilganSummary.innerHTML = `
+      <div class="detail-pilgan-summary-item benar"><span class="num">${totalBenar}</span><span class="lbl">Jawaban Benar</span></div>
+      <div class="detail-pilgan-summary-item salah"><span class="num">${totalSalah}</span><span class="lbl">Jawaban Salah</span></div>
+      <div class="detail-pilgan-summary-item nilai"><span class="num">${totalNilai}</span><span class="lbl">Total Nilai</span></div>
+    `;
+    detailPilganList.innerHTML = cards;
+  }
+
+  // ---------- Export Laporan (PDF) dari modal Detail Jawaban Pilihan Ganda ----------
+  // Kop surat diambil dari tabel "profil" (lihat identitassekolah.html) dan
+  // tanda tangan guru diambil dari tabel "dataguru" (lihat adminguru.html),
+  // dicocokkan lewat sesi guru yang sedang login (guru_session).
+  const btnExportDetailPilgan = document.getElementById('btnExportDetailPilgan');
+  const detailPilganExportMsg = document.getElementById('detailPilganExportMsg');
+
+  function setDetailPilganExportMsg(text, type){
+    if(!detailPilganExportMsg) return;
+    detailPilganExportMsg.textContent = text || '';
+    detailPilganExportMsg.className = 'form-msg' + (type ? ' ' + type : '');
+  }
+
+  function fmtTanggalIndoLaporan(date){
+    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  // Deteksi format gambar dari data URL (base64) supaya jsPDF.addImage tidak
+  // salah menebak tipe berkas logo yang diunggah lewat identitassekolah.html.
+  function detectImageFormatLaporan(dataUrl){
+    const match = /^data:image\/(\w+);base64,/i.exec(dataUrl || '');
+    if(!match) return 'PNG';
+    const ext = match[1].toLowerCase();
+    if(ext === 'jpg' || ext === 'jpeg') return 'JPEG';
+    if(ext === 'webp') return 'WEBP';
+    return 'PNG';
+  }
+
+  async function fetchProfilSekolahLaporan(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=*&limit=1`, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      return (rows && rows[0]) || {};
+    }catch(err){
+      console.error('Gagal memuat identitas sekolah untuk laporan:', err);
+      return {};
+    }
+  }
+
+  async function fetchGuruLaporan(){
+    try{
+      const namaFallback = guruSession.nama_guru || guruSession.nama || '';
+      const url = guruSession.id
+        ? `${SUPABASE_URL}/dataguru?id=eq.${encodeURIComponent(guruSession.id)}&select=nama_guru,nip&limit=1`
+        : `${SUPABASE_URL}/dataguru?nama_guru=eq.${encodeURIComponent(namaFallback)}&select=nama_guru,nip&limit=1`;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      const guru = (rows && rows[0]) || {};
+      return {
+        nama_guru: guru.nama_guru || namaFallback || '-',
+        nip: guru.nip || ''
+      };
+    }catch(err){
+      console.error('Gagal memuat identitas guru untuk laporan:', err);
+      return { nama_guru: guruSession.nama_guru || guruSession.nama || '-', nip: '' };
+    }
+  }
+
+  async function exportDetailPilganLaporan(){
+    if(!detailPilganContext){
+      setDetailPilganExportMsg('Tidak ada data siswa yang bisa diexport.', 'err');
+      return;
+    }
+    if(!detailPilganRows || detailPilganRows.length === 0){
+      setDetailPilganExportMsg('Belum ada jawaban tersimpan untuk siswa ini.', 'err');
+      return;
+    }
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      setDetailPilganExportMsg('Gagal memuat pustaka PDF. Periksa koneksi internet Anda.', 'err');
+      return;
+    }
+
+    setDetailPilganExportMsg('', '');
+    btnExportDetailPilgan.disabled = true;
+    btnExportDetailPilgan.textContent = 'Menyiapkan PDF...';
+
+    try{
+      const [profil, guru] = await Promise.all([fetchProfilSekolahLaporan(), fetchGuruLaporan()]);
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 15;
+      let y = 15;
+
+      // ---------- Kop Surat (identitas sekolah) ----------
+      let textX = marginX;
+      if(profil.logo){
+        try{
+          doc.addImage(profil.logo, detectImageFormatLaporan(profil.logo), marginX, y - 2, 20, 20);
+          textX = marginX + 26;
+        }catch(err){
+          console.error('Gagal menambahkan logo sekolah ke laporan:', err);
+        }
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13.5);
+      doc.text((profil.nama_sekolah || 'Nama Sekolah').toUpperCase(), textX, y + 5);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      let kopY = y + 10.5;
+      const alamatLine = [profil.alamat, profil.tlp ? `Telp. ${profil.tlp}` : '', profil.email || ''].filter(Boolean).join('  |  ');
+      if(alamatLine){
+        const alamatWrapped = doc.splitTextToSize(alamatLine, pageWidth - textX - marginX);
+        doc.text(alamatWrapped, textX, kopY);
+        kopY += 4.2 * alamatWrapped.length;
+      }
+      const npsnLine = [profil.npsn ? `NPSN: ${profil.npsn}` : '', profil.status ? `Status: ${profil.status}` : ''].filter(Boolean).join('     ');
+      if(npsnLine){ doc.text(npsnLine, textX, kopY); }
+
+      y += 24;
+      doc.setLineWidth(0.7);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, y + 0.8, pageWidth - marginX, y + 0.8);
+      y += 9;
+
+      // ---------- Judul Laporan ----------
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('LAPORAN HASIL UJIAN PILIHAN GANDA', pageWidth / 2, y, { align: 'center' });
+      y += 8;
+
+      // ---------- Identitas Siswa & Ujian ----------
+      doc.setFontSize(10);
+      const namaSiswa = detailPilganContext.namaSiswa || document.getElementById('detailPilganNamaSiswa').textContent || '-';
+      const nisn = detailPilganContext.nisn || document.getElementById('detailPilganNisn').textContent || '-';
+      const kelas = document.getElementById('detailPilganKelas').textContent || '-';
+      const mapel = document.getElementById('detailPilganMapel').textContent || '-';
+      const kodeMapping = detailPilganContext.kodeMapping || '-';
+      const semesterTp = [profil.semester ? `Semester ${profil.semester}` : '', profil.tahun_pelajaran || ''].filter(Boolean).join(' — ') || '-';
+
+      const infoRows = [
+        ['Nama Siswa', namaSiswa],
+        ['NISN', nisn],
+        ['Kelas', kelas],
+        ['Mata Pelajaran', mapel],
+        ['Kode Mapping', kodeMapping],
+        ['Tahun Pelajaran', semesterTp]
+      ];
+      doc.setFont('helvetica', 'normal');
+      infoRows.forEach(([label, value]) => {
+        doc.text(label, marginX, y);
+        doc.text(':', marginX + 33, y);
+        doc.text(String(value), marginX + 37, y);
+        y += 5.2;
+      });
+      y += 3;
+
+      // ---------- Tabel Jawaban ----------
+      let totalBenar = 0, totalSalah = 0, totalNilai = 0;
+      const body = detailPilganRows.map((row, idx) => {
+        const nomor = pickField(row, 'nomor_soal', 'no_soal') || (idx + 1);
+        const jawabanText = pickField(row, 'jawaban_siswa', 'jawaban', 'teks_jawaban') || '-';
+        const bobot = pickField(row, 'bobot_nilai', 'bobot', 'bobot_soal');
+        const nilaiRaw = pickField(row, 'nilai', 'skor');
+        const nilai = nilaiRaw === '' ? 0 : Number(nilaiRaw);
+        const soalRef = detailPilganSoalMap.get(String(nomor));
+        const kunci = soalRef ? soalRef.kunci_jawaban : '';
+        const st = tentukanStatusPilgan(row, kunci);
+
+        if(st.status === 'benar') totalBenar++;
+        else if(st.status === 'salah') totalSalah++;
+        totalNilai += nilai;
+
+        return [
+          String(nomor),
+          jawabanText,
+          kunci || '-',
+          st.label,
+          bobot !== '' ? `${nilai} / ${bobot}` : String(nilai)
+        ];
+      });
+
+      doc.autoTable({
+        startY: y,
+        head: [['No', 'Jawaban Siswa', 'Kunci Jawaban', 'Status', 'Nilai']],
+        body,
+        margin: { left: marginX, right: marginX },
+        styles: { fontSize: 9, cellPadding: 2.2, valign: 'middle' },
+        headStyles: { fillColor: [61, 107, 253], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 12, halign: 'center' },
+          1: { cellWidth: 'auto' },
+          2: { cellWidth: 26, halign: 'center' },
+          3: { cellWidth: 24, halign: 'center' },
+          4: { cellWidth: 24, halign: 'center' }
+        }
+      });
+
+      let afterY = doc.lastAutoTable.finalY + 8;
+
+      // ---------- Ringkasan Nilai ----------
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(`Jawaban Benar: ${totalBenar}      Jawaban Salah: ${totalSalah}      Total Nilai Akhir: ${totalNilai}`, marginX, afterY);
+      afterY += 16;
+
+      // ---------- Tanda Tangan ----------
+      if(afterY > pageHeight - 55){
+        doc.addPage();
+        afterY = 20;
+      }
+      const tanggalLaporan = fmtTanggalIndoLaporan(new Date());
+      // Nama kecamatan/kota untuk baris tanggal tanda tangan.
+      const kotaSekolah = 'Simpang Teritip';
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+
+      // Guru Mata Pelajaran (kanan) — data dari tabel "dataguru"
+      const rightX = pageWidth - marginX - 60;
+      const tanggalText = `${kotaSekolah}, ${tanggalLaporan}`;
+      doc.text(tanggalText, rightX, afterY);
+      doc.text('Guru Mata Pelajaran', rightX, afterY + 5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(guru.nama_guru || '-', rightX, afterY + 30);
+      doc.setFont('helvetica', 'normal');
+      if(guru.nip){ doc.text(`NIP. ${guru.nip}`, rightX, afterY + 35); }
+
+      const safeName = String(namaSiswa).replace(/[^a-z0-9]+/gi, '_');
+      const fileName = `Laporan_${safeName}_${kodeMapping}.pdf`;
+      doc.save(fileName);
+
+      setDetailPilganExportMsg('Laporan PDF berhasil dibuat.', 'ok');
+    }catch(err){
+      console.error('Gagal membuat laporan PDF:', err);
+      setDetailPilganExportMsg('Gagal membuat laporan PDF: ' + err.message, 'err');
+    }finally{
+      btnExportDetailPilgan.disabled = false;
+      btnExportDetailPilgan.textContent = 'Export Laporan';
+    }
+  }
+
+  if(btnExportDetailPilgan){
+    btnExportDetailPilgan.addEventListener('click', exportDetailPilganLaporan);
+  }
+
+  // ================= Modal Upload Nilai Kolektif =================
+  // Menampilkan tabel siswa (kolom sama seperti Daftar Jawaban Siswa) sesuai
+  // filter Kelas/Mata Pelajaran yang sedang aktif saat tombol diklik. Nilai
+  // bisa diedit langsung di tabel, atau diisi lewat Excel untuk data dalam
+  // jumlah besar. Kedua jalur memakai logika simpan yang sama: butir soal
+  // pertama diisi nilai total, butir lainnya diset 0, supaya total (jumlah
+  // semua butir) yang ditampilkan di tabel utama tetap sama dengan nilai
+  // yang diinput di sini.
+  const uploadNilaiBackdrop = document.getElementById('uploadNilaiBackdrop');
+  const uploadNilaiTabLabel = document.getElementById('uploadNilaiTabLabel');
+  const uploadNilaiFilterInfo = document.getElementById('uploadNilaiFilterInfo');
+  const tableUploadNilaiBody = document.getElementById('tableUploadNilaiBody');
+  const uploadNilaiCountInfo = document.getElementById('uploadNilaiCountInfo');
+  const selectPenilaianNilai = document.getElementById('selectPenilaianNilai');
+  const uploadNilaiMsg = document.getElementById('uploadNilaiMsg');
+  const btnSimpanTabelNilai = document.getElementById('btnSimpanTabelNilai');
+  const checkAllUploadNilai = document.getElementById('checkAllUploadNilai');
+
+  // Centang/hapus centang semua baris sekaligus lewat checkbox di header.
+  if(checkAllUploadNilai){
+    checkAllUploadNilai.addEventListener('change', () => {
+      tableUploadNilaiBody.querySelectorAll('.upload-nilai-check').forEach(cb => {
+        cb.checked = checkAllUploadNilai.checked;
+      });
+    });
+  }
+
+  // Data yang ditampilkan di tabel modal: SALINAN dari lastJawabanGroupsForTemplate
+  // pada saat modal dibuka, supaya tetap sesuai filter Kelas/Mata Pelajaran
+  // yang aktif waktu tombol diklik meski data utama berubah setelahnya.
+  let uploadNilaiSnapshot = [];
+
+  function renderUploadNilaiTable(){
+    if(!uploadNilaiSnapshot || uploadNilaiSnapshot.length === 0){
+      tableUploadNilaiBody.innerHTML = '<tr class="empty-row"><td colspan="7">Tidak ada siswa yang sesuai dengan filter saat ini.</td></tr>';
+      uploadNilaiCountInfo.textContent = 'Menampilkan 0 siswa.';
+      return;
+    }
+    tableUploadNilaiBody.innerHTML = uploadNilaiSnapshot.map((g, idx) => `
+      <tr>
+        <td class="center"><input type="checkbox" class="upload-nilai-check" data-idx="${idx}"></td>
+        <td>${escapeHtml(g.kode_mapping ?? '-')}</td>
+        <td>${escapeHtml(g.nama_siswa ?? '-')}</td>
+        <td>${escapeHtml(g.nisn ?? '-')}</td>
+        <td>${escapeHtml(g.kelas ?? '-')}</td>
+        <td>${escapeHtml(g.mata_pelajaran ?? '-')}</td>
+        <td>${escapeHtml(formatWaktuJawaban(g.waktu_pengiriman))}</td>
+        <td><input type="number" class="upload-nilai-input" data-idx="${idx}" min="0" step="1" value="${g.adaNilai ? escapeHtml(g.nilai) : ''}" placeholder="-"></td>
+      </tr>
+    `).join('');
+    uploadNilaiCountInfo.textContent = `Menampilkan ${uploadNilaiSnapshot.length} siswa.`;
+    if(checkAllUploadNilai) checkAllUploadNilai.checked = false;
+  }
+
+  function openUploadNilaiModal(){
+    uploadNilaiTabLabel.textContent = activeJawabanTab === 'pilgan' ? 'Pilihan Ganda' : 'Essay';
+    uploadNilaiFilterInfo.textContent = `${selectedKelasJawaban || 'Semua Kelas'}, ${selectedMapelJawaban || 'Semua Mata Pelajaran'}`;
+    // Ambil salinan data sesuai filter yang aktif SAAT INI (bukan semua data).
+    uploadNilaiSnapshot = (lastJawabanGroupsForTemplate || []).slice();
+    renderUploadNilaiTable();
+    selectPenilaianNilai.value = '';
+    btnSimpanTabelNilai.disabled = true;
+    uploadNilaiMsg.textContent = '';
+    uploadNilaiMsg.className = 'form-msg';
+    uploadNilaiBackdrop.classList.add('open');
+  }
+  function closeUploadNilaiModal(){
+    uploadNilaiBackdrop.classList.remove('open');
+  }
+  document.getElementById('btnUploadNilaiKolektif').addEventListener('click', openUploadNilaiModal);
+  document.getElementById('btnTutupUploadNilai').addEventListener('click', closeUploadNilaiModal);
+  uploadNilaiBackdrop.addEventListener('click', (e)=>{
+    if(e.target === uploadNilaiBackdrop) closeUploadNilaiModal();
+  });
+
+  // ---------- Aktifkan tombol Kirim Nilai hanya jika Pilih Penilaian sudah dipilih ----------
+  selectPenilaianNilai.addEventListener('change', ()=>{
+    btnSimpanTabelNilai.disabled = !selectPenilaianNilai.value;
+  });
+
+  // Logika simpan bersama, dipakai baik oleh tabel di modal maupun oleh
+  // proses file Excel. entries: [{ kodeMapping, nisn, nilai (number), label }]
+  async function saveNilaiKolektifBatch(entries, table){
+    let sukses = 0;
+    const gagal = [];
+    let i = 0;
+    for(const entry of entries){
+      i++;
+      const { kodeMapping, nisn, nilai, label } = entry;
+      try{
+        uploadNilaiMsg.textContent = `Menyimpan ${i} dari ${entries.length}...`;
+        const params = new URLSearchParams({
+          select: 'id,nomor_soal',
+          kode_mapping: `eq.${kodeMapping}`,
+          nisn: `eq.${nisn}`,
+          order: 'nomor_soal.asc'
+        });
+        const resRows = await fetch(`${SUPABASE_URL}/${table}?${params.toString()}`, { headers: sbHeaders() });
+        if(!resRows.ok) throw new Error('Status ' + resRows.status);
+        const itemRows = await resRows.json();
+
+        if(!itemRows || itemRows.length === 0){
+          gagal.push(`${label}: data jawaban siswa tidak ditemukan.`);
+          continue;
+        }
+
+        const firstId = itemRows[0].id;
+        const restIds = itemRows.slice(1).map(r => r.id).filter(id => id !== undefined && id !== null);
+
+        const resFirst = await fetch(`${SUPABASE_URL}/${table}?id=eq.${encodeURIComponent(firstId)}`, {
+          method: 'PATCH',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ nilai })
+        });
+        if(!resFirst.ok) throw new Error('Gagal menyimpan (status ' + resFirst.status + ')');
+
+        if(restIds.length > 0){
+          const idsParam = restIds.map(id => encodeURIComponent(id)).join(',');
+          const resRest = await fetch(`${SUPABASE_URL}/${table}?id=in.(${idsParam})`, {
+            method: 'PATCH',
+            headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+            body: JSON.stringify({ nilai: 0 })
+          });
+          if(!resRest.ok) throw new Error('Gagal menyimpan (status ' + resRest.status + ')');
+        }
+
+        sukses++;
+      }catch(errRow){
+        console.error('Gagal menyimpan nilai kolektif:', label, errRow);
+        gagal.push(`${label}: gagal disimpan, coba lagi.`);
+      }
+    }
+    return { sukses, gagal };
+  }
+
+  function tampilkanHasilSimpanNilai(sukses, gagal){
+    if(gagal.length === 0){
+      uploadNilaiMsg.textContent = `Berhasil memperbarui nilai untuk ${sukses} siswa.`;
+      uploadNilaiMsg.className = 'form-msg success';
+    } else {
+      uploadNilaiMsg.innerHTML = `Berhasil: ${sukses} siswa. Gagal/dilewati: ${gagal.length}.<br>` +
+        gagal.slice(0, 8).map(g => escapeHtml(g)).join('<br>') +
+        (gagal.length > 8 ? `<br>...dan ${gagal.length - 8} lainnya.` : '');
+      uploadNilaiMsg.className = 'form-msg error';
+    }
+  }
+
+  // ================= Modal notifikasi: siswa belum di-mapping =================
+  const mappingWarningBackdrop = document.getElementById('mappingWarningBackdrop');
+  const mappingWarningList = document.getElementById('mappingWarningList');
+
+  function showMappingWarningModal(entriesBelumMapping){
+    mappingWarningList.innerHTML = (entriesBelumMapping && entriesBelumMapping.length)
+      ? '<b>Siswa yang belum ter-mapping:</b><br>' + entriesBelumMapping.map(e => escapeHtml(e.label)).join('<br>')
+      : '';
+    mappingWarningBackdrop.classList.add('open');
+  }
+  function closeMappingWarningModal(){
+    mappingWarningBackdrop.classList.remove('open');
+  }
+  document.getElementById('btnTutupMappingWarning').addEventListener('click', closeMappingWarningModal);
+  mappingWarningBackdrop.addEventListener('click', (e)=>{
+    if(e.target === mappingWarningBackdrop) closeMappingWarningModal();
+  });
+
+  // ---------- Pencocokan siswa dengan baris di tabel "daftarnilai" ----------
+  // Kunci pencocokan: Nama Siswa + NISN + Kelas + Mata Pelajaran (semua harus
+  // sama persis, tidak peka huruf besar/kecil & spasi di ujung diabaikan),
+  // sesuai baris yang sudah di-mapping guru lewat menu Daftar Nilai Siswa.
+  function buatKunciMappingNilai(namaSiswa, nisn, kelas, mataPelajaran){
+    return [namaSiswa, nisn, kelas, mataPelajaran]
+      .map(v => String(v ?? '').trim().toLowerCase())
+      .join('|');
+  }
+
+  async function lookupDaftarNilaiRows(entries){
+    const nisnUnik = [...new Set(entries.map(e => e.nisn).filter(v => v !== undefined && v !== null && v !== ''))];
+    const peta = new Map();
+    if(nisnUnik.length === 0) return peta;
+    const nisnFilter = nisnUnik.map(n => encodeURIComponent(n)).join(',');
+    const url = `${SUPABASE_URL}/${TABLE_DAFTARNILAI}?select=id,nama_siswa,nisn,kelas,mata_pelajaran&nisn=in.(${nisnFilter})`;
+    const res = await fetch(url, { headers: sbHeaders() });
+    if(!res.ok) throw new Error('Gagal memeriksa mapping siswa (status ' + res.status + ')');
+    const rows = await res.json();
+    rows.forEach(r => {
+      const key = buatKunciMappingNilai(r.nama_siswa, r.nisn, r.kelas, r.mata_pelajaran);
+      // Jika ada duplikat kunci (seharusnya tidak terjadi), baris terakhir yang dipakai.
+      peta.set(key, r.id);
+    });
+    return peta;
+  }
+
+  // ---------- Kirim nilai langsung dari tabel di modal ----------
+  btnSimpanTabelNilai.addEventListener('click', async ()=>{
+    // Hanya baris yang dicentang guru yang boleh diproses/diimpor ke
+    // "daftarnilai". Jika belum ada satupun yang dicentang, tolak dulu
+    // sebelum validasi lain (jenis penilaian, dsb.) dijalankan.
+    const checkedIdxSet = new Set(
+      Array.from(tableUploadNilaiBody.querySelectorAll('.upload-nilai-check:checked'))
+        .map(cb => Number(cb.dataset.idx))
+    );
+    if(checkedIdxSet.size === 0){
+      uploadNilaiMsg.textContent = 'Silahkan cheklist/centang penilaian yang akan di input ke daftar niai terlebih dahulu untuk di import ke daftar nilai';
+      uploadNilaiMsg.className = 'form-msg error';
+      return;
+    }
+
+    if(!selectPenilaianNilai.value){
+      uploadNilaiMsg.textContent = 'Pilih jenis penilaian terlebih dahulu.';
+      uploadNilaiMsg.className = 'form-msg error';
+      return;
+    }
+    const config = currentJawabanConfig();
+    if(!config.table){
+      uploadNilaiMsg.textContent = 'Tabel jawaban untuk tab ini belum tersedia.';
+      uploadNilaiMsg.className = 'form-msg error';
+      return;
+    }
+
+    // Kolom tujuan di tabel "daftarnilai", diturunkan dari opsi Jenis
+    // Penilaian yang dipilih (UH1 -> uh1, UTS -> uts, UAS -> uas, dst).
+    const kolomNilai = selectPenilaianNilai.value.toLowerCase();
+
+    // Hanya ambil input nilai dari baris yang dicentang saja.
+    const inputs = Array.from(tableUploadNilaiBody.querySelectorAll('.upload-nilai-input'))
+      .filter(input => checkedIdxSet.has(Number(input.dataset.idx)));
+    const entries = [];
+    let adaInputTidakValid = false;
+    inputs.forEach(input=>{
+      const val = input.value;
+      if(val === '' || val === null) return; // biarkan kosong -> tidak diubah
+      const idx = Number(input.dataset.idx);
+      const g = uploadNilaiSnapshot[idx];
+      const nilai = Number(val);
+      if(isNaN(nilai)){ adaInputTidakValid = true; return; }
+      entries.push({
+        kodeMapping: g.kode_mapping,
+        namaSiswa: g.nama_siswa,
+        nisn: g.nisn,
+        kelas: g.kelas,
+        mataPelajaran: g.mata_pelajaran,
+        nilai,
+        label: `${g.nama_siswa} (NISN ${g.nisn})`
+      });
+    });
+
+    if(adaInputTidakValid){
+      uploadNilaiMsg.textContent = 'Ada nilai yang tidak valid (bukan angka). Periksa kembali isian tabel.';
+      uploadNilaiMsg.className = 'form-msg error';
+      return;
+    }
+    if(entries.length === 0){
+      uploadNilaiMsg.textContent = 'Belum ada nilai yang diisi/diubah di tabel.';
+      uploadNilaiMsg.className = 'form-msg error';
+      return;
+    }
+
+    btnSimpanTabelNilai.disabled = true;
+    btnSimpanTabelNilai.textContent = 'Mengirim...';
+    uploadNilaiMsg.textContent = 'Mengirim...';
+    uploadNilaiMsg.className = 'form-msg';
+    try{
+      // 1) Cocokkan tiap siswa dengan baris mapping-nya di tabel "daftarnilai"
+      //    berdasarkan Nama Siswa + NISN + Kelas + Mata Pelajaran.
+      const petaDaftarNilai = await lookupDaftarNilaiRows(entries);
+      const entriesTerpetakan = [];
+      const entriesBelumMapping = [];
+      entries.forEach(e => {
+        const key = buatKunciMappingNilai(e.namaSiswa, e.nisn, e.kelas, e.mataPelajaran);
+        const idDaftarNilai = petaDaftarNilai.get(key);
+        if(idDaftarNilai){
+          entriesTerpetakan.push({ ...e, idDaftarNilai });
+        } else {
+          entriesBelumMapping.push(e);
+        }
+      });
+
+      // 2) Tulis HANYA nilainya ke kolom jenis penilaian terpilih (mis. uh1,
+      //    uts, uas) pada baris "daftarnilai" yang sudah cocok mapping-nya.
+      let suksesDaftarNilai = 0;
+      const gagalDaftarNilai = [];
+      for(const e of entriesTerpetakan){
+        try{
+          const resPatch = await fetch(`${SUPABASE_URL}/${TABLE_DAFTARNILAI}?id=eq.${encodeURIComponent(e.idDaftarNilai)}`, {
+            method: 'PATCH',
+            headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+            body: JSON.stringify({ [kolomNilai]: e.nilai })
+          });
+          if(!resPatch.ok) throw new Error('Status ' + resPatch.status);
+          suksesDaftarNilai++;
+        }catch(errPatch){
+          console.error('Gagal menyimpan nilai ke daftarnilai:', e.label, errPatch);
+          gagalDaftarNilai.push(e.label);
+        }
+      }
+
+      // 3) Tetap perbarui juga total nilai di tabel jawaban (fitur lama)
+      //    supaya kolom "Nilai" pada Daftar Jawaban Siswa tidak berubah.
+      const entriesUntukJawaban = entries.map(e => ({ kodeMapping: e.kodeMapping, nisn: e.nisn, nilai: e.nilai, label: e.label }));
+      await saveNilaiKolektifBatch(entriesUntukJawaban, config.table);
+      await fetchJawaban();
+      // Muat ulang snapshot & tabel modal sesuai filter yang sama, supaya
+      // nilai yang baru tersimpan langsung terlihat.
+      uploadNilaiSnapshot = (lastJawabanGroupsForTemplate || []).slice();
+      renderUploadNilaiTable();
+
+      // 4) Ringkasan hasil pengiriman ke "daftarnilai"
+      const pesan = [];
+      if(suksesDaftarNilai > 0){
+        pesan.push(`Berhasil menyimpan nilai ${selectPenilaianNilai.value} ke Daftar Nilai untuk ${suksesDaftarNilai} siswa.`);
+      }
+      if(gagalDaftarNilai.length > 0){
+        pesan.push(`Gagal menyimpan untuk ${gagalDaftarNilai.length} siswa, coba lagi.`);
+      }
+      if(entriesBelumMapping.length > 0){
+        pesan.push(`${entriesBelumMapping.length} siswa belum ter-mapping di Daftar Nilai Siswa.`);
+      }
+      uploadNilaiMsg.innerHTML = pesan.length ? pesan.map(p => escapeHtml(p)).join('<br>') : 'Tidak ada nilai yang tersimpan.';
+      uploadNilaiMsg.className = (gagalDaftarNilai.length > 0 || entriesBelumMapping.length > 0) ? 'form-msg error' : 'form-msg success';
+
+      // 5) Jika ada siswa yang belum di-mapping, munculkan modal notifikasi.
+      if(entriesBelumMapping.length > 0){
+        showMappingWarningModal(entriesBelumMapping);
+      }
+    }catch(err){
+      console.error('Gagal mengirim nilai dari tabel:', err);
+      uploadNilaiMsg.textContent = 'Terjadi kesalahan saat mengirim. Silakan coba lagi.';
+      uploadNilaiMsg.className = 'form-msg error';
+    }finally{
+      btnSimpanTabelNilai.textContent = 'Kirim Nilai';
+      btnSimpanTabelNilai.disabled = !selectPenilaianNilai.value;
+    }
+  });
+
+  async function deleteSoal(kodeMapping){
+    if(!confirm(`Hapus seluruh soal dengan Kode Mapping "${kodeMapping}"? Semua butir soal di dalamnya ikut terhapus. Tindakan ini tidak bisa dibatalkan.`)) return;
+    try{
+      const table = currentConfig().table;
+      const res = await fetch(`${SUPABASE_URL}/${table}?kode_mapping=eq.${encodeURIComponent(kodeMapping)}`, {
+        method: 'DELETE',
+        headers: sbHeaders({ 'Prefer': 'return=minimal' })
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      fetchSoal();
+    }catch(err){
+      console.error('Gagal menghapus soal:', err);
+      alert('Gagal menghapus data. Coba lagi.');
+    }
+  }
+
+  // ---------- Dashboard ----------
+  document.getElementById('btnDashboard').addEventListener('click', ()=>{
+    window.location.href = 'adminguru.html';
+  });
+
+  // ---------- Bottom sheet: Pilih Jenis Soal ----------
+  const jenisBackdrop = document.getElementById('jenisBackdrop');
+
+  function openJenisModal(){
+    jenisBackdrop.classList.add('open');
+  }
+  function closeJenisModal(){
+    jenisBackdrop.classList.remove('open');
+  }
+
+  document.getElementById('btnTambahSoal').addEventListener('click', openJenisModal);
+  document.getElementById('btnBatalJenis').addEventListener('click', closeJenisModal);
+  jenisBackdrop.addEventListener('click', (e)=>{
+    if(e.target === jenisBackdrop) closeJenisModal();
+  });
+
+  document.getElementById('btnJenisEssay').addEventListener('click', ()=>{
+    closeJenisModal();
+    openAddForm('Essay');
+  });
+  document.getElementById('btnJenisPG').addEventListener('click', ()=>{
+    closeJenisModal();
+    openAddForm('Pilihan Ganda');
+  });
+
+  // ---------- Modal: Tambah Soal ----------
+  const formBackdrop = document.getElementById('formBackdrop');
+  const soalForm = document.getElementById('soalForm');
+  const formMsg = document.getElementById('formMsg');
+  const inputKodeSoal = document.getElementById('inputKodeSoal');
+  const inputKodeMapping = document.getElementById('inputKodeMapping');
+  const inputMapel = document.getElementById('inputMapel');
+  const inputKelas = document.getElementById('inputKelas');
+  const inputJenisPenilaian = document.getElementById('inputJenisPenilaian');
+  const inputKkm = document.getElementById('inputKkm');
+  const inputTujuan = document.getElementById('inputTujuan');
+  const inputCapaian = document.getElementById('inputCapaian');
+  const inputJenisSoal = document.getElementById('inputJenisSoal');
+  const soalItemsContainer = document.getElementById('soalItemsContainer');
+  const btnAddSoalItem = document.getElementById('btnAddSoalItem');
+
+  let mappingList = []; // cache data mappingpenilaian untuk auto-isi
+  let currentJenisSoal = '';
+  let itemCounter = 0;
+
+  // ---------- State mode edit ----------
+  let editMode = false;
+  let editTargetTable = null;
+  let removedOriginalKode = []; // kode_soal baris asli yang dihapus user saat mode edit
+
+  const formTitle = document.getElementById('formTitle');
+  const btnSimpanSoal = document.getElementById('btnSimpanSoal');
+  const btnBuatKodeSoal = document.getElementById('btnBuatKodeSoal');
+
+  function applyMappingRow(kodeMapping){
+    const row = mappingList.find(m => m.kode_mapping === kodeMapping);
+    if(!row) return false;
+    inputMapel.value = row.mata_pelajaran || '';
+    inputKelas.value = row.kelas || '';
+    inputJenisPenilaian.value = row.jenis_penilaian || '';
+    inputKkm.value = row.kkm ?? '';
+    inputTujuan.value = row.tujuan_pembelajaran || '';
+    inputCapaian.value = row.capaian_pembelajaran || '';
+    return true;
+  }
+
+  const HURUF_PILIHAN = ['A','B','C','D','E'];
+
+  function buildEssayItemHtml(idx, data){
+    data = data || {};
+    const originalAttr = data.originalKode ? ` data-original-kode="${escapeHtml(data.originalKode)}"` : '';
+    return `
+      <div class="soal-item-card" data-item-index="${idx}" data-item-type="essay"${originalAttr}>
+        <div class="soal-item-head">
+          <span>Soal ${idx + 1}</span>
+          <button type="button" class="btn-icon-remove" data-remove-item>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Hapus
+          </button>
+        </div>
+        <div class="soal-item-grid">
+          <div class="form-group">
+            <label>Kode Soal</label>
+            <input type="text" class="f-kode-soal" readonly value="">
+          </div>
+          <div class="form-group">
+            <label>No Soal</label>
+            <input type="number" min="1" class="f-no-soal" value="${data.nomor_soal ?? (idx + 1)}">
+          </div>
+          <div class="form-group">
+            <label>Bobot Nilai</label>
+            <input type="number" min="0" class="f-bobot" placeholder="Mis. 10" value="${data.bobot_nilai ?? ''}">
+          </div>
+          <div class="form-group full">
+            <label>Soal</label>
+            <textarea class="f-soal" placeholder="Tuliskan pertanyaan...">${escapeHtml(data.soal)}</textarea>
+          </div>
+          <div class="form-group full">
+            <label>Kunci Jawaban</label>
+            <textarea class="f-kunci" placeholder="Tuliskan kunci jawaban...">${escapeHtml(data.kunci_jawaban)}</textarea>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function buildPGItemHtml(idx, data){
+    data = data || {};
+    const originalAttr = data.originalKode ? ` data-original-kode="${escapeHtml(data.originalKode)}"` : '';
+    const pilihanInputs = HURUF_PILIHAN.map(h => {
+      const key = 'pilihan_' + h.toLowerCase();
+      const val = data[key] ?? '';
+      return `
+          <div class="form-group">
+            <label>Pilihan ${h}</label>
+            <input type="text" class="f-pilihan" data-huruf="${h}" placeholder="Jawaban ${h}" value="${escapeHtml(val)}">
+          </div>`;
+    }).join('');
+    const kunciOptions = HURUF_PILIHAN.map(h => `<option value="${h}"${data.kunci_jawaban === h ? ' selected' : ''}>${h}</option>`).join('');
+    return `
+      <div class="soal-item-card" data-item-index="${idx}" data-item-type="pg"${originalAttr}>
+        <div class="soal-item-head">
+          <span>Soal ${idx + 1}</span>
+          <button type="button" class="btn-icon-remove" data-remove-item>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Hapus
+          </button>
+        </div>
+        <div class="soal-item-grid">
+          <div class="form-group">
+            <label>Kode Soal</label>
+            <input type="text" class="f-kode-soal" readonly value="">
+          </div>
+          <div class="form-group">
+            <label>Nomor Soal</label>
+            <input type="number" min="1" class="f-no-soal" value="${data.nomor_soal ?? (idx + 1)}">
+          </div>
+          <div class="form-group">
+            <label>Bobot Nilai</label>
+            <input type="number" min="0" class="f-bobot" placeholder="Mis. 10" value="${data.bobot_nilai ?? ''}">
+          </div>
+          <div class="form-group full">
+            <label>Soal</label>
+            <textarea class="f-soal" placeholder="Tuliskan pertanyaan...">${escapeHtml(data.soal)}</textarea>
+          </div>
+          <div class="pilihan-grid">${pilihanInputs}</div>
+          <div class="form-group">
+            <label>Kunci Jawaban</label>
+            <select class="f-kunci">
+              <option value="" disabled${data.kunci_jawaban ? '' : ' selected'}>Pilih kunci</option>
+              ${kunciOptions}
+            </select>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function addSoalItem(data){
+    const idx = itemCounter++;
+    const html = currentJenisSoal === 'Pilihan Ganda' ? buildPGItemHtml(idx, data) : buildEssayItemHtml(idx, data);
+    soalItemsContainer.insertAdjacentHTML('beforeend', html);
+    updateRemoveButtonsVisibility();
+    refreshEssayKodeSoalDisplays();
+  }
+
+  // ---------- Kode Soal otomatis per butir (Essay & Pilihan Ganda) ----------
+  // Meniru logika penomoran kode_soal yang dipakai saat Simpan (buildRowPayload):
+  // jika hanya 1 butir soal, kode_soal = Kode Soal dasar apa adanya;
+  // jika lebih dari 1 butir, kode_soal = "<dasar>-<no urut 2 digit>".
+  function refreshEssayKodeSoalDisplays(){
+    const base = inputKodeSoal.value.trim();
+    const cards = soalItemsContainer.querySelectorAll('.soal-item-card');
+    const multi = cards.length > 1;
+    cards.forEach(card=>{
+      const kodeField = card.querySelector('.f-kode-soal');
+      if(!kodeField) return;
+      const originalKode = card.dataset.originalKode;
+      if(editMode && originalKode){
+        kodeField.value = originalKode;
+        return;
+      }
+      if(!base){
+        kodeField.value = '(isi Kode Soal dahulu)';
+        return;
+      }
+      const noInput = card.querySelector('.f-no-soal');
+      const no = noInput ? noInput.value : '';
+      kodeField.value = multi ? `${base}-${String(no || '').padStart(2, '0')}` : base;
+    });
+  }
+
+  function updateEssayExcelActionsVisibility(){
+    const el = document.getElementById('soalExcelActions');
+    if(!el) return;
+    el.style.display = (currentJenisSoal === 'Essay' || currentJenisSoal === 'Pilihan Ganda') ? '' : 'none';
+  }
+
+  function updateRemoveButtonsVisibility(){
+    const cards = soalItemsContainer.querySelectorAll('.soal-item-card');
+    cards.forEach(card=>{
+      const btn = card.querySelector('[data-remove-item]');
+      btn.style.visibility = cards.length > 1 ? 'visible' : 'hidden';
+    });
+  }
+
+  soalItemsContainer.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-remove-item]');
+    if(!btn) return;
+    const card = btn.closest('.soal-item-card');
+    // Jika kartu ini mewakili baris yang sudah ada di database (mode edit),
+    // catat kode_soal aslinya supaya ikut dihapus saat disimpan.
+    if(card.dataset.originalKode){
+      removedOriginalKode.push(card.dataset.originalKode);
+    }
+    card.remove();
+    renumberSoalItems();
+    refreshEssayKodeSoalDisplays();
+  });
+
+  function renumberSoalItems(){
+    const cards = soalItemsContainer.querySelectorAll('.soal-item-card');
+    cards.forEach((card, i)=>{
+      card.querySelector('.soal-item-head span').textContent = `Soal ${i + 1}`;
+    });
+    updateRemoveButtonsVisibility();
+  }
+
+  // Perbarui tampilan Kode Soal setiap kali No Soal salah satu butir diubah.
+  soalItemsContainer.addEventListener('input', (e)=>{
+    if(e.target.classList.contains('f-no-soal')) refreshEssayKodeSoalDisplays();
+  });
+
+  btnAddSoalItem.addEventListener('click', ()=> addSoalItem());
+
+  // ---------- Export Template Soal (Excel) — Essay & Pilihan Ganda ----------
+  function exportTemplateSoalEssay(){
+    if(typeof XLSX === 'undefined'){
+      alert('Gagal memuat pustaka Excel (XLSX). Periksa koneksi internet Anda lalu coba lagi.');
+      return;
+    }
+
+    let templateRows, colWidths, sheetName, fileName;
+
+    if(currentJenisSoal === 'Pilihan Ganda'){
+      templateRows = [
+        { 'No Soal': 1, 'Soal': 'Contoh: Ibu kota Indonesia adalah...', 'Pilihan A': 'Jakarta', 'Pilihan B': 'Bandung', 'Pilihan C': 'Surabaya', 'Pilihan D': 'Medan', 'Pilihan E': 'Semarang', 'Kunci Jawaban': 'A', 'Bobot Nilai': 10 },
+        { 'No Soal': 2, 'Soal': '', 'Pilihan A': '', 'Pilihan B': '', 'Pilihan C': '', 'Pilihan D': '', 'Pilihan E': '', 'Kunci Jawaban': '', 'Bobot Nilai': '' },
+        { 'No Soal': 3, 'Soal': '', 'Pilihan A': '', 'Pilihan B': '', 'Pilihan C': '', 'Pilihan D': '', 'Pilihan E': '', 'Kunci Jawaban': '', 'Bobot Nilai': '' }
+      ];
+      colWidths = [{ wch: 8 }, { wch: 45 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 12 }];
+      sheetName = 'Template Soal PG';
+      fileName = 'template_soal_pilihan_ganda.xlsx';
+    } else {
+      templateRows = [
+        { 'No Soal': 1, 'Soal': 'Contoh: Jelaskan pengertian fotosintesis.', 'Kunci Jawaban': 'Contoh kunci jawaban di sini.', 'Bobot Nilai': 10 },
+        { 'No Soal': 2, 'Soal': '', 'Kunci Jawaban': '', 'Bobot Nilai': '' },
+        { 'No Soal': 3, 'Soal': '', 'Kunci Jawaban': '', 'Bobot Nilai': '' }
+      ];
+      colWidths = [{ wch: 8 }, { wch: 55 }, { wch: 55 }, { wch: 12 }];
+      sheetName = 'Template Soal Essay';
+      fileName = 'template_soal_essay.xlsx';
+    }
+
+    const ws = XLSX.utils.json_to_sheet(templateRows);
+    ws['!cols'] = colWidths;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, fileName);
+  }
+
+  document.getElementById('btnExportTemplateSoal').addEventListener('click', exportTemplateSoalEssay);
+
+  // ---------- Import Soal (Excel) — Essay & Pilihan Ganda ----------
+  const inputImportSoalExcel = document.getElementById('inputImportSoalExcel');
+
+  document.getElementById('btnImportSoalExcel').addEventListener('click', ()=>{
+    inputImportSoalExcel.click();
+  });
+
+  inputImportSoalExcel.addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    e.target.value = ''; // reset agar file yang sama bisa dipilih ulang
+    if(!file) return;
+
+    if(typeof XLSX === 'undefined'){
+      alert('Gagal memuat pustaka Excel (XLSX). Periksa koneksi internet Anda lalu coba lagi.');
+      return;
+    }
+
+    try{
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if(!rawRows || rawRows.length === 0){
+        alert('File Excel tidak berisi data soal.');
+        return;
+      }
+
+      const getVal = (row, ...keys)=>{
+        for(const k of keys){
+          if(row[k] !== undefined && String(row[k]).trim() !== '') return row[k];
+        }
+        return '';
+      };
+
+      const isPG = currentJenisSoal === 'Pilihan Ganda';
+
+      const items = rawRows
+        .map((row, i)=>{
+          const base = {
+            nomor_soal: getVal(row, 'No Soal', 'no_soal', 'Nomor Soal') || (i + 1),
+            soal: String(getVal(row, 'Soal', 'soal')).trim(),
+            bobot_nilai: getVal(row, 'Bobot Nilai', 'bobot_nilai')
+          };
+          if(isPG){
+            return {
+              ...base,
+              pilihan_a: String(getVal(row, 'Pilihan A', 'pilihan_a')).trim(),
+              pilihan_b: String(getVal(row, 'Pilihan B', 'pilihan_b', 'pilhan_b')).trim(),
+              pilihan_c: String(getVal(row, 'Pilihan C', 'pilihan_c')).trim(),
+              pilihan_d: String(getVal(row, 'Pilihan D', 'pilihan_d')).trim(),
+              pilihan_e: String(getVal(row, 'Pilihan E', 'pilihan_e')).trim(),
+              kunci_jawaban: String(getVal(row, 'Kunci Jawaban', 'kunci_jawaban')).trim().toUpperCase().slice(0, 1)
+            };
+          }
+          return {
+            ...base,
+            kunci_jawaban: String(getVal(row, 'Kunci Jawaban', 'kunci_jawaban')).trim()
+          };
+        })
+        .filter(it => it.soal); // buang baris kosong/template yang belum diisi
+
+      if(items.length === 0){
+        alert('Tidak ditemukan baris soal yang valid. Pastikan kolom "Soal" pada file sudah diisi.');
+        return;
+      }
+
+      if(!confirm(`Ditemukan ${items.length} soal pada file "${file.name}". Impor soal-soal ini ke dalam form sekarang?`)) return;
+
+      // Buang kartu kosong bawaan (kartu default yang belum diisi apa pun)
+      // sebelum menambahkan hasil impor, supaya tidak menyisakan kartu kosong.
+      const existingCards = soalItemsContainer.querySelectorAll('.soal-item-card');
+      if(existingCards.length === 1){
+        const c = existingCards[0];
+        const isEmpty = !c.querySelector('.f-soal').value.trim() && !c.dataset.originalKode;
+        if(isEmpty) c.remove();
+      }
+
+      items.forEach(it => addSoalItem(it));
+      renumberSoalItems();
+      refreshEssayKodeSoalDisplays();
+      setFormMsg(`${items.length} soal berhasil diimpor dari Excel. Periksa kembali sebelum menekan Simpan.`, 'success');
+    }catch(err){
+      console.error('Gagal mengimpor file Excel:', err);
+      alert('Gagal membaca file Excel. Pastikan format file sesuai dengan Template Soal yang diunduh.');
+    }
+  });
+
+  function resetSoalItems(rowsToLoad){
+    soalItemsContainer.innerHTML = '';
+    itemCounter = 0;
+    if(rowsToLoad && rowsToLoad.length > 0){
+      rowsToLoad.forEach(row => addSoalItem({
+        nomor_soal: row.nomor_soal,
+        soal: row.soal,
+        kunci_jawaban: row.kunci_jawaban,
+        bobot_nilai: row.bobot_nilai,
+        pilihan_a: row.pilihan_a,
+        pilihan_b: row.pilihan_b,
+        pilihan_c: row.pilihan_c,
+        pilihan_d: row.pilihan_d,
+        pilihan_e: row.pilihan_e,
+        originalKode: row.kode_soal
+      }));
+    } else {
+      addSoalItem();
+    }
+  }
+
+  function collectSoalItems(){
+    const cards = soalItemsContainer.querySelectorAll('.soal-item-card');
+    const items = [];
+    cards.forEach(card=>{
+      if(card.dataset.itemType === 'pg'){
+        const pilihan = {};
+        card.querySelectorAll('.f-pilihan').forEach(inp=>{
+          const huruf = inp.dataset.huruf;
+          const key = 'pilihan_' + huruf.toLowerCase();
+          pilihan[key] = inp.value.trim();
+        });
+        items.push({
+          originalKode: card.dataset.originalKode || null,
+          no_soal: Number(card.querySelector('.f-no-soal').value) || null,
+          soal: card.querySelector('.f-soal').value.trim(),
+          ...pilihan,
+          kunci_jawaban: card.querySelector('.f-kunci').value,
+          bobot_nilai: card.querySelector('.f-bobot').value === '' ? null : Number(card.querySelector('.f-bobot').value)
+        });
+      } else {
+        items.push({
+          originalKode: card.dataset.originalKode || null,
+          no_soal: Number(card.querySelector('.f-no-soal').value) || null,
+          soal: card.querySelector('.f-soal').value.trim(),
+          kunci_jawaban: card.querySelector('.f-kunci').value.trim(),
+          bobot_nilai: card.querySelector('.f-bobot').value === '' ? null : Number(card.querySelector('.f-bobot').value)
+        });
+      }
+    });
+    return items;
+  }
+
+  function setFormMsg(text, type){
+    formMsg.textContent = text || '';
+    formMsg.className = 'form-msg' + (type ? ' ' + type : '');
+  }
+
+  function resetForm(){
+    soalForm.reset();
+    inputMapel.value = '';
+    inputKelas.value = '';
+    inputJenisPenilaian.value = '';
+    inputKkm.value = '';
+    inputTujuan.value = '';
+    inputCapaian.value = '';
+    soalItemsContainer.innerHTML = '';
+    itemCounter = 0;
+    setFormMsg('');
+  }
+
+  async function loadKodeMappingOptions(){
+    const mapelFilter = guruMapelFilterParam();
+    if(!mapelFilter){
+      mappingList = [];
+      inputKodeMapping.innerHTML = '<option value="" disabled selected>Anda belum memiliki mata pelajaran yang ditugaskan</option>';
+      return;
+    }
+    try{
+      const res = await fetch(`${SUPABASE_URL}/mappingpenilaian?select=*&order=kode_mapping.asc&${mapelFilter}`, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      mappingList = await res.json();
+      inputKodeMapping.innerHTML = '<option value="" disabled selected>Pilih kode mapping</option>';
+      mappingList.forEach(row=>{
+        if(!row.kode_mapping) return;
+        const opt = document.createElement('option');
+        opt.value = row.kode_mapping;
+        opt.textContent = row.kode_mapping;
+        inputKodeMapping.appendChild(opt);
+      });
+      if(mappingList.length === 0){
+        inputKodeMapping.innerHTML = '<option value="" disabled selected>Belum ada data mapping penilaian untuk mapel Anda</option>';
+      }
+    }catch(err){
+      console.error('Gagal memuat data mapping penilaian:', err);
+      inputKodeMapping.innerHTML = '<option value="" disabled selected>Gagal memuat data mapping</option>';
+    }
+  }
+
+  inputKodeMapping.addEventListener('change', ()=>{
+    applyMappingRow(inputKodeMapping.value);
+  });
+
+  inputKodeSoal.addEventListener('input', refreshEssayKodeSoalDisplays);
+
+  btnBuatKodeSoal.addEventListener('click', ()=>{
+    if(!inputKodeMapping.value){
+      setFormMsg('Pilih Kode Mapping dahulu untuk membuat kode soal otomatis.', 'error');
+      return;
+    }
+    const rand = Math.floor(Math.random() * 90 + 10); // 2 digit acak
+    inputKodeSoal.value = `${inputKodeMapping.value}-${rand}`;
+    setFormMsg('');
+    refreshEssayKodeSoalDisplays();
+  });
+
+  function openAddForm(jenisSoalTerpilih){
+    resetForm();
+    editMode = false;
+    editTargetTable = null;
+    removedOriginalKode = [];
+    formTitle.textContent = 'Tambah Soal';
+    btnSimpanSoal.textContent = 'Simpan';
+    inputKodeMapping.disabled = false;
+    inputKodeSoal.disabled = false;
+    btnBuatKodeSoal.disabled = false;
+    if(jenisSoalTerpilih) inputJenisSoal.value = jenisSoalTerpilih;
+    currentJenisSoal = jenisSoalTerpilih || '';
+    updateEssayExcelActionsVisibility();
+    resetSoalItems();
+    formBackdrop.classList.add('open');
+  }
+
+  // ---------- Mode Edit: muat semua butir soal dengan kode_mapping sama ----------
+  async function openEditForm(kodeMapping, jenisSoal, table){
+    setFormMsg('');
+    try{
+      const res = await fetch(
+        `${SUPABASE_URL}/${table}?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=*&order=nomor_soal.asc`,
+        { headers: sbHeaders() }
+      );
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      if(!rows || rows.length === 0){
+        alert('Data soal tidak ditemukan atau sudah dihapus.');
+        return;
+      }
+
+      resetForm();
+      editMode = true;
+      editTargetTable = table;
+      removedOriginalKode = [];
+      formTitle.textContent = 'Edit Soal';
+      btnSimpanSoal.textContent = 'Update';
+
+      currentJenisSoal = jenisSoal;
+      inputJenisSoal.value = jenisSoal;
+      updateEssayExcelActionsVisibility();
+
+      // Kode Mapping dikunci selama edit agar baris yang diubah tetap
+      // merujuk ke grup soal yang sama.
+      inputKodeMapping.value = kodeMapping;
+      inputKodeMapping.disabled = true;
+      applyMappingRow(kodeMapping);
+
+      // Turunkan "kode soal dasar" dari baris pertama (buang akhiran -NN
+      // jika ada), lalu kunci field-nya selama edit.
+      const firstRow = rows[0];
+      const suffix = '-' + String(firstRow.nomor_soal ?? '').padStart(2, '0');
+      const baseKode = firstRow.kode_soal.endsWith(suffix) && rows.length > 1
+        ? firstRow.kode_soal.slice(0, -suffix.length)
+        : firstRow.kode_soal;
+      inputKodeSoal.value = baseKode;
+      inputKodeSoal.disabled = true;
+      btnBuatKodeSoal.disabled = true;
+
+      resetSoalItems(rows);
+      formBackdrop.classList.add('open');
+    }catch(err){
+      console.error('Gagal memuat data untuk edit:', err);
+      alert('Gagal memuat data soal untuk diedit. Coba lagi.');
+    }
+  }
+
+  function closeForm(){
+    formBackdrop.classList.remove('open');
+    resetForm();
+    editMode = false;
+    editTargetTable = null;
+    removedOriginalKode = [];
+    formTitle.textContent = 'Tambah Soal';
+    btnSimpanSoal.textContent = 'Simpan';
+    inputKodeMapping.disabled = false;
+    inputKodeSoal.disabled = false;
+    btnBuatKodeSoal.disabled = false;
+  }
+
+  document.getElementById('btnBatalForm').addEventListener('click', closeForm);
+  formBackdrop.addEventListener('click', (e)=>{
+    if(e.target === formBackdrop) closeForm();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      closeJenisModal();
+      closeForm();
+      closeExamSettingModal();
+      closeMappingWarningModal();
+    }
+  });
+
+  soalForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+
+    const baseKodeSoal = inputKodeSoal.value.trim();
+    const jenisSoal = inputJenisSoal.value; // 'Essay' atau 'Pilihan Ganda'
+
+    const dataUmum = {
+      kode_mapping: inputKodeMapping.value,
+      mata_pelajaran: inputMapel.value,
+      kelas: inputKelas.value,
+      jenis_penilaian: inputJenisPenilaian.value,
+      kkm: inputKkm.value === '' ? null : Number(inputKkm.value),
+      tujuan_pembelajaran: inputTujuan.value,
+      capaian_pembelajaran: inputCapaian.value
+    };
+
+    if(!baseKodeSoal || !dataUmum.kode_mapping || !jenisSoal){
+      setFormMsg('Mohon lengkapi semua field yang wajib diisi.', 'error');
+      return;
+    }
+
+    // ---------- Validasi jenis soal & tentukan tabel tujuan ----------
+    let targetTable;
+    if(jenisSoal === 'Essay'){
+      targetTable = TABLE_ESSAY;
+    } else if(jenisSoal === 'Pilihan Ganda'){
+      targetTable = TABLE_PILGAN;
+    } else {
+      setFormMsg('Jenis soal tidak valid. Pilih ulang jenis soal (Essay/Pilihan Ganda).', 'error');
+      return;
+    }
+
+    const soalItems = collectSoalItems();
+    const adaItemKosong = soalItems.some(it => !it.soal);
+    if(soalItems.length === 0 || adaItemKosong){
+      setFormMsg('Mohon lengkapi isian setiap butir soal (minimal kolom Soal).', 'error');
+      return;
+    }
+
+    // ---------- Fungsi bantu: susun 1 baris payload untuk 1 butir soal ----------
+    function buildRowPayload(it, kodeSoalBaris){
+      if(jenisSoal === 'Essay'){
+        return {
+          kode_soal: kodeSoalBaris,
+          ...dataUmum,
+          nomor_soal: it.no_soal,
+          soal: it.soal,
+          kunci_jawaban: it.kunci_jawaban,
+          bobot_nilai: it.bobot_nilai
+        };
+      }
+      // Pilihan Ganda — kolom pilihan_a s/d pilihan_e di tabel daftar_soal_pilgan.
+      return {
+        kode_soal: kodeSoalBaris,
+        ...dataUmum,
+        nomor_soal: it.no_soal,
+        soal: it.soal,
+        pilihan_a: it.pilihan_a,
+        pilihan_b: it.pilihan_b,
+        pilihan_c: it.pilihan_c,
+        pilihan_d: it.pilihan_d,
+        pilihan_e: it.pilihan_e,
+        kunci_jawaban: it.kunci_jawaban,
+        bobot_nilai: it.bobot_nilai
+      };
+    }
+
+    const btnSimpan = btnSimpanSoal;
+    btnSimpan.disabled = true;
+
+    if(!editMode){
+      // ================= MODE TAMBAH (create) =================
+      // kode_soal adalah kolom Primary Key, sedangkan satu Kode Soal bisa
+      // memiliki banyak butir. Agar tetap unik per baris, butir ke-2 dst
+      // diberi akhiran nomor urut soal (mis. MTK-7A-UH1-01-02).
+      const rows = soalItems.map(it => {
+        const kodeSoalBaris = soalItems.length > 1
+          ? `${baseKodeSoal}-${String(it.no_soal ?? '').padStart(2, '0')}`
+          : baseKodeSoal;
+        // Soal yang baru dibuat defaultnya berstatus "Non Aktif" di kolom
+        // status, sampai guru mengaktifkannya sendiri lewat toggle di tabel.
+        return { ...buildRowPayload(it, kodeSoalBaris), status: 'Non Aktif' };
+      });
+
+      setFormMsg('Menyimpan...', '');
+      try{
+        const res = await fetch(`${SUPABASE_URL}/${targetTable}`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(rows)
+        });
+
+        if(!res.ok){
+          const errText = await res.text();
+          console.error('Supabase error:', errText);
+          if(res.status === 409 || /duplicate/i.test(errText)){
+            setFormMsg('Kode Soal sudah dipakai. Gunakan kode lain.', 'error');
+          } else {
+            setFormMsg(`Gagal menyimpan data ke tabel "${targetTable}". Periksa kembali isian Anda.`, 'error');
+          }
+          btnSimpan.disabled = false;
+          return;
+        }
+
+        closeForm();
+        fetchSoal();
+      }catch(err){
+        console.error('Gagal menyimpan soal:', err);
+        if(err.name === 'TypeError' && /fetch/i.test(err.message)){
+          setFormMsg('Koneksi internet terputus/berubah saat menyimpan. Periksa koneksi Anda dan coba lagi.', 'error');
+        } else {
+          setFormMsg('Terjadi kesalahan tak terduga. Coba lagi.', 'error');
+        }
+      }finally{
+        btnSimpan.disabled = false;
+      }
+      return;
+    }
+
+    // ================= MODE EDIT (update) =================
+    setFormMsg('Menyimpan perubahan...', '');
+
+    const existingKodes = soalItems.filter(it => it.originalKode).map(it => it.originalKode);
+    // Butir baru yang ditambahkan selagi mengedit: beri kode_soal unik baru
+    // (base + nomor soal, dengan sufiks acak jika ternyata bentrok).
+    let newSeq = 0;
+    const usedKodes = new Set(existingKodes);
+    const itemsToUpdate = [];
+    const itemsToInsert = [];
+
+    soalItems.forEach(it => {
+      if(it.originalKode){
+        itemsToUpdate.push({ kode: it.originalKode, payload: buildRowPayload(it, it.originalKode) });
+      } else {
+        let kode = `${baseKodeSoal}-${String(it.no_soal ?? (newSeq + 1)).padStart(2, '0')}`;
+        while(usedKodes.has(kode)){
+          kode = `${baseKodeSoal}-${String(it.no_soal ?? (newSeq + 1)).padStart(2, '0')}-${Math.random().toString(36).slice(2, 5)}`;
+        }
+        usedKodes.add(kode);
+        newSeq++;
+        itemsToInsert.push(buildRowPayload(it, kode));
+      }
+    });
+
+    try{
+      // 1) Hapus baris-baris yang dibuang user dari form
+      if(removedOriginalKode.length > 0){
+        const list = removedOriginalKode.map(k => encodeURIComponent(k)).join(',');
+        const resDel = await fetch(`${SUPABASE_URL}/${targetTable}?kode_soal=in.(${list})`, {
+          method: 'DELETE',
+          headers: sbHeaders({ 'Prefer': 'return=minimal' })
+        });
+        if(!resDel.ok) throw new Error('Gagal menghapus butir soal lama: status ' + resDel.status);
+      }
+
+      // 2) Perbarui baris-baris yang sudah ada
+      for(const item of itemsToUpdate){
+        const resUpd = await fetch(`${SUPABASE_URL}/${targetTable}?kode_soal=eq.${encodeURIComponent(item.kode)}`, {
+          method: 'PATCH',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(item.payload)
+        });
+        if(!resUpd.ok){
+          const errText = await resUpd.text();
+          throw new Error('Gagal memperbarui butir soal "' + item.kode + '": ' + errText);
+        }
+      }
+
+      // 3) Tambahkan baris-baris baru (jika user menambah butir soal baru saat edit)
+      if(itemsToInsert.length > 0){
+        const resIns = await fetch(`${SUPABASE_URL}/${targetTable}`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(itemsToInsert)
+        });
+        if(!resIns.ok){
+          const errText = await resIns.text();
+          throw new Error('Gagal menambahkan butir soal baru: ' + errText);
+        }
+      }
+
+      closeForm();
+      fetchSoal();
+    }catch(err){
+      console.error('Gagal memperbarui soal:', err);
+      setFormMsg('Gagal menyimpan perubahan. Periksa kembali isian Anda dan coba lagi.', 'error');
+    }finally{
+      btnSimpan.disabled = false;
+    }
+  });
+
+  // ---------- Init ----------
+  (async function init(){
+    await loadGuruMapelList();
+    loadKodeMappingOptions();
+    fetchSoal();
+    fetchJawaban();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beranda Siswa — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+    --blue:#2F80ED;
+    --orange:#F2994A;
+    --footer-h:72px;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--footer-h) + 20px);
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .term-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .term-badge .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0 0 28px;
+  }
+
+  /* ---------- Kartu identitas siswa (tanpa foto) ---------- */
+  .profile-card{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    background:linear-gradient(135deg, var(--brand) 0%, #8A6FF0 55%, var(--purple) 100%);
+    border-radius:14px;
+    padding:24px clamp(18px,3vw,32px);
+    margin-bottom:28px;
+    box-shadow:0 10px 30px rgba(108,79,224,0.28);
+    position:relative;
+    overflow:hidden;
+  }
+  .profile-card::after{
+    content:"";
+    position:absolute;
+    top:-40%; right:-10%;
+    width:220px; height:220px;
+    background:radial-gradient(circle, rgba(255,201,60,0.35) 0%, rgba(255,201,60,0) 70%);
+    pointer-events:none;
+  }
+  .profile-info{
+    position:relative;
+    z-index:1;
+    flex:1;
+    min-width:0;
+  }
+  .profile-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    margin:0 0 4px;
+  }
+  .profile-name{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:clamp(1.2rem,2.4vw,1.5rem);
+    color:#FFFFFF;
+    margin:0 0 14px;
+    line-height:1.2;
+  }
+  .profile-meta{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px 24px;
+  }
+  .profile-meta-item{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .profile-meta-item.full{grid-column:1 / -1;}
+  .meta-label{
+    font-size:0.68rem;
+    font-weight:600;
+    letter-spacing:0.03em;
+    color:rgba(255,255,255,0.65);
+    text-transform:uppercase;
+  }
+  .meta-value{
+    font-size:0.92rem;
+    color:#FFFFFF;
+    font-weight:500;
+  }
+
+  @media (max-width:560px){
+    main{padding-left:5px; padding-right:5px;}
+    .navbar{padding-left:5px; padding-right:5px;}
+    .panel-row{grid-template-columns:1fr;}
+    .panel{padding:16px 12px;}
+    .profile-card{flex-direction:column; text-align:left; align-items:stretch;}
+    .profile-tag{text-align:center;}
+    .profile-name{text-align:center;}
+    .profile-meta{
+      display:block;
+      background:rgba(0,0,0,0.14);
+      border-radius:10px;
+      padding:4px 12px;
+    }
+    .profile-meta-item{
+      flex-direction:row;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:10px;
+      padding:9px 0;
+      border-bottom:1px solid rgba(255,255,255,0.16);
+    }
+    .profile-meta-item:last-child{border-bottom:none;}
+    .profile-meta-item .meta-label{flex:0 0 auto; white-space:nowrap;}
+    .profile-meta-item .meta-value{text-align:right;}
+    .profile-meta-item.full{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:3px;
+    }
+    .profile-meta-item.full .meta-value{text-align:left;}
+  }
+
+  .section-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:6px 0 14px;
+  }
+
+  .panel-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-bottom:16px;
+    min-width:0;
+  }
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .panel-search{
+    font-family:inherit;
+    font-size:0.82rem;
+    padding:7px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    background:#fbf8f0;
+    color:var(--ink);
+    min-width:160px;
+  }
+  .panel-search:focus{border-color:var(--brick); outline:none;}
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:var(--brand) var(--paper-deep);
+    border-radius:6px;
+  }
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--brand); border-radius:6px;}
+  .preview-table{
+    width:100%;
+    min-width:560px;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  .scroll-hint{
+    display:none;
+    align-items:center;
+    gap:6px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .scroll-hint svg{width:14px; height:14px; flex-shrink:0;}
+  @media (max-width:820px){
+    .scroll-hint{display:flex;}
+  }
+  .preview-table th{
+    text-align:left;
+    font-size:0.7rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:8px 10px;
+    border-bottom:2px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  .preview-table td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--paper-line);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .preview-table tbody tr:hover{background:var(--paper-deep);}
+
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:0.72rem;
+    font-weight:600;
+  }
+  .badge-ok{background:#E4F6EC; color:var(--green);}
+  .badge-no{background:#FDE7EE; color:var(--brick);}
+  .badge-info{background:#E8EEFC; color:var(--blue);}
+
+  .panel-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .pager{display:flex; align-items:center; gap:4px;}
+  .pager button{
+    font-family:inherit;
+    font-size:0.76rem;
+    background:#fbf8f0;
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    padding:5px 9px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .pager button.active{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
+  .pager button:disabled{opacity:0.45; cursor:not-allowed;}
+  .pager span{color:var(--ink-soft); padding:0 2px;}
+
+  /* ---------- Footer sticky ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    height:var(--footer-h);
+    background:var(--turquoise);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    z-index:30;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-size:0.75rem;
+    font-weight:600;
+    width:140px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-divider{
+    width:1px;
+    background:rgba(59,46,99,0.2);
+    margin:14px 0;
+  }
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+
+  /* ---------- Bottom sheet menu ---------- */
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.2s ease;
+    z-index:40;
+  }
+  .sheet-backdrop.open{opacity:1; visibility:visible;}
+
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    padding:10px 20px calc(20px + var(--footer-h));
+    max-width:640px;
+    margin:0 auto;
+    transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.3,1);
+    z-index:41;
+    max-height:78vh;
+    overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+
+  .sheet-handle{
+    width:40px; height:4px;
+    background:var(--paper-line);
+    border-radius:2px;
+    margin:8px auto 16px;
+  }
+  .sheet h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:0 0 16px;
+  }
+  .menu-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .menu-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-align:center;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:16px 8px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:0.78rem;
+    font-weight:500;
+    line-height:1.25;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:hover{border-color:var(--brick); background:#FFE3EE;}
+  .menu-item svg{width:22px; height:22px; color:var(--brick);}
+
+  @media (max-width:520px){
+    .menu-grid{grid-template-columns:repeat(3,1fr);}
+    .nav-schoolinfo{display:none;}
+  }
+
+  /* ---------- Modal Kode Ujian ---------- */
+  .exam-modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.5);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; visibility:hidden;
+    transition:opacity 0.2s ease;
+    z-index:50;
+  }
+  .exam-modal-backdrop.open{opacity:1; visibility:visible;}
+  .exam-modal{
+    position:relative;
+    background:var(--paper);
+    color:var(--ink);
+    width:100%;
+    max-width:380px;
+    border-radius:8px;
+    padding:28px 26px 26px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    transform:translateY(10px);
+    transition:transform 0.2s ease;
+  }
+  .exam-modal-backdrop.open .exam-modal{transform:translateY(0);}
+  .exam-modal h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.25rem;
+    margin:0 0 6px;
+  }
+  .exam-modal p.exam-modal-sub{
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+  }
+  .exam-modal label{
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .exam-modal input{
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:1rem;
+    padding:11px 12px;
+    border:1px solid var(--paper-line);
+    border-radius:4px;
+    background:#fbf8f0;
+    color:var(--ink);
+  }
+  .exam-modal input:focus{border-color:var(--brick); outline:none;}
+  .exam-modal-error{
+    color:var(--brick);
+    font-size:0.82rem;
+    margin:8px 0 0;
+  }
+  .exam-modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .exam-btn{
+    flex:1;
+    font-family:inherit;
+    font-size:0.9rem;
+    font-weight:600;
+    border-radius:5px;
+    padding:11px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:background 0.2s ease, opacity 0.2s ease;
+  }
+  .exam-btn-cancel{
+    background:none;
+    border-color:var(--paper-line);
+    color:var(--ink-soft);
+  }
+  .exam-btn-cancel:hover{border-color:var(--ink-soft); color:var(--ink);}
+  .exam-btn-confirm{
+    background:var(--turquoise);
+    color:#FFFFFF;
+  }
+  .exam-btn-confirm:hover{background:#0B5F58;}
+  .exam-btn-confirm:disabled{opacity:0.6; cursor:not-allowed;}
+
+  /* ---------- Modal Informasi Ujian ---------- */
+  .info-modal{max-width:420px;}
+  .info-modal-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    margin:0 0 6px;
+  }
+  .info-modal-top h3{margin:0;}
+  .info-modal-clock{
+    text-align:right;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .info-modal-clock .clock-date{
+    font-size:0.7rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .info-modal-clock .clock-time{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.95rem;
+    font-weight:700;
+    color:var(--turquoise);
+  }
+  .info-modal h3{display:flex; align-items:center; gap:8px;}
+  .info-modal-badge{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    color:var(--turquoise);
+    background:rgba(15,118,110,0.1);
+    border:1px solid rgba(15,118,110,0.25);
+    border-radius:4px;
+    padding:2px 8px;
+    margin:0 0 14px;
+  }
+  .info-rows{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    border-top:1px solid var(--paper-line);
+  }
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    padding:10px 0;
+    border-bottom:1px solid var(--paper-line);
+    font-size:0.88rem;
+  }
+  .info-row-label{color:var(--ink-soft); flex-shrink:0;}
+  .info-row-value{color:var(--ink); font-weight:500; text-align:right;}
+  .info-modal-note{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin:14px 0 0;
+    line-height:1.4;
+  }
+  .info-modal-loading{
+    padding:24px 0;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.88rem;
+  }
+  .exam-btn-start{
+    background:var(--brick);
+    color:#FFFFFF;
+  }
+  .exam-btn-start:hover{background:#B32A5C;}
+  .exam-btn-start:disabled{opacity:0.6; cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar" id="siswaAvatar">SW</span>
+      <span class="admin-name" id="siswaName">Siswa</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-heading">Beranda Siswa</h1>
+  <p class="page-sub">Pantau nilai dan riwayat ujianmu di sini.</p>
+
+  <div class="profile-card" id="profileCard">
+    <div class="profile-info">
+      <p class="profile-tag">IDENTITAS SISWA</p>
+      <h2 class="profile-name" id="profileNama">Memuat data...</h2>
+      <div class="profile-meta">
+        <div class="profile-meta-item">
+          <span class="meta-label">NISN</span>
+          <span class="meta-value" id="profileNisn">–</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="meta-label">Kelas</span>
+          <span class="meta-value" id="profileKelas">–</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="meta-label">Tempat, Tanggal Lahir</span>
+          <span class="meta-value" id="profileTtl">–</span>
+        </div>
+        <div class="profile-meta-item full">
+          <span class="meta-label">Alamat</span>
+          <span class="meta-value" id="profileAlamat">–</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Daftar Nilaiku ================= -->
+  <h2 class="section-heading">Ringkasan Akademik</h2>
+
+  <div class="panel-row">
+    <div class="panel panel-wide">
+      <div class="panel-head">
+        <h3>Daftar Nilaiku</h3>
+        <input type="text" class="panel-search" id="cariNilaikuInput" placeholder="Cari mata pelajaran...">
+      </div>
+      <p class="scroll-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+        Geser tabel ke samping untuk melihat kolom lainnya
+      </p>
+      <div class="table-wrap">
+        <table class="preview-table" id="tableNilaiku">
+          <thead>
+            <tr><th>No</th><th>Mapel</th><th>Semester</th><th>Nilai Akhir (NR)</th><th>Status</th></tr>
+          </thead>
+          <tbody id="tableNilaikuBody">
+            <tr><td colspan="5">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel-foot">
+        <span id="entriesInfoNilaiku">Menampilkan 0 entri</span>
+        <div class="pager">
+          <button type="button" id="btnPrevNilaiku" disabled>Sebelumnya</button>
+          <button type="button" id="btnNextNilaiku" disabled>Berikutnya</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Riwayat Ujian ================= -->
+  <div class="panel-row">
+    <div class="panel panel-wide">
+      <div class="panel-head">
+        <h3>Riwayat Ujian</h3>
+        <input type="text" class="panel-search" id="cariUjianInput" placeholder="Cari ujian...">
+      </div>
+      <p class="scroll-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 6 15 12 9 18"/></svg>
+        Geser tabel ke samping untuk melihat kolom lainnya
+      </p>
+      <div class="table-wrap">
+        <table class="preview-table" id="tableUjian">
+          <thead>
+            <tr><th>No</th><th>Kode Ujian</th><th>Mapel</th><th>Tanggal</th><th>Nilai</th><th>Status</th></tr>
+          </thead>
+          <tbody id="tableUjianBody">
+            <tr><td colspan="6">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel-foot">
+        <span id="entriesInfoUjian">Menampilkan 0 entri</span>
+        <div class="pager">
+          <button type="button" id="btnPrevUjian" disabled>Sebelumnya</button>
+          <button type="button" id="btnNextUjian" disabled>Berikutnya</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer sticky -->
+<div class="footer-bar">
+  <button class="footer-btn" id="openMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    Menu
+  </button>
+  <div class="footer-divider"></div>
+  <button class="footer-btn logout" id="logoutBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Log Out
+  </button>
+</div>
+
+<!-- Bottom sheet menu -->
+<div class="sheet-backdrop" id="sheetBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetHeading">
+    <div class="sheet-handle"></div>
+    <h3 id="sheetHeading">Menu Siswa</h3>
+    <div class="menu-grid">
+      <a class="menu-item" href="daftarnilaisiswa.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16"/><path d="M9 10v10"/></svg>
+        Daftar Nilaiku
+      </a>
+      <a class="menu-item" href="pelajaranku.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h5"/></svg>
+        Materi Pelajaran
+      </a>
+      <a class="menu-item" href="#" id="menuUjianBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+        Ujian
+      </a>
+      <a class="menu-item" href="absensiku.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M9 14l2 2 4-4"/></svg>
+        Riwayat Kehadiranku
+      </a>
+      <a class="menu-item logout-item" href="#" id="sheetLogout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Kode Ulangan/Ujian -->
+<div class="exam-modal-backdrop" id="examModalBackdrop">
+  <div class="exam-modal" role="dialog" aria-modal="true" aria-labelledby="examModalHeading">
+    <h3 id="examModalHeading">Masukkan Kode Ujian</h3>
+    <p class="exam-modal-sub">Masukkan kode ulangan/ujian yang diberikan oleh guru untuk mulai mengerjakan.</p>
+    <form id="examCodeForm">
+      <label for="examCodeInput">Kode Ulangan/Ujian
+        <input type="text" id="examCodeInput" placeholder="Contoh: MTK7A01" required autocomplete="off">
+      </label>
+      <p class="exam-modal-error" id="examCodeError" hidden></p>
+      <div class="exam-modal-actions">
+        <button type="button" class="exam-btn exam-btn-cancel" id="examCancelBtn">Cancel</button>
+        <button type="submit" class="exam-btn exam-btn-confirm" id="examConfirmBtn">Konfirmasi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Informasi Ujian -->
+<div class="exam-modal-backdrop" id="examInfoModalBackdrop">
+  <div class="exam-modal info-modal" role="dialog" aria-modal="true" aria-labelledby="examInfoHeading">
+    <div class="info-modal-top">
+      <h3 id="examInfoHeading">Informasi Ujian</h3>
+      <div class="info-modal-clock">
+        <span class="clock-date" id="infoClockDate">-</span>
+        <span class="clock-time" id="infoClockTime">-</span>
+      </div>
+    </div>
+    <span class="info-modal-badge" id="infoKodeMapping">—</span>
+    <div id="infoLoading" class="info-modal-loading" hidden>Memuat detail ujian...</div>
+    <div class="info-rows" id="infoRows">
+      <div class="info-row"><span class="info-row-label">Mata Pelajaran</span><span class="info-row-value" id="infoMapel">-</span></div>
+      <div class="info-row"><span class="info-row-label">Kelas</span><span class="info-row-value" id="infoKelas">-</span></div>
+      <div class="info-row"><span class="info-row-label">Jenis Penilaian</span><span class="info-row-value" id="infoJenis">-</span></div>
+      <div class="info-row"><span class="info-row-label">KKM</span><span class="info-row-value" id="infoKkm">-</span></div>
+      <div class="info-row"><span class="info-row-label">Waktu Mulai</span><span class="info-row-value" id="infoWaktuMulai">-</span></div>
+      <div class="info-row"><span class="info-row-label">Waktu Selesai</span><span class="info-row-value" id="infoWaktuSelesai">-</span></div>
+    </div>
+    <p class="info-modal-note" id="infoNote" hidden></p>
+    <p class="exam-modal-error" id="infoStartError" hidden></p>
+    <div class="exam-modal-actions">
+      <button type="button" class="exam-btn exam-btn-cancel" id="infoCancelBtn">Cancel</button>
+      <button type="button" class="exam-btn exam-btn-start" id="infoStartBtn">Mulai Ujian</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+
+  // ---------- Auth guard: pastikan ada sesi siswa ----------
+  function getSiswaSession(){
+    try{
+      const raw = localStorage.getItem('siswa_session');
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){
+      return null;
+    }
+  }
+
+  const siswaSession = getSiswaSession();
+  if(!siswaSession){
+    window.location.href = 'siswa.html';
+  }
+
+  // ---------- Tampilkan nama siswa yang login ----------
+  function getInitials(nama){
+    return nama
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w[0].toUpperCase())
+      .join('');
+  }
+
+  (function renderSiswaAccount(){
+    if(!siswaSession) return;
+    const nama = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+    document.getElementById('siswaName').textContent = nama;
+    document.getElementById('siswaAvatar').textContent = getInitials(nama) || 'SW';
+  })();
+
+  // ---------- Ambil identitas lengkap siswa dari tabel "datasiswa" ----------
+  // currentSiswaData & siswaProfilePromise disimpan secara global agar bisa
+  // dipakai ulang saat validasi kode ujian (cek apakah siswa sudah pernah
+  // mengerjakan ujian ini di tabel jawabanujianessay).
+  let currentSiswaData = null;
+
+  const siswaProfilePromise = (async function loadSiswaProfile(){
+    const profileNama = document.getElementById('profileNama');
+    const profileNisn = document.getElementById('profileNisn');
+    const profileKelas = document.getElementById('profileKelas');
+    const profileTtl = document.getElementById('profileTtl');
+    const profileAlamat = document.getElementById('profileAlamat');
+
+    if(!siswaSession){
+      profileNama.textContent = 'Sesi tidak ditemukan';
+      return null;
+    }
+
+    try{
+      let url;
+      if(siswaSession.id){
+        url = `${SUPABASE_URL}/datasiswa?id=eq.${encodeURIComponent(siswaSession.id)}&select=nama_siswa,nisn,kelas,tempat_lahir,tanggal_lahir,alamat&limit=1`;
+      } else {
+        const nama = siswaSession.nama_siswa || siswaSession.nama || '';
+        url = `${SUPABASE_URL}/datasiswa?nama_siswa=eq.${encodeURIComponent(nama)}&select=nama_siswa,nisn,kelas,tempat_lahir,tanggal_lahir,alamat&limit=1`;
+      }
+
+      const res = await fetch(url, {
+        headers:{
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY
+        }
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      const siswa = rows && rows[0];
+
+      if(!siswa){
+        profileNama.textContent = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+        return null;
+      }
+
+      const nama = siswa.nama_siswa || '-';
+      profileNama.textContent = nama;
+      profileNisn.textContent = siswa.nisn || '-';
+      profileKelas.textContent = siswa.kelas || '-';
+      profileAlamat.textContent = siswa.alamat || '-';
+
+      if(siswa.tempat_lahir || siswa.tanggal_lahir){
+        let tgl = '-';
+        if(siswa.tanggal_lahir){
+          try{
+            tgl = new Date(siswa.tanggal_lahir).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+          }catch(e){
+            tgl = siswa.tanggal_lahir;
+          }
+        }
+        profileTtl.textContent = [siswa.tempat_lahir, tgl].filter(Boolean).join(', ');
+      } else {
+        profileTtl.textContent = '-';
+      }
+
+      currentSiswaData = siswa;
+      return siswa;
+    }catch(err){
+      console.error('Gagal memuat identitas siswa:', err);
+      profileNama.textContent = siswaSession.nama_siswa || siswaSession.nama || 'Siswa';
+      return null;
+    }
+  })();
+
+  // ================= Daftar Nilaiku (preview di Beranda) =================
+  // Sumber data: tabel "daftarnilai", difilter nama_siswa + nisn milik siswa
+  // yang sedang login saja (memakai identitas dari "datasiswa", bukan input
+  // bebas), supaya siswa lain tidak pernah ikut tampil di sini.
+  const NILAIKU_PAGE_SIZE = 5;
+  let currentPageNilaiku = 0;
+  let searchTermNilaiku = '';
+  let lastNilaikuRows = [];
+
+  const tableNilaikuBody = document.getElementById('tableNilaikuBody');
+  const entriesInfoNilaiku = document.getElementById('entriesInfoNilaiku');
+  const btnPrevNilaiku = document.getElementById('btnPrevNilaiku');
+  const btnNextNilaiku = document.getElementById('btnNextNilaiku');
+  const cariNilaikuInput = document.getElementById('cariNilaikuInput');
+
+  // NH & NR dihitung dengan rumus yang sama seperti di halaman guru:
+  // NH = rata-rata UH1..UH-sejumlah "Jumlah UH" (UH kosong dihitung 0).
+  // NR = (NH + UTS + UAS) : 3 (UTS/UAS kosong dihitung 0).
+  function hitungNHNilaiku(row){
+    const jumlahUh = Number(row.jumlah_uh);
+    if(!jumlahUh || jumlahUh < 1) return null;
+    const kolomUh = ['uh1','uh2','uh3','uh4','uh5','uh6'].slice(0, jumlahUh);
+    let total = 0;
+    kolomUh.forEach(k => {
+      const v = row[k];
+      const n = Number(v);
+      const valid = !(v === null || v === undefined || v === '' || isNaN(n));
+      total += valid ? n : 0;
+    });
+    return total / jumlahUh;
+  }
+
+  function hitungNRNilaiku(row){
+    const nh = hitungNHNilaiku(row);
+    const nhValid = (nh === null) ? 0 : nh;
+    const uts = Number(row.uts);
+    const utsValid = (row.uts === null || row.uts === undefined || row.uts === '' || isNaN(uts)) ? 0 : uts;
+    const uas = Number(row.uas);
+    const uasValid = (row.uas === null || row.uas === undefined || row.uas === '' || isNaN(uas)) ? 0 : uas;
+    return (nhValid + utsValid + uasValid) / 3;
+  }
+
+  function formatNilaiHitungNilaiku(v){
+    if(v === null || v === undefined || isNaN(v)) return '-';
+    const dibulatkan = Math.round(v * 100) / 100;
+    let str = dibulatkan.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+    return str.replace('.', ',');
+  }
+
+  // Status Tuntas/Belum Tuntas dibanding KKM. Kalau KKM belum diisi guru,
+  // status belum bisa ditentukan.
+  function hitungStatusNilaiku(row){
+    const kkm = Number(row.kkm);
+    if(row.kkm === null || row.kkm === undefined || row.kkm === '' || isNaN(kkm)) return null;
+    const nr = hitungNRNilaiku(row);
+    if(nr === null || isNaN(nr)) return null;
+    return nr < kkm ? 'Belum Tuntas' : 'Tuntas';
+  }
+
+  function statusBadgeNilaiku(status){
+    if(status === 'Tuntas') return '<span class="badge badge-ok">Tuntas</span>';
+    if(status === 'Belum Tuntas') return '<span class="badge badge-no">Belum Tuntas</span>';
+    return '<span class="badge badge-info">Menunggu Nilai</span>';
+  }
+
+  function escapeHtmlNilaiku(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  async function fetchDaftarNilaikuRows(namaSiswa, nisn){
+    const url = `${SUPABASE_URL}/daftarnilai` +
+      `?select=mata_pelajaran,semester,tahun_pelajaran,kkm,jumlah_uh,uh1,uh2,uh3,uh4,uh5,uh6,uts,uas` +
+      `&nama_siswa=eq.${encodeURIComponent(namaSiswa)}` +
+      `&nisn=eq.${encodeURIComponent(nisn)}` +
+      `&order=tahun_pelajaran.desc,semester.desc,mata_pelajaran.asc`;
+    const res = await fetch(url, {
+      headers:{
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      }
+    });
+    if(!res.ok) throw new Error('Status ' + res.status);
+    return await res.json();
+  }
+
+  function renderNilaikuTable(rows, offset){
+    if(!rows || rows.length === 0){
+      tableNilaikuBody.innerHTML = `<tr><td colspan="5">Belum ada data nilai untukmu.</td></tr>`;
+      return;
+    }
+    tableNilaikuBody.innerHTML = rows.map((r, idx) => {
+      const status = hitungStatusNilaiku(r);
+      return `
+        <tr>
+          <td>${offset + idx + 1}</td>
+          <td>${escapeHtmlNilaiku(r.mata_pelajaran ?? '-')}</td>
+          <td>${escapeHtmlNilaiku(r.semester ?? '-')}</td>
+          <td>${formatNilaiHitungNilaiku(hitungNRNilaiku(r))}</td>
+          <td>${statusBadgeNilaiku(status)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderNilaikuFoot(offset, shownCount, total){
+    entriesInfoNilaiku.textContent = total === 0
+      ? 'Menampilkan 0 entri'
+      : `Menampilkan ${offset + 1} - ${offset + shownCount} dari ${total} entri`;
+    btnPrevNilaiku.disabled = currentPageNilaiku === 0;
+    btnNextNilaiku.disabled = offset + shownCount >= total;
+  }
+
+  function renderNilaikuPage(){
+    let rows = lastNilaikuRows;
+    const term = searchTermNilaiku.trim().toLowerCase();
+    if(term){
+      rows = rows.filter(r => String(r.mata_pelajaran ?? '').toLowerCase().includes(term));
+    }
+    const total = rows.length;
+    const offset = currentPageNilaiku * NILAIKU_PAGE_SIZE;
+    const pageRows = rows.slice(offset, offset + NILAIKU_PAGE_SIZE);
+    renderNilaikuTable(pageRows, offset);
+    renderNilaikuFoot(offset, pageRows.length, total);
+  }
+
+  async function loadDaftarNilaiku(){
+    tableNilaikuBody.innerHTML = `<tr><td colspan="5">Memuat data...</td></tr>`;
+    try{
+      const siswa = currentSiswaData || await siswaProfilePromise;
+      const namaSiswa = (siswa && siswa.nama_siswa) || siswaSession.nama_siswa || siswaSession.nama || '';
+      const nisn = (siswa && siswa.nisn) || siswaSession.nisn || '';
+
+      if(!namaSiswa || !nisn){
+        lastNilaikuRows = [];
+        tableNilaikuBody.innerHTML = `<tr><td colspan="5">Identitas siswa (nama/NISN) tidak ditemukan.</td></tr>`;
+        renderNilaikuFoot(0, 0, 0);
+        return;
+      }
+
+      lastNilaikuRows = await fetchDaftarNilaikuRows(namaSiswa, nisn);
+      currentPageNilaiku = 0;
+      renderNilaikuPage();
+    }catch(err){
+      console.error('Gagal memuat Daftar Nilaiku:', err);
+      tableNilaikuBody.innerHTML = `<tr><td colspan="5">Gagal memuat data nilai.</td></tr>`;
+      renderNilaikuFoot(0, 0, 0);
+    }
+  }
+
+  let cariNilaikuDebounce = null;
+  cariNilaikuInput.addEventListener('input', (e) => {
+    searchTermNilaiku = e.target.value;
+    clearTimeout(cariNilaikuDebounce);
+    cariNilaikuDebounce = setTimeout(() => {
+      currentPageNilaiku = 0;
+      renderNilaikuPage();
+    }, 300);
+  });
+
+  btnPrevNilaiku.addEventListener('click', () => {
+    if(currentPageNilaiku > 0){
+      currentPageNilaiku--;
+      renderNilaikuPage();
+    }
+  });
+  btnNextNilaiku.addEventListener('click', () => {
+    const term = searchTermNilaiku.trim().toLowerCase();
+    const total = term
+      ? lastNilaikuRows.filter(r => String(r.mata_pelajaran ?? '').toLowerCase().includes(term)).length
+      : lastNilaikuRows.length;
+    const maxPage = Math.floor(Math.max(total - 1, 0) / NILAIKU_PAGE_SIZE);
+    if(currentPageNilaiku < maxPage){
+      currentPageNilaiku++;
+      renderNilaikuPage();
+    }
+  });
+
+  loadDaftarNilaiku();
+
+  // ================= Riwayat Ujian (preview di Beranda) =================
+  // Sumber data: tabel "jawabanujianessay" dan "jawabanujianpilgan", yang
+  // masing-masing menyimpan SATU BARIS PER BUTIR SOAL untuk setiap ujian
+  // yang sudah dikerjakan siswa. Kedua tabel difilter nama_siswa + nisn
+  // milik siswa yang login, lalu dikelompokkan per "kode_mapping" supaya
+  // satu baris di tabel ini mewakili satu kali pengerjaan ujian.
+  // - "jawabanujianpilgan" punya kolom "nilai" per soal (dikoreksi otomatis
+  //   saat siswa submit), jadi Nilai = jumlah "nilai" semua butir soalnya.
+  // - "jawabanujianessay" tidak punya nilai otomatis (perlu dikoreksi guru),
+  //   jadi statusnya ditampilkan "Menunggu Penilaian".
+  const UJIAN_PAGE_SIZE = 5;
+  let currentPageUjian = 0;
+  let searchTermUjian = '';
+  let lastRiwayatUjianRows = [];
+
+  const tableUjianBody = document.getElementById('tableUjianBody');
+  const entriesInfoUjian = document.getElementById('entriesInfoUjian');
+  const btnPrevUjian = document.getElementById('btnPrevUjian');
+  const btnNextUjian = document.getElementById('btnNextUjian');
+  const cariUjianInput = document.getElementById('cariUjianInput');
+
+  function escapeHtmlUjian(str){
+    if(str === null || str === undefined) return '';
+    return String(str)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+      .replaceAll('"','&quot;');
+  }
+
+  function formatTanggalUjian(iso){
+    if(!iso) return '-';
+    try{
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return '-';
+      return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+    }catch(e){
+      return '-';
+    }
+  }
+
+  async function fetchJawabanUjianRows(tabel, kolomSelect, namaSiswa, nisn){
+    const url = `${SUPABASE_URL}/${tabel}` +
+      `?select=${kolomSelect}` +
+      `&nama_siswa=eq.${encodeURIComponent(namaSiswa)}` +
+      `&nisn=eq.${encodeURIComponent(nisn)}`;
+    const res = await fetch(url, {
+      headers:{
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      }
+    });
+    if(!res.ok) throw new Error('Status ' + res.status);
+    return await res.json();
+  }
+
+  // Kelompokkan baris-per-soal menjadi satu baris per pengerjaan ujian
+  // (per kode_mapping), lalu jumlahkan nilai (khusus pilgan yang punya nilai).
+  function kelompokkanRiwayatUjian(rowsPilgan, rowsEssay){
+    const map = new Map();
+
+    rowsPilgan.forEach(r => {
+      const key = 'pilgan|' + (r.kode_mapping || '');
+      if(!map.has(key)){
+        map.set(key, {
+          kode_mapping: r.kode_mapping || '-',
+          mata_pelajaran: r.mata_pelajaran || '-',
+          kkm: r.kkm,
+          jenis: 'pilgan',
+          nilai: 0,
+          waktu_pengiriman: r.waktu_pengiriman || null
+        });
+      }
+      const grup = map.get(key);
+      const n = Number(r.nilai);
+      grup.nilai += isNaN(n) ? 0 : n;
+      if(r.waktu_pengiriman && (!grup.waktu_pengiriman || r.waktu_pengiriman > grup.waktu_pengiriman)){
+        grup.waktu_pengiriman = r.waktu_pengiriman;
+      }
+    });
+
+    rowsEssay.forEach(r => {
+      const key = 'essay|' + (r.kode_mapping || '');
+      if(!map.has(key)){
+        map.set(key, {
+          kode_mapping: r.kode_mapping || '-',
+          mata_pelajaran: r.mata_pelajaran || '-',
+          kkm: r.kkm,
+          jenis: 'essay',
+          nilai: null,
+          waktu_pengiriman: r.waktu_pengiriman || null
+        });
+      } else {
+        const grup = map.get(key);
+        if(r.waktu_pengiriman && (!grup.waktu_pengiriman || r.waktu_pengiriman > grup.waktu_pengiriman)){
+          grup.waktu_pengiriman = r.waktu_pengiriman;
+        }
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+      const ta = a.waktu_pengiriman || '';
+      const tb = b.waktu_pengiriman || '';
+      return tb.localeCompare(ta);
+    });
+  }
+
+  function statusBadgeUjian(grup){
+    if(grup.jenis === 'essay'){
+      return '<span class="badge badge-info">Menunggu Penilaian</span>';
+    }
+    const kkm = Number(grup.kkm);
+    if(grup.kkm === null || grup.kkm === undefined || grup.kkm === '' || isNaN(kkm)){
+      return '<span class="badge badge-ok">Selesai</span>';
+    }
+    return grup.nilai >= kkm
+      ? '<span class="badge badge-ok">Tuntas</span>'
+      : '<span class="badge badge-no">Belum Tuntas</span>';
+  }
+
+  function renderRiwayatUjianTable(rows, offset){
+    if(!rows || rows.length === 0){
+      tableUjianBody.innerHTML = `<tr><td colspan="6">Belum ada riwayat ujian.</td></tr>`;
+      return;
+    }
+    tableUjianBody.innerHTML = rows.map((r, idx) => `
+      <tr>
+        <td>${offset + idx + 1}</td>
+        <td>${escapeHtmlUjian(r.kode_mapping)}</td>
+        <td>${escapeHtmlUjian(r.mata_pelajaran)}</td>
+        <td>${formatTanggalUjian(r.waktu_pengiriman)}</td>
+        <td>${r.nilai === null ? '–' : r.nilai}</td>
+        <td>${statusBadgeUjian(r)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderRiwayatUjianFoot(offset, shownCount, total){
+    entriesInfoUjian.textContent = total === 0
+      ? 'Menampilkan 0 entri'
+      : `Menampilkan ${offset + 1} - ${offset + shownCount} dari ${total} entri`;
+    btnPrevUjian.disabled = currentPageUjian === 0;
+    btnNextUjian.disabled = offset + shownCount >= total;
+  }
+
+  function riwayatUjianTerfilter(){
+    const term = searchTermUjian.trim().toLowerCase();
+    if(!term) return lastRiwayatUjianRows;
+    return lastRiwayatUjianRows.filter(r =>
+      String(r.kode_mapping ?? '').toLowerCase().includes(term) ||
+      String(r.mata_pelajaran ?? '').toLowerCase().includes(term)
+    );
+  }
+
+  function renderRiwayatUjianPage(){
+    const rows = riwayatUjianTerfilter();
+    const total = rows.length;
+    const offset = currentPageUjian * UJIAN_PAGE_SIZE;
+    const pageRows = rows.slice(offset, offset + UJIAN_PAGE_SIZE);
+    renderRiwayatUjianTable(pageRows, offset);
+    renderRiwayatUjianFoot(offset, pageRows.length, total);
+  }
+
+  async function loadRiwayatUjian(){
+    tableUjianBody.innerHTML = `<tr><td colspan="6">Memuat data...</td></tr>`;
+    try{
+      const siswa = currentSiswaData || await siswaProfilePromise;
+      const namaSiswa = (siswa && siswa.nama_siswa) || siswaSession.nama_siswa || siswaSession.nama || '';
+      const nisn = (siswa && siswa.nisn) || siswaSession.nisn || '';
+
+      if(!namaSiswa || !nisn){
+        lastRiwayatUjianRows = [];
+        tableUjianBody.innerHTML = `<tr><td colspan="6">Identitas siswa (nama/NISN) tidak ditemukan.</td></tr>`;
+        renderRiwayatUjianFoot(0, 0, 0);
+        return;
+      }
+
+      const [rowsPilgan, rowsEssay] = await Promise.all([
+        fetchJawabanUjianRows('jawabanujianpilgan', 'kode_mapping,mata_pelajaran,kkm,nilai,waktu_pengiriman', namaSiswa, nisn),
+        fetchJawabanUjianRows('jawabanujianessay', 'kode_mapping,mata_pelajaran,kkm,waktu_pengiriman', namaSiswa, nisn)
+      ]);
+
+      lastRiwayatUjianRows = kelompokkanRiwayatUjian(rowsPilgan, rowsEssay);
+      currentPageUjian = 0;
+      renderRiwayatUjianPage();
+    }catch(err){
+      console.error('Gagal memuat Riwayat Ujian:', err);
+      tableUjianBody.innerHTML = `<tr><td colspan="6">Gagal memuat data riwayat ujian.</td></tr>`;
+      renderRiwayatUjianFoot(0, 0, 0);
+    }
+  }
+
+  let cariUjianDebounce = null;
+  cariUjianInput.addEventListener('input', (e) => {
+    searchTermUjian = e.target.value;
+    clearTimeout(cariUjianDebounce);
+    cariUjianDebounce = setTimeout(() => {
+      currentPageUjian = 0;
+      renderRiwayatUjianPage();
+    }, 300);
+  });
+
+  btnPrevUjian.addEventListener('click', () => {
+    if(currentPageUjian > 0){
+      currentPageUjian--;
+      renderRiwayatUjianPage();
+    }
+  });
+  btnNextUjian.addEventListener('click', () => {
+    const total = riwayatUjianTerfilter().length;
+    const maxPage = Math.floor(Math.max(total - 1, 0) / UJIAN_PAGE_SIZE);
+    if(currentPageUjian < maxPage){
+      currentPageUjian++;
+      renderRiwayatUjianPage();
+    }
+  });
+
+  loadRiwayatUjian();
+
+  // ---------- Ambil logo & nama sekolah dari tabel "profil" ----------
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran&limit=1`, {
+        headers:{
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY
+        }
+      });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+
+      if(profil.nama_sekolah){
+        document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      }
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          const termBadge = document.getElementById('termBadge');
+          if(termBadge) termBadge.style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){
+      console.error('Gagal memuat profil sekolah:', err);
+    }
+  })();
+
+  // ---------- Bottom sheet menu ----------
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  document.getElementById('openMenuBtn').addEventListener('click', () => {
+    sheetBackdrop.classList.add('open');
+  });
+  sheetBackdrop.addEventListener('click', (e) => {
+    if (e.target === sheetBackdrop) sheetBackdrop.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') sheetBackdrop.classList.remove('open');
+  });
+
+  // ---------- Modal Kode Ulangan/Ujian ----------
+  const examModalBackdrop = document.getElementById('examModalBackdrop');
+  const examCodeForm = document.getElementById('examCodeForm');
+  const examCodeInput = document.getElementById('examCodeInput');
+  const examCodeError = document.getElementById('examCodeError');
+  const examConfirmBtn = document.getElementById('examConfirmBtn');
+
+  function showExamError(msg){
+    examCodeError.textContent = msg;
+    examCodeError.hidden = false;
+  }
+  function clearExamError(){
+    examCodeError.hidden = true;
+    examCodeError.textContent = '';
+  }
+  function openExamModal(){
+    sheetBackdrop.classList.remove('open');
+    examCodeForm.reset();
+    clearExamError();
+    examModalBackdrop.classList.add('open');
+    setTimeout(() => examCodeInput.focus(), 50);
+  }
+  function closeExamModal(){
+    examModalBackdrop.classList.remove('open');
+  }
+
+  document.getElementById('menuUjianBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    openExamModal();
+  });
+  document.getElementById('examCancelBtn').addEventListener('click', closeExamModal);
+  examModalBackdrop.addEventListener('click', (e) => {
+    if (e.target === examModalBackdrop) closeExamModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && examModalBackdrop.classList.contains('open')) closeExamModal();
+  });
+
+  // Validasi kode ujian terhadap kolom "kode_mapping" (text) di tabel "ujianaktif"
+  async function validasiKodeUjian(kode){
+    const url = `${SUPABASE_URL}/ujianaktif?kode_mapping=eq.${encodeURIComponent(kode)}` +
+      `&select=kode_mapping,mata_pelajaran,kelas,jenis_penilaian,kkm,tujuan_pembelajaran,capaian_pembelajaran,waktu_mulai,waktu_selesai&limit=1`;
+    const res = await fetch(url, {
+      headers:{
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      }
+    });
+    if(!res.ok) throw new Error('Status ' + res.status);
+    const rows = await res.json();
+    return rows && rows.length > 0 ? rows[0] : null;
+  }
+
+  // Cek apakah siswa ini (nama_siswa + nisn) sudah pernah mengirim jawaban
+  // untuk kode_mapping tsb di tabel "jawabanujianessay". Dipakai untuk
+  // mencegah siswa mengerjakan ulang ujian yang sama.
+  async function cekSudahUjian(kodeMapping, namaSiswa, nisn){
+    const url = `${SUPABASE_URL}/jawabanujianessay` +
+      `?kode_mapping=eq.${encodeURIComponent(kodeMapping)}` +
+      `&nama_siswa=eq.${encodeURIComponent(namaSiswa)}` +
+      `&nisn=eq.${encodeURIComponent(nisn)}` +
+      `&select=id_jawaban&limit=1`;
+    const res = await fetch(url, {
+      headers:{
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      }
+    });
+    if(!res.ok) throw new Error('Status ' + res.status);
+    const rows = await res.json();
+    return rows && rows.length > 0;
+  }
+
+  examCodeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearExamError();
+
+    const kode = examCodeInput.value.trim();
+    if(!kode){
+      showExamError('Kode ujian wajib diisi.');
+      return;
+    }
+
+    examConfirmBtn.disabled = true;
+    examConfirmBtn.textContent = 'Memeriksa...';
+    try{
+      const ujianAktif = await validasiKodeUjian(kode);
+      if(!ujianAktif){
+        showExamError('Kode ujian tidak ditemukan. Periksa kembali kode yang diberikan guru.');
+        return;
+      }
+
+      // Pastikan identitas siswa (nama + NISN) sudah dimuat dari "datasiswa"
+      // sebelum dicocokkan ke tabel jawaban, supaya nama/nisn yang dipakai
+      // konsisten dengan yang tersimpan saat siswa mengirim jawaban.
+      const siswa = currentSiswaData || await siswaProfilePromise;
+      const namaSiswa = (siswa && siswa.nama_siswa) || siswaSession.nama_siswa || siswaSession.nama || '';
+      const nisn = (siswa && siswa.nisn) || siswaSession.nisn || '';
+
+      const sudahUjian = await cekSudahUjian(ujianAktif.kode_mapping, namaSiswa, nisn);
+      if(sudahUjian){
+        showExamError('Maaf, anda sudah melaksanakan ujian.');
+        return;
+      }
+
+      closeExamModal();
+      openExamInfoModal(ujianAktif);
+    }catch(err){
+      console.error('Gagal memvalidasi kode ujian:', err);
+      showExamError('Terjadi kesalahan saat memeriksa kode. Coba lagi.');
+    }finally{
+      examConfirmBtn.disabled = false;
+      examConfirmBtn.textContent = 'Konfirmasi';
+    }
+  });
+
+  // ---------- Modal Informasi Ujian ----------
+  const examInfoModalBackdrop = document.getElementById('examInfoModalBackdrop');
+  const infoKodeMapping = document.getElementById('infoKodeMapping');
+  const infoMapel = document.getElementById('infoMapel');
+  const infoKelas = document.getElementById('infoKelas');
+  const infoJenis = document.getElementById('infoJenis');
+  const infoKkm = document.getElementById('infoKkm');
+  const infoWaktuMulai = document.getElementById('infoWaktuMulai');
+  const infoWaktuSelesai = document.getElementById('infoWaktuSelesai');
+  const infoNote = document.getElementById('infoNote');
+  const infoStartBtn = document.getElementById('infoStartBtn');
+  const infoCancelBtn = document.getElementById('infoCancelBtn');
+
+  let currentUjianAktif = null;
+  let infoModalTimer = null;
+  const infoClockDate = document.getElementById('infoClockDate');
+  const infoClockTime = document.getElementById('infoClockTime');
+
+  // Menerjemahkan nilai waktu_mulai/waktu_selesai dari Supabase.
+  // Kolom ini bertipe TIME (mis. "13:53:00"), jadi tidak bisa langsung
+  // di-parse dengan `new Date()`. Fallback tetap disediakan untuk kolom
+  // yang berupa timestamp penuh (mis. "2026-12-11T13:53:00").
+  function parseJamMenit(val){
+    const match = String(val).match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if(!match) return null;
+    return { jam: Number(match[1]), menit: Number(match[2]) };
+  }
+
+  function formatWaktuUjian(val){
+    if(!val) return '-';
+
+    const jm = parseJamMenit(val);
+    if(jm){
+      const jj = String(jm.jam).padStart(2, '0');
+      const mm = String(jm.menit).padStart(2, '0');
+      return `${jj}.${mm} WIB`;
+    }
+
+    try{
+      const d = new Date(val);
+      if(isNaN(d.getTime())) return val;
+      return d.toLocaleString('id-ID', {
+        day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'
+      }) + ' WIB';
+    }catch(e){
+      return val;
+    }
+  }
+
+  // Bangun objek Date hari ini dengan jam dari kolom TIME, untuk keperluan
+  // membandingkan apakah ujian sudah/belum berlangsung.
+  function buatWaktuHariIni(val){
+    if(!val) return null;
+    const jm = parseJamMenit(val);
+    if(jm){
+      const d = new Date();
+      d.setHours(jm.jam, jm.menit, 0, 0);
+      return d;
+    }
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Format durasi (ms) menjadi "HH:MM:SS"
+  function formatDurasi(ms){
+    if(ms < 0) ms = 0;
+    let totalDetik = Math.floor(ms / 1000);
+    const jam = Math.floor(totalDetik / 3600);
+    totalDetik %= 3600;
+    const menit = Math.floor(totalDetik / 60);
+    const detik = totalDetik % 60;
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(jam)}:${pad(menit)}:${pad(detik)}`;
+  }
+
+  // Perbarui jam berjalan (tanggal + jam saat ini) di pojok kanan atas modal
+  function updateInfoClock(){
+    const now = new Date();
+    infoClockDate.textContent = now.toLocaleDateString('id-ID', {
+      weekday:'long', day:'numeric', month:'long', year:'numeric'
+    });
+    infoClockTime.textContent = now.toLocaleTimeString('id-ID', {
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+  }
+
+  // Perbarui keterangan status waktu ujian (hitung mundur / sisa waktu)
+  function updateInfoCountdown(){
+    if(!currentUjianAktif){
+      infoNote.hidden = true;
+      infoNote.textContent = '';
+      return;
+    }
+    const now = new Date();
+    const mulai = buatWaktuHariIni(currentUjianAktif.waktu_mulai);
+    const selesai = buatWaktuHariIni(currentUjianAktif.waktu_selesai);
+
+    if(mulai && now < mulai){
+      infoNote.textContent = `Ujian akan di mulai dalam ${formatDurasi(mulai - now)}`;
+      infoNote.hidden = false;
+    } else if(selesai && now > selesai){
+      infoNote.textContent = 'Waktu pengerjaan ujian ini sudah berakhir.';
+      infoNote.hidden = false;
+    } else if(selesai){
+      infoNote.textContent = `Sisa waktu ujian tinggal ${formatDurasi(selesai - now)}`;
+      infoNote.hidden = false;
+    } else {
+      infoNote.hidden = true;
+      infoNote.textContent = '';
+    }
+  }
+
+  function openExamInfoModal(ujianAktif){
+    currentUjianAktif = ujianAktif;
+    clearInfoStartError();
+
+    infoKodeMapping.textContent = ujianAktif.kode_mapping || '-';
+    infoMapel.textContent = ujianAktif.mata_pelajaran || '-';
+    infoKelas.textContent = ujianAktif.kelas || '-';
+    infoJenis.textContent = ujianAktif.jenis_penilaian || '-';
+    infoKkm.textContent = (ujianAktif.kkm ?? '') !== '' ? ujianAktif.kkm : '-';
+    infoWaktuMulai.textContent = formatWaktuUjian(ujianAktif.waktu_mulai);
+    infoWaktuSelesai.textContent = formatWaktuUjian(ujianAktif.waktu_selesai);
+
+    updateInfoClock();
+    updateInfoCountdown();
+
+    if(infoModalTimer) clearInterval(infoModalTimer);
+    infoModalTimer = setInterval(() => {
+      updateInfoClock();
+      updateInfoCountdown();
+    }, 1000);
+
+    examInfoModalBackdrop.classList.add('open');
+  }
+
+  function closeExamInfoModal(){
+    examInfoModalBackdrop.classList.remove('open');
+    currentUjianAktif = null;
+    if(infoModalTimer){
+      clearInterval(infoModalTimer);
+      infoModalTimer = null;
+    }
+  }
+
+  infoCancelBtn.addEventListener('click', closeExamInfoModal);
+  examInfoModalBackdrop.addEventListener('click', (e) => {
+    if (e.target === examInfoModalBackdrop) closeExamInfoModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && examInfoModalBackdrop.classList.contains('open')) closeExamInfoModal();
+  });
+
+  const infoStartError = document.getElementById('infoStartError');
+
+  function showInfoStartError(msg){
+    infoStartError.textContent = msg;
+    infoStartError.hidden = false;
+  }
+  function clearInfoStartError(){
+    infoStartError.hidden = true;
+    infoStartError.textContent = '';
+  }
+
+  // Tentukan halaman ujian & tabel soal berdasarkan akhiran Kode Mapping:
+  // "-PG" -> validasi & tarik soal dari tabel daftar_soal_pilgan (ujianpilihanganda.html)
+  // "-ES" -> validasi & tarik soal dari tabel daftar_soal_essay (ujianessay.html)
+  // Kalau Kode Mapping lama tidak punya akhiran -PG/-ES, tetap dicoba dengan
+  // cara lama (cek soal Essay dulu, baru Pilihan Ganda) supaya kode lama masih bisa dibuka.
+  async function cariJenisSoal(kodeMapping){
+    const headers = {
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    };
+
+    const kodeUpper = kodeMapping.toUpperCase();
+
+    if(kodeUpper.endsWith('-PG')){
+      const resPilgan = await fetch(
+        `${SUPABASE_URL}/daftar_soal_pilgan?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=kode_soal&limit=1`,
+        { headers }
+      );
+      if(resPilgan.ok){
+        const rows = await resPilgan.json();
+        if(rows && rows.length > 0) return 'pilgan';
+      }
+      return null;
+    }
+
+    if(kodeUpper.endsWith('-ES')){
+      const resEssay = await fetch(
+        `${SUPABASE_URL}/daftar_soal_essay?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=kode_soal&limit=1`,
+        { headers }
+      );
+      if(resEssay.ok){
+        const rows = await resEssay.json();
+        if(rows && rows.length > 0) return 'essay';
+      }
+      return null;
+    }
+
+    // Fallback untuk Kode Mapping lama tanpa akhiran -ES/-PG
+    const resEssay = await fetch(
+      `${SUPABASE_URL}/daftar_soal_essay?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=kode_soal&limit=1`,
+      { headers }
+    );
+    if(resEssay.ok){
+      const rows = await resEssay.json();
+      if(rows && rows.length > 0) return 'essay';
+    }
+
+    const resPilgan = await fetch(
+      `${SUPABASE_URL}/daftar_soal_pilgan?kode_mapping=eq.${encodeURIComponent(kodeMapping)}&select=kode_soal&limit=1`,
+      { headers }
+    );
+    if(resPilgan.ok){
+      const rows = await resPilgan.json();
+      if(rows && rows.length > 0) return 'pilgan';
+    }
+
+    return null;
+  }
+
+  infoStartBtn.addEventListener('click', async () => {
+    if(!currentUjianAktif || !currentUjianAktif.kode_mapping) return;
+    const kodeMapping = currentUjianAktif.kode_mapping;
+
+    clearInfoStartError();
+    infoStartBtn.disabled = true;
+    const originalLabel = infoStartBtn.textContent;
+    infoStartBtn.textContent = 'Memuat...';
+
+    try{
+      const jenis = await cariJenisSoal(kodeMapping);
+      if(jenis === 'essay'){
+        window.location.href = `ujianessay.html?kode=${encodeURIComponent(kodeMapping)}`;
+        return;
+      } else if(jenis === 'pilgan'){
+        window.location.href = `ujianpilihanganda.html?kode=${encodeURIComponent(kodeMapping)}`;
+        return;
+      } else {
+        showInfoStartError('Soal untuk ujian ini belum tersedia. Hubungi guru Anda.');
+      }
+    }catch(err){
+      console.error('Gagal memeriksa jenis soal:', err);
+      showInfoStartError('Terjadi kesalahan saat memeriksa soal. Coba lagi.');
+    }finally{
+      infoStartBtn.disabled = false;
+      infoStartBtn.textContent = originalLabel;
+    }
+  });
+
+  // ---------- Log Out ----------
+  function doLogout(){
+    localStorage.removeItem('siswa_session');
+    window.location.href = 'index.html';
+  }
+  document.getElementById('logoutBtn').addEventListener('click', doLogout);
+  document.getElementById('sheetLogout').addEventListener('click', (e) => {
+    e.preventDefault();
+    doLogout();
+  });
+</script>
+
+</body>
+</html>

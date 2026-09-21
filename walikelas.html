@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wali Kelas — SCORIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B2E63;
+    --ink-soft:#7A7191;
+    --paper:#FFFAF0;
+    --paper-deep:#FFEFD6;
+    --paper-line:#F5DDAE;
+    --brand:#6C4FE0;
+    --gold:#FFC93C;
+    --brick:#D6336C;
+    --green:#1A8754;
+    --turquoise:#0F766E;
+    --purple:#7B5EEA;
+    --amber:#92600F;
+    --blue:#2F80ED;
+    --orange:#F2994A;
+    --footer-h:72px;
+  }
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--footer-h) + 20px);
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- Navbar (sama seperti admin.html) ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--brand);
+    color:#FFFFFF;
+    padding:14px clamp(16px,4vw,40px);
+  }
+  .nav-left{display:flex; align-items:center; gap:10px;}
+  .school-logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--paper);
+    color:var(--brand);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.75rem;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .school-logo img{
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .nav-right{display:flex; align-items:center; gap:16px;}
+  .nav-schoolinfo{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .school-name{
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--paper);
+    max-width:32ch;
+  }
+  .term-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.66rem;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    background:rgba(255,201,60,0.14);
+    border:1px solid rgba(255,201,60,0.4);
+    padding:2px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .term-badge .dot{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    flex-shrink:0;
+  }
+  .admin-account{
+    display:flex; align-items:center; gap:8px;
+    padding-left:16px;
+    border-left:1px solid rgba(240,234,217,0.25);
+  }
+  .avatar{
+    width:32px; height:32px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#221a06;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:0.78rem;
+    flex-shrink:0;
+  }
+  .admin-name{font-size:0.88rem; color:#ddd6bf;}
+
+  /* ---------- Main ---------- */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:32px clamp(16px,4vw,40px) 12px;
+  }
+  .page-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  .page-heading{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:clamp(1.4rem,2.6vw,1.85rem);
+    margin:0 0 4px;
+  }
+  .page-sub{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .page-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Inter',sans-serif;
+    font-size:0.86rem;
+    font-weight:600;
+    border-radius:8px;
+    padding:10px 18px;
+    border:1px solid transparent;
+    cursor:pointer;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:filter 0.15s ease, transform 0.1s ease;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn:active{transform:translateY(1px);}
+  .btn svg{width:16px; height:16px; flex-shrink:0;}
+  .btn-primary{background:var(--brick); color:#FFFFFF;}
+  .btn-secondary{background:#fffdf7; color:var(--ink); border-color:var(--paper-line);}
+
+  /* ---------- Panel tabel ---------- */
+  .panel{
+    background:#fffdf7;
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:18px 20px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .panel-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.05rem;
+    margin:0;
+  }
+  .table-scroll{overflow-x:auto;}
+  table.data-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.86rem;
+    min-width:560px;
+  }
+  table.data-table th{
+    text-align:left;
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:0 10px 10px;
+    border-bottom:1px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  table.data-table td{
+    padding:12px 10px;
+    border-bottom:1px solid var(--paper-line);
+    vertical-align:middle;
+  }
+  table.data-table tr:last-child td{border-bottom:none;}
+  .rombel-chip{
+    display:inline-block;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    color:var(--amber);
+    font-weight:600;
+    font-size:0.76rem;
+    padding:3px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .row-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:30px; height:30px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:#fffdf7;
+    color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .icon-btn svg{width:15px; height:15px;}
+  .icon-btn:hover{border-color:var(--brick); color:var(--brick); background:#FFE3EE;}
+  .empty-state{
+    text-align:center;
+    padding:36px 12px;
+    color:var(--ink-soft);
+    font-size:0.88rem;
+  }
+
+  /* ---------- Modal Tambah Walikelas ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    opacity:0; visibility:hidden;
+    transition:opacity 0.25s ease, visibility 0s linear 0.25s;
+    z-index:50;
+  }
+  .modal-backdrop.open{
+    opacity:1; visibility:visible;
+    transition:opacity 0.25s ease, visibility 0s linear 0s;
+  }
+  .modal{
+    background:var(--paper);
+    border-radius:14px;
+    width:100%;
+    max-width:440px;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:24px 24px 22px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    transform:translateY(16px) scale(0.98);
+    transition:transform 0.25s ease;
+  }
+  .modal-backdrop.open .modal{transform:translateY(0) scale(1);}
+  .modal-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .modal-head h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.2rem;
+    margin:0 0 4px;
+  }
+  .modal-head p{
+    margin:0;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+  }
+  .modal-close{
+    background:none; border:none; cursor:pointer;
+    color:var(--ink-soft);
+    width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .modal-close:hover{background:var(--paper-deep); color:var(--brick);}
+  .modal-close svg{width:18px; height:18px;}
+  .form-field{margin-bottom:16px;}
+  .form-field label{
+    display:block;
+    font-size:0.78rem;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .form-field input,
+  .form-field select{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:0.9rem;
+    color:var(--ink);
+    background:#FFFFFF;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .form-field input:focus,
+  .form-field select:focus{
+    outline:none;
+    border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(108,79,224,0.15);
+  }
+  .form-field input[readonly]{
+    background:var(--paper-deep);
+    color:var(--ink-soft);
+    cursor:not-allowed;
+  }
+  .form-field select{cursor:pointer;}
+  .id-row{display:flex; gap:8px;}
+  .id-row input{flex:1; min-width:0;}
+  .id-row .btn{padding:10px 14px; font-size:0.8rem; flex-shrink:0;}
+  .form-hint{font-size:0.72rem; color:var(--ink-soft); margin-top:5px;}
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:22px;
+  }
+  .form-msg{
+    font-size:0.8rem;
+    padding:9px 12px;
+    border-radius:8px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .form-msg.show{display:block;}
+  .form-msg.error{background:#FCE4EC; color:var(--brick);}
+  .form-msg.success{background:#E3F5EC; color:var(--green);}
+
+  @media (max-width:560px){
+    main{padding-left:5px; padding-right:5px;}
+    .navbar{padding-left:5px; padding-right:5px;}
+    .page-actions{width:100%;}
+    .page-actions .btn{flex:1; justify-content:center;}
+  }
+
+  /* ---------- Footer sticky & bottom sheet (sama seperti admin.html) ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    height:var(--footer-h);
+    background:var(--turquoise);
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    z-index:30;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .footer-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-size:0.75rem;
+    font-weight:600;
+    width:140px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .footer-btn svg{width:20px; height:20px;}
+  .footer-btn:hover{background:rgba(59,46,99,0.12); color:#FFFFFF;}
+  .footer-divider{
+    width:1px;
+    background:rgba(59,46,99,0.2);
+    margin:14px 0;
+  }
+  .footer-btn.logout:hover{background:rgba(242,80,138,0.35); color:#FFFFFF;}
+
+  .sheet-backdrop{
+    position:fixed; inset:0;
+    background:rgba(59,46,99,0.45);
+    opacity:0; visibility:hidden;
+    transition:opacity 0.28s ease, visibility 0s linear 0.28s;
+    z-index:40;
+  }
+  .sheet-backdrop.open{
+    opacity:1; visibility:visible;
+    transition:opacity 0.28s ease, visibility 0s linear 0s;
+  }
+  .sheet{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    padding:10px 20px calc(20px + var(--footer-h));
+    max-width:640px;
+    margin:0 auto;
+    transform:translateY(100%);
+    transition:transform 0.32s cubic-bezier(.32,.72,.33,1);
+    z-index:41;
+    max-height:78vh;
+    overflow-y:auto;
+  }
+  .sheet-backdrop.open .sheet{transform:translateY(0);}
+  .sheet-handle{
+    width:40px; height:4px;
+    background:var(--paper-line);
+    border-radius:2px;
+    margin:8px auto 16px;
+  }
+  .sheet h3{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.15rem;
+    margin:0 0 16px;
+  }
+  .menu-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .menu-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-align:center;
+    background:var(--paper-deep);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:16px 8px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:0.78rem;
+    font-weight:500;
+    line-height:1.25;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:hover{border-color:var(--brick); background:#FFE3EE;}
+  .menu-item svg{width:22px; height:22px; color:var(--brick);}
+
+  @media (max-width:520px){
+    .menu-grid{grid-template-columns:repeat(3,1fr);}
+    .nav-schoolinfo{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-left">
+    <div class="school-logo" id="schoolLogo">SMA</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-schoolinfo">
+      <span class="school-name" id="schoolName">SMA Negeri 1 Contoh</span>
+      <span class="term-badge" id="termBadge"><span class="dot"></span><span id="termBadgeText">Memuat...</span></span>
+    </div>
+    <div class="admin-account">
+      <span class="avatar">AD</span>
+      <span class="admin-name">Admin</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div>
+      <h1 class="page-heading">Wali Kelas</h1>
+      <p class="page-sub">Kelola data wali kelas dan rombel yang menjadi tanggung jawabnya.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" id="openAddBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Tambah Walikelas
+      </button>
+      <a class="btn btn-secondary" href="admin.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Daftar Wali Kelas</h3>
+      <span class="term-badge" style="color:var(--turquoise); background:rgba(15,118,110,0.12); border-color:rgba(15,118,110,0.35);"><span class="dot" style="background:var(--turquoise);"></span><span id="totalWalikelasText">Memuat...</span></span>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Id Walikelas</th>
+            <th>Nama Guru</th>
+            <th>NIP</th>
+            <th>Rombel</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="walikelasTableBody">
+          <tr><td colspan="5" class="empty-state">Memuat data wali kelas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Footer sticky -->
+<div class="footer-bar">
+  <button class="footer-btn" id="openMenuBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    Menu
+  </button>
+  <div class="footer-divider"></div>
+  <button class="footer-btn logout" id="logoutBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Log Out
+  </button>
+</div>
+
+<!-- Bottom sheet menu -->
+<div class="sheet-backdrop" id="sheetBackdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetHeading">
+    <div class="sheet-handle"></div>
+    <h3 id="sheetHeading">Menu</h3>
+    <div class="menu-grid">
+      <a class="menu-item" href="identitassekolah.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+        Profil Sekolah
+      </a>
+      <a class="menu-item" href="rombel.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Rombongan Belajar
+      </a>
+      <a class="menu-item" href="datasiswa.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        Data Siswa
+      </a>
+      <a class="menu-item" href="dataguru.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="7" r="3.5"/><path d="M5 21c0-4.5 3.5-7 7-7s7 2.5 7 7"/><path d="M17 4l1.5 1.5L21 3"/></svg>
+        Data Guru
+      </a>
+      <a class="menu-item" href="walikelas.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V6a2 2 0 0 1 2-2h9l5 5v10.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M15 4v5h5"/><circle cx="10" cy="13" r="2"/><path d="M6.5 19c.3-2 1.7-3.3 3.5-3.3s3.2 1.3 3.5 3.3"/></svg>
+        Wali Kelas
+      </a>
+      <a class="menu-item" href="matapelajaran.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8"/><path d="M8 11h5"/></svg>
+        Mata Pelajaran
+      </a>
+      <a class="menu-item" href="daftarnilairombel.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16"/><path d="M9 10v10"/></svg>
+        Daftar Nilai Per Rombel
+      </a>
+      <a class="menu-item" href="backupreset.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+        Back Up &amp; Reset
+      </a>
+      <a class="menu-item" href="restore.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Restore
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tambah Walikelas -->
+<div class="modal-backdrop" id="addModalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addModalHeading">
+    <div class="modal-head">
+      <div>
+        <h3 id="addModalHeading">Tambah Walikelas</h3>
+        <p>Lengkapi data wali kelas di bawah ini.</p>
+      </div>
+      <button class="modal-close" id="closeAddModalBtn" type="button" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="form-msg" id="formMsg"></div>
+
+    <form id="walikelasForm">
+      <div class="form-field">
+        <label for="idWalikelas">Id Walikelas <span class="form-hint" style="display:inline; margin:0;">(otomatis)</span></label>
+        <div class="id-row">
+          <input type="text" id="idWalikelas" name="id_walikelas" required readonly>
+          <button type="button" class="btn btn-secondary" id="btnRegenId">Acak Ulang</button>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="namaGuru">Nama Guru</label>
+        <select id="namaGuru" name="nama_guru" required>
+          <option value="" data-nip="">Memuat data guru...</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="nipGuru">NIP</label>
+        <input type="text" id="nipGuru" name="nip" placeholder="Terisi otomatis setelah memilih guru" readonly required>
+      </div>
+      <div class="form-field">
+        <label for="rombelGuru">Rombel</label>
+        <select id="rombelGuru" name="rombel" required>
+          <option value="">Memuat data rombel...</option>
+        </select>
+        <p class="form-hint">Rombongan belajar yang menjadi tanggung jawab wali kelas ini.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancelAddBtn">Batal</button>
+        <button type="submit" class="btn btn-primary" id="submitAddBtn">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
+  const sbHeaders = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  };
+
+  // Ambil logo & nama sekolah dari tabel "profil" di Supabase (sama seperti admin.html)
+  (async function loadSchoolProfile(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/profil?select=nama_sekolah,logo,semester,tahun_pelajaran&limit=1`, { headers: sbHeaders });
+      if(!res.ok) return;
+      const rows = await res.json();
+      const profil = rows && rows[0];
+      if(!profil) return;
+
+      if(profil.nama_sekolah){
+        document.getElementById('schoolName').textContent = profil.nama_sekolah;
+      }
+
+      const termBadgeText = document.getElementById('termBadgeText');
+      if(termBadgeText){
+        const semester = (profil.semester || '').trim();
+        const tahunPelajaran = (profil.tahun_pelajaran || '').trim();
+        if(semester || tahunPelajaran){
+          termBadgeText.textContent = [semester ? 'Semester ' + semester : '', tahunPelajaran].filter(Boolean).join(' • ');
+        } else {
+          document.getElementById('termBadge').style.display = 'none';
+        }
+      }
+
+      if(profil.logo){
+        const logoEl = document.getElementById('schoolLogo');
+        logoEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = profil.logo;
+        img.alt = 'Logo Sekolah';
+        logoEl.appendChild(img);
+      }
+    }catch(err){
+      console.error('Gagal memuat profil sekolah:', err);
+    }
+  })();
+
+  // ---------- Dropdown Nama Guru (data ditarik dari tabel "dataguru") ----------
+  const namaGuruSelect = document.getElementById('namaGuru');
+  const nipGuruInput = document.getElementById('nipGuru');
+  const GURU_TABLE = "dataguru";
+
+  async function loadGuruOptions(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${GURU_TABLE}?select=nama_guru,nip&order=nama_guru.asc`, { headers: sbHeaders });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+
+      if(!rows || rows.length === 0){
+        namaGuruSelect.innerHTML = '<option value="" data-nip="">Belum ada data guru</option>';
+        return;
+      }
+
+      namaGuruSelect.innerHTML = '<option value="" data-nip="">-- Pilih Guru --</option>' +
+        rows.map(g => `<option value="${escapeHtml(g.nama_guru)}" data-nip="${escapeHtml(g.nip || '')}">${escapeHtml(g.nama_guru)}</option>`).join('');
+    }catch(err){
+      console.error('Gagal memuat daftar guru:', err);
+      namaGuruSelect.innerHTML = '<option value="" data-nip="">Gagal memuat data guru</option>';
+    }
+  }
+  loadGuruOptions();
+
+  namaGuruSelect.addEventListener('change', () => {
+    const selected = namaGuruSelect.options[namaGuruSelect.selectedIndex];
+    nipGuruInput.value = selected ? (selected.getAttribute('data-nip') || '') : '';
+  });
+
+  // ---------- Dropdown Rombel (data ditarik dari tabel "rombel") ----------
+  const rombelSelect = document.getElementById('rombelGuru');
+  const ROMBEL_TABLE = "rombel";
+
+  async function loadRombelOptions(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${ROMBEL_TABLE}?select=nama_rombel&order=nama_rombel.asc`, { headers: sbHeaders });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+
+      if(!rows || rows.length === 0){
+        rombelSelect.innerHTML = '<option value="">Belum ada data rombel</option>';
+        return;
+      }
+
+      rombelSelect.innerHTML = '<option value="">-- Pilih Rombel --</option>' +
+        rows.map(r => `<option value="${escapeHtml(r.nama_rombel)}">${escapeHtml(r.nama_rombel)}</option>`).join('');
+    }catch(err){
+      console.error('Gagal memuat daftar rombel:', err);
+      rombelSelect.innerHTML = '<option value="">Gagal memuat data rombel</option>';
+    }
+  }
+  loadRombelOptions();
+
+  // ---------- Daftar Wali Kelas ----------
+  const tableBody = document.getElementById('walikelasTableBody');
+  const totalWalikelasText = document.getElementById('totalWalikelasText');
+
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[c]));
+  }
+
+  function renderWalikelas(rows){
+    if(!rows || rows.length === 0){
+      tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data wali kelas. Klik "Tambah Walikelas" untuk menambahkan.</td></tr>';
+      totalWalikelasText.textContent = '0 wali kelas';
+      return;
+    }
+    tableBody.innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHtml(row.id_walikelas)}</td>
+        <td>${escapeHtml(row.nama_guru)}</td>
+        <td>${escapeHtml(row.nip)}</td>
+        <td><span class="rombel-chip">${escapeHtml(row.rombel)}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" title="Edit" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button class="icon-btn" title="Hapus" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    totalWalikelasText.textContent = rows.length + ' wali kelas';
+  }
+
+  async function loadWalikelas(){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/walikelas?select=*&order=id_walikelas.asc`, { headers: sbHeaders });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      renderWalikelas(rows);
+    }catch(err){
+      console.error('Gagal memuat data wali kelas:', err);
+      tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">Gagal memuat data wali kelas. Pastikan tabel "walikelas" sudah tersedia di Supabase.</td></tr>';
+      totalWalikelasText.textContent = '– wali kelas';
+    }
+  }
+  loadWalikelas();
+
+  // ---------- Modal Tambah Walikelas ----------
+  const addModalBackdrop = document.getElementById('addModalBackdrop');
+  const openAddBtn = document.getElementById('openAddBtn');
+  const closeAddModalBtn = document.getElementById('closeAddModalBtn');
+  const cancelAddBtn = document.getElementById('cancelAddBtn');
+  const walikelasForm = document.getElementById('walikelasForm');
+  const formMsg = document.getElementById('formMsg');
+  const submitAddBtn = document.getElementById('submitAddBtn');
+
+  const idWalikelasInput = document.getElementById('idWalikelas');
+  const btnRegenId = document.getElementById('btnRegenId');
+
+  function generateWalikelasId(){
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let rand = '';
+    for(let i = 0; i < 5; i++){
+      rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return 'WK-' + rand;
+  }
+
+  btnRegenId.addEventListener('click', () => {
+    idWalikelasInput.value = generateWalikelasId();
+  });
+
+  function openAddModal(){
+    formMsg.className = 'form-msg';
+    formMsg.textContent = '';
+    walikelasForm.reset();
+    idWalikelasInput.value = generateWalikelasId();
+    addModalBackdrop.classList.add('open');
+    document.getElementById('idWalikelas').focus();
+  }
+  function closeAddModal(){
+    addModalBackdrop.classList.remove('open');
+  }
+
+  openAddBtn.addEventListener('click', openAddModal);
+  closeAddModalBtn.addEventListener('click', closeAddModal);
+  cancelAddBtn.addEventListener('click', closeAddModal);
+  addModalBackdrop.addEventListener('click', (e) => {
+    if(e.target === addModalBackdrop) closeAddModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && addModalBackdrop.classList.contains('open')) closeAddModal();
+  });
+
+  walikelasForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formMsg.className = 'form-msg';
+    formMsg.textContent = '';
+
+    const payload = {
+      id_walikelas: document.getElementById('idWalikelas').value.trim(),
+      nama_guru: document.getElementById('namaGuru').value.trim(),
+      nip: document.getElementById('nipGuru').value.trim(),
+      rombel: document.getElementById('rombelGuru').value.trim()
+    };
+
+    submitAddBtn.disabled = true;
+    submitAddBtn.textContent = 'Menyimpan...';
+
+    try{
+      const res = await fetch(`${SUPABASE_URL}/walikelas`, {
+        method: 'POST',
+        headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok){
+        const errBody = await res.text();
+        throw new Error(errBody || ('Status ' + res.status));
+      }
+      formMsg.classList.add('show', 'success');
+      formMsg.textContent = 'Data wali kelas berhasil disimpan.';
+      await loadWalikelas();
+      setTimeout(closeAddModal, 700);
+    }catch(err){
+      console.error('Gagal menyimpan data wali kelas:', err);
+      formMsg.classList.add('show', 'error');
+      formMsg.textContent = 'Gagal menyimpan data. Pastikan tabel "walikelas" sudah tersedia di Supabase.';
+    }finally{
+      submitAddBtn.disabled = false;
+      submitAddBtn.textContent = 'Simpan';
+    }
+  });
+
+  // ---------- Footer & bottom sheet menu ----------
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  document.getElementById('openMenuBtn').addEventListener('click', () => {
+    sheetBackdrop.classList.add('open');
+  });
+  sheetBackdrop.addEventListener('click', (e) => {
+    if (e.target === sheetBackdrop) sheetBackdrop.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') sheetBackdrop.classList.remove('open');
+  });
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+</script>
+
+</body>
+</html>
