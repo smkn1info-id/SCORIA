@@ -1010,6 +1010,10 @@
           <input type="text" id="inputKkm" readonly placeholder="Terisi otomatis dari Kode Mapping">
         </div>
         <div class="form-group full">
+          <label for="inputNamaMateri">Nama Materi/Bab</label>
+          <input type="text" id="inputNamaMateri" readonly placeholder="Terisi otomatis dari Kode Mapping">
+        </div>
+        <div class="form-group full">
           <label for="inputTujuan">Tujuan Pembelajaran</label>
           <textarea id="inputTujuan" readonly placeholder="Terisi otomatis dari Kode Mapping"></textarea>
         </div>
@@ -3106,6 +3110,7 @@
   const inputKelas = document.getElementById('inputKelas');
   const inputJenisPenilaian = document.getElementById('inputJenisPenilaian');
   const inputKkm = document.getElementById('inputKkm');
+  const inputNamaMateri = document.getElementById('inputNamaMateri');
   const inputTujuan = document.getElementById('inputTujuan');
   const inputCapaian = document.getElementById('inputCapaian');
   const inputJenisSoal = document.getElementById('inputJenisSoal');
@@ -3132,6 +3137,7 @@
     inputKelas.value = row.kelas || '';
     inputJenisPenilaian.value = row.jenis_penilaian || '';
     inputKkm.value = row.kkm ?? '';
+    inputNamaMateri.value = row.nama_materi || '';
     inputTujuan.value = row.tujuan_pembelajaran || '';
     inputCapaian.value = row.capaian_pembelajaran || '';
     return true;
@@ -3494,6 +3500,7 @@
     inputKelas.value = '';
     inputJenisPenilaian.value = '';
     inputKkm.value = '';
+    inputNamaMateri.value = '';
     inputTujuan.value = '';
     inputCapaian.value = '';
     soalItemsContainer.innerHTML = '';
