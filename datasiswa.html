@@ -170,15 +170,33 @@
   /* ---------- Table ---------- */
   .table-header{
     display:flex;
-    align-items:baseline;
+    align-items:center;
     justify-content:space-between;
+    gap:12px 18px;
+    flex-wrap:wrap;
     margin-bottom:14px;
   }
   .table-header h2{margin:0;}
+  .table-controls{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-left:auto;
+  }
+  .kelas-filter{
+    width:auto;
+    min-width:150px;
+    padding:8px 30px 8px 12px;
+    font-size:0.85rem;
+  }
+  .btn-ghost.btn-export-pdf{padding:8px 14px; font-size:0.82rem;}
+  .btn-ghost.btn-export-pdf:hover{border-color:var(--brick); color:var(--brick);}
   .table-count{
     font-family:'JetBrains Mono',monospace;
     font-size:0.78rem;
     color:var(--ink-soft);
+    white-space:nowrap;
   }
   .table-wrap{overflow-x:auto;}
   table{
@@ -342,7 +360,16 @@
   <div class="card">
     <div class="table-header">
       <h2>Daftar Siswa</h2>
-      <span class="table-count" id="tableCount">0 siswa</span>
+      <div class="table-controls">
+        <select id="kelasFilter" class="kelas-filter">
+          <option value="">Semua Kelas</option>
+        </select>
+        <button type="button" class="btn-ghost btn-export-pdf" id="btnExportPdf">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
+          Export PDF
+        </button>
+        <span class="table-count" id="tableCount">0 siswa</span>
+      </div>
     </div>
     <div class="table-wrap">
       <table>
@@ -367,6 +394,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
   const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
@@ -398,8 +427,11 @@
   const siswaBody = document.getElementById('siswaBody');
   const emptyState = document.getElementById('emptyState');
   const tableCount = document.getElementById('tableCount');
+  const kelasFilter = document.getElementById('kelasFilter');
+  const btnExportPdf = document.getElementById('btnExportPdf');
 
   let editingId = null;
+  let allSiswaRows = [];
 
   const datePicker = flatpickr(tanggalLahirInput, {
     dateFormat: "Y-m-d",
@@ -551,12 +583,30 @@
       });
       if(!res.ok) throw new Error('Status ' + res.status);
       const rows = await res.json();
-      renderRows(rows);
+      allSiswaRows = rows;
+      populateKelasFilter(rows);
+      applyKelasFilter();
     }catch(err){
       console.error(err);
       setFormMsg('Gagal memuat daftar siswa: ' + err.message, 'err');
     }
   }
+
+  function populateKelasFilter(rows){
+    const current = kelasFilter.value;
+    const kelasList = Array.from(new Set(rows.map(r => r.kelas).filter(Boolean))).sort();
+    kelasFilter.innerHTML = '<option value="">Semua Kelas</option>' +
+      kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
+    if(current && kelasList.includes(current)) kelasFilter.value = current;
+  }
+
+  function applyKelasFilter(){
+    const val = kelasFilter.value;
+    const filtered = val ? allSiswaRows.filter(r => r.kelas === val) : allSiswaRows;
+    renderRows(filtered);
+  }
+
+  kelasFilter.addEventListener('change', applyKelasFilter);
 
   async function deleteSiswa(row){
     const ok = confirm(`Hapus data siswa "${row.nama_siswa}" (${row.id})? Tindakan ini tidak bisa dibatalkan.`);
@@ -685,6 +735,62 @@
 
     return { imported: payloads.length, skipped };
   }
+
+  function exportPdf(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const val = kelasFilter.value;
+    const rows = val ? allSiswaRows.filter(r => r.kelas === val) : allSiswaRows;
+
+    doc.setFontSize(14);
+    doc.text('Daftar Siswa' + (val ? ' — Kelas ' + val : ''), 14, 15);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 113, 145);
+    doc.text('Diunduh: ' + new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) + ' · Total: ' + rows.length + ' siswa', 14, 21);
+
+    const body = rows.map(r => [
+      r.id || '',
+      r.nama_siswa || '',
+      r.nisn || '',
+      r.kelas || '',
+      `${r.tempat_lahir || ''}, ${formatTanggal(r.tanggal_lahir)}`,
+      r.alamat || ''
+    ]);
+
+    const autoTableOptions = {
+      startY: 26,
+      head: [['ID', 'Nama Siswa', 'NISN', 'Kelas', 'Tempat, Tgl Lahir', 'Alamat']],
+      body,
+      styles: { fontSize: 8, cellPadding: 3, textColor: [59, 46, 99] },
+      headStyles: { fillColor: [108, 79, 224], textColor: 255 },
+      alternateRowStyles: { fillColor: [255, 239, 214] }
+    };
+
+    if(typeof doc.autoTable === 'function'){
+      doc.autoTable(autoTableOptions);
+    } else if(window['jspdf-autotable'] && typeof window['jspdf-autotable'].autoTable === 'function'){
+      window['jspdf-autotable'].autoTable(doc, autoTableOptions);
+    } else {
+      throw new Error('Library AutoTable belum termuat.');
+    }
+
+    const fileSuffix = val ? '_' + val.replace(/\s+/g, '_') : '';
+    doc.save(`daftar_siswa${fileSuffix}.pdf`);
+  }
+
+  btnExportPdf.addEventListener('click', () => {
+    if(allSiswaRows.length === 0){
+      setFormMsg('Tidak ada data siswa untuk diekspor.', 'err');
+      return;
+    }
+    try{
+      exportPdf();
+      setFormMsg('PDF daftar siswa berhasil diunduh.', 'ok');
+    }catch(err){
+      console.error(err);
+      setFormMsg('Gagal membuat PDF: ' + err.message, 'err');
+    }
+  });
 
   btnExportTemplate.addEventListener('click', () => {
     try{
