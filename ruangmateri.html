@@ -114,6 +114,7 @@
   .materi-hero.jenis-video{ border-top-color:var(--brick); }
   .materi-hero.jenis-tautan{ border-top-color:var(--blue); }
   .materi-hero.jenis-teks{ border-top-color:var(--amber); }
+  .materi-hero.jenis-ganda{ border-top-color:var(--turquoise); }
 
   .badge-jenis{
     display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:20px;
@@ -123,11 +124,18 @@
   .badge-jenis.video{ background:#FDE7EE; color:var(--brick); }
   .badge-jenis.tautan{ background:#E6F0FF; color:var(--blue); }
   .badge-jenis.teks{ background:#FFF3DE; color:var(--amber); }
+  .badge-jenis.ganda{ background:#E4F7F1; color:var(--turquoise); }
 
   .materi-title{
     font-family:'Newsreader',serif; font-weight:600; line-height:1.22;
     font-size:clamp(1.5rem,3.4vw,2.15rem); margin:12px 0 10px;
   }
+
+  .ganda-wrap{ display:grid; grid-template-columns:1fr; gap:18px; }
+  .ganda-blok{ padding-top:14px; border-top:1px dashed var(--paper-line); }
+  .ganda-blok:first-child{ padding-top:0; border-top:none; }
+  .ganda-blok h3{ font-size:0.98rem; margin:0 0 10px; display:flex; align-items:center; gap:7px; }
+  .ganda-blok h3 svg{ width:17px; height:17px; }
   .meta-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .meta-chip{
     display:inline-flex; align-items:center; gap:6px;
@@ -212,6 +220,8 @@
   .btn.ghost:hover{ background:var(--paper-deep); color:var(--brand); }
   .btn.green{ background:var(--green); }
   .btn.green:hover{ background:#146C43; }
+  .btn:disabled, .btn.green:disabled{ background:#D8D2C7; color:#8A8272; cursor:not-allowed; }
+  .btn:disabled:hover{ background:#D8D2C7; }
   .btn.full{ width:100%; }
   .btn-row{ display:flex; flex-wrap:wrap; gap:10px; padding:0 clamp(16px,3vw,26px) 20px; }
 
@@ -397,10 +407,16 @@
   const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
   const TABLE_MATERIAJAR = "materiajar";
+  const TABLE_ABSENSI = "absensimapel";
 
   const sbHeaders = {
     "apikey": SUPABASE_ANON_KEY,
     "Authorization": "Bearer " + SUPABASE_ANON_KEY
+  };
+  const sbHeadersJson = {
+    ...sbHeaders,
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
   };
 
   // ---------- Auth guard ----------
@@ -482,6 +498,8 @@
   const materiId = new URLSearchParams(window.location.search).get('id');
 
   let siswaKelas = (siswaSession && siswaSession.kelas) ? String(siswaSession.kelas).trim() : '';
+  let siswaNamaLengkap = (siswaSession && (siswaSession.nama_siswa || siswaSession.nama)) ? String(siswaSession.nama_siswa || siswaSession.nama).trim() : '';
+  let siswaNisn = (siswaSession && siswaSession.nisn) ? String(siswaSession.nisn).trim() : '';
   let materiRow = null;
   let materiSemapel = [];
 
@@ -494,6 +512,7 @@
   function jenisClass(jenis){
     switch(jenis){
       case 'Video': return 'video';
+      case 'PDF & Video': return 'ganda';
       case 'Tautan': return 'tautan';
       case 'Teks Bacaan': return 'teks';
       default: return '';
@@ -511,6 +530,8 @@
     switch(jenis){
       case 'Video':
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>';
+      case 'PDF & Video':
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/><path d="M9.5 12.5l3 2-3 2z"/></svg>';
       case 'Tautan':
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
       case 'Teks Bacaan':
@@ -604,6 +625,54 @@
     return !!(p[String(id)] && p[String(id)].selesai);
   }
 
+  function tanggalLokalISO(d){
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  // Simpan catatan "sudah dipelajari" ke tabel absensimapel di Supabase.
+  // Mengembalikan id baris yang berhasil disimpan (untuk dihapus lagi jika siswa membatalkan tanda).
+  async function simpanAbsensiMapel(catatan){
+    const now = new Date();
+    const payload = {
+      tanggal: tanggalLokalISO(now),
+      time_stamp: now.toISOString(),
+      nama_siswa: siswaNamaLengkap || (siswaSession && (siswaSession.nama_siswa || siswaSession.nama)) || '',
+      nisn: siswaNisn || null,
+      kelas: siswaKelas || null,
+      judul_materi: materiRow.judul_materi || '',
+      catatanku: catatan || null
+    };
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE_ABSENSI}`, {
+        method: 'POST',
+        headers: sbHeadersJson,
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+      return rows && rows[0] && rows[0].id;
+    }catch(err){
+      console.error('Gagal menyimpan absensi mapel:', err);
+      return null;
+    }
+  }
+
+  async function hapusAbsensiMapel(id){
+    if(!id) return;
+    try{
+      const res = await fetch(`${SUPABASE_URL}/${TABLE_ABSENSI}?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: sbHeaders
+      });
+      if(!res.ok) throw new Error('Status ' + res.status);
+    }catch(err){
+      console.error('Gagal menghapus absensi mapel:', err);
+    }
+  }
+
   // ================= Muat data =================
   async function loadKelasSiswa(){
     if(!siswaSession) return;
@@ -620,6 +689,8 @@
         const rows = await res.json();
         const siswa = rows && rows[0];
         if(siswa && siswa.kelas) siswaKelas = String(siswa.kelas).trim();
+        if(siswa && siswa.nama_siswa) siswaNamaLengkap = String(siswa.nama_siswa).trim();
+        if(siswa && siswa.nisn) siswaNisn = String(siswa.nisn).trim();
       }
     }catch(err){
       console.error('Gagal memuat data kelas siswa:', err);
@@ -730,6 +801,70 @@
       return panelTautan('Video ini berasal dari layanan yang tidak bisa diputar langsung di sini.');
     }
 
+    if(jenis === 'PDF & Video'){
+      const urlVideo = materiRow.url_video;
+      const embedDoc = url ? toDocEmbed(url) : null;
+      const embedVideo = urlVideo ? toVideoEmbed(urlVideo) : null;
+
+      const blokPdf = embedDoc
+        ? `<div class="ganda-blok">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/></svg> Baca PDF</h3>
+            <div class="embed-wrap">
+              <iframe class="doc-frame" src="${esc(embedDoc)}" title="Dokumen materi" loading="lazy"></iframe>
+            </div>
+            <div class="btn-row">
+              <a class="btn ghost" href="${esc(url)}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+                Buka PDF di tab baru
+              </a>
+              <button type="button" class="btn ghost" id="cetakBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>
+                Cetak halaman
+              </button>
+            </div>
+          </div>`
+        : `<div class="ganda-blok">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M14 4v5h5"/></svg> Baca PDF</h3>
+            <p style="font-size:0.85rem; color:var(--ink-soft); margin:0;">Gurumu belum melampirkan berkas PDF untuk materi ini.</p>
+          </div>`;
+
+      const blokVideo = embedVideo
+        ? `<div class="ganda-blok">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg> Tonton video</h3>
+            <div class="embed-wrap">
+              <div class="ratio-16x9">
+                <iframe src="${esc(embedVideo)}" title="Video materi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+              </div>
+            </div>
+            <div class="btn-row">
+              <a class="btn ghost" href="${esc(urlVideo)}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+                Buka video di aplikasi aslinya
+              </a>
+            </div>
+          </div>`
+        : urlVideo
+          ? `<div class="ganda-blok">
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg> Tonton video</h3>
+              <p style="font-size:0.85rem; color:var(--ink-soft); margin:0 0 10px;">Video ini berasal dari layanan yang tidak bisa diputar langsung di sini.</p>
+              <div class="btn-row">
+                <a class="btn ghost" href="${esc(urlVideo)}" target="_blank" rel="noopener">Buka video di tab baru</a>
+              </div>
+            </div>`
+          : `<div class="ganda-blok">
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg> Tonton video</h3>
+              <p style="font-size:0.85rem; color:var(--ink-soft); margin:0;">Gurumu belum melampirkan video untuk materi ini.</p>
+            </div>`;
+
+      return `<div class="content-panel">
+        <div class="panel-head"><h2>PDF &amp; Video</h2></div>
+        <div class="ganda-wrap">
+          ${blokPdf}
+          ${blokVideo}
+        </div>
+      </div>`;
+    }
+
     if(jenis === 'Tautan'){
       return panelTautan('Materi ini berupa tautan ke situs lain. Halaman itu akan terbuka di tab baru.');
     }
@@ -801,7 +936,7 @@
     return `<div class="side-card">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg> Tentang materi</h3>
       ${baris}
-      <button type="button" class="btn green full" id="tandaiBtn" style="margin-top:14px;">
+      <button type="button" class="btn green full" id="tandaiBtn" style="margin-top:14px;" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         Tandai sudah dipelajari
       </button>
@@ -815,7 +950,7 @@
   function sidebarCatatan(){
     return `<div class="side-card">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Catatanku</h3>
-      <textarea class="note-area" id="catatanArea" placeholder="Tulis poin penting atau pertanyaan untuk gurumu di sini."></textarea>
+      <textarea class="note-area" id="catatanArea" placeholder="Tuliskan hal-hal apa yang Anda dapatkan setelah mempelajari materi ini."></textarea>
       <p class="note-status" id="catatanStatus">Catatan tersimpan di perangkat ini saja.</p>
     </div>`;
   }
@@ -920,49 +1055,76 @@
     const cetakBtn = document.getElementById('cetakBtn');
     if(cetakBtn) cetakBtn.addEventListener('click', () => window.print());
 
-    // Tandai selesai
-    const tandaiBtn = document.getElementById('tandaiBtn');
-    const statusDone = document.getElementById('statusDone');
-    const statusDoneText = document.getElementById('statusDoneText');
-
-    function segarkanStatus(){
-      const p = getProgress();
-      const item = p[String(materiRow.id)];
-      if(item && item.selesai){
-        statusDone.classList.add('show');
-        statusDoneText.textContent = 'Sudah dipelajari pada ' + formatTanggal(item.waktu);
-        tandaiBtn.classList.add('ghost');
-        tandaiBtn.classList.remove('green');
-        tandaiBtn.lastChild.textContent = ' Batalkan tanda selesai';
-      } else {
-        statusDone.classList.remove('show');
-        tandaiBtn.classList.remove('ghost');
-        tandaiBtn.classList.add('green');
-        tandaiBtn.lastChild.textContent = ' Tandai sudah dipelajari';
-      }
-    }
-
-    tandaiBtn.addEventListener('click', () => {
-      const p = getProgress();
-      const key = String(materiRow.id);
-      if(p[key] && p[key].selesai){
-        delete p[key];
-      } else {
-        p[key] = { selesai:true, waktu:new Date().toISOString(), judul: materiRow.judul_materi || '' };
-      }
-      setProgress(p);
-      segarkanStatus();
-      renderDaftarLain();
-    });
-    segarkanStatus();
-
     // Catatan siswa
     const catatanArea = document.getElementById('catatanArea');
     const catatanStatus = document.getElementById('catatanStatus');
     const catatanKey = 'materi_catatan_' + materiRow.id;
     try{ catatanArea.value = localStorage.getItem(catatanKey) || ''; }catch(e){}
+
+    // Tandai selesai
+    const tandaiBtn = document.getElementById('tandaiBtn');
+    const statusDone = document.getElementById('statusDone');
+    const statusDoneText = document.getElementById('statusDoneText');
+
+    function catatanTerisi(){
+      return !!(catatanArea.value && catatanArea.value.trim());
+    }
+
+    function segarkanStatus(){
+      const p = getProgress();
+      const item = p[String(materiRow.id)];
+      const sudah = !!(item && item.selesai);
+      if(sudah){
+        statusDone.classList.add('show');
+        statusDoneText.textContent = 'Sudah dipelajari pada ' + formatTanggal(item.waktu);
+        tandaiBtn.classList.add('ghost');
+        tandaiBtn.classList.remove('green');
+        tandaiBtn.lastChild.textContent = ' Batalkan tanda selesai';
+        tandaiBtn.disabled = false;
+        tandaiBtn.title = '';
+      } else {
+        statusDone.classList.remove('show');
+        tandaiBtn.classList.remove('ghost');
+        tandaiBtn.classList.add('green');
+        tandaiBtn.lastChild.textContent = ' Tandai sudah dipelajari';
+        tandaiBtn.disabled = !catatanTerisi();
+        tandaiBtn.title = tandaiBtn.disabled ? 'Isi dulu "Catatanku" sebelum menandai materi ini selesai dipelajari.' : '';
+      }
+    }
+
+    tandaiBtn.addEventListener('click', async () => {
+      const p = getProgress();
+      const key = String(materiRow.id);
+      const sudah = p[key] && p[key].selesai;
+
+      if(!sudah && !catatanTerisi()){
+        catatanArea.focus();
+        return;
+      }
+
+      tandaiBtn.disabled = true;
+      if(sudah){
+        await hapusAbsensiMapel(p[key].absensiId);
+        delete p[key];
+        setProgress(p);
+        segarkanStatus();
+        renderDaftarLain();
+      } else {
+        const catatanSaatIni = catatanArea.value || '';
+        const absensiId = await simpanAbsensiMapel(catatanSaatIni);
+        p[key] = { selesai:true, waktu:new Date().toISOString(), judul: materiRow.judul_materi || '', absensiId };
+        setProgress(p);
+        segarkanStatus();
+        renderDaftarLain();
+      }
+      tandaiBtn.disabled = false;
+      segarkanStatus();
+    });
+    segarkanStatus();
+
     let catatanTimer = null;
     catatanArea.addEventListener('input', () => {
+      segarkanStatus();
       clearTimeout(catatanTimer);
       catatanStatus.textContent = 'Menyimpan...';
       catatanTimer = setTimeout(() => {
