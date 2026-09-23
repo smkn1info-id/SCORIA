@@ -374,6 +374,7 @@
   .form-group input:focus,
   .form-group select:focus,
   .form-group textarea:focus{border-color:var(--brand); outline:none;}
+  .form-group select:disabled{opacity:0.6; cursor:not-allowed;}
   .kode-row{display:flex; gap:8px;}
   .kode-row input{flex:1; min-width:0;}
   .form-msg{
@@ -442,6 +443,7 @@
             <th>Mata Pelajaran</th>
             <th>Kelas</th>
             <th>Jenis Penilaian</th>
+            <th>Nama Materi/Bab</th>
             <th>KKM</th>
             <th>Tujuan Pembelajaran</th>
             <th>Capaian Pembelajaran</th>
@@ -449,7 +451,7 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr class="empty-row"><td colspan="8">Memuat data...</td></tr>
+          <tr class="empty-row"><td colspan="9">Memuat data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -510,6 +512,12 @@
             <option value="Pilihan Ganda">Pilihan Ganda</option>
           </select>
         </div>
+        <div class="form-group">
+          <label for="inputNamaMateri">Nama Materi/Bab</label>
+          <select id="inputNamaMateri" disabled>
+            <option value="" disabled selected>Pilih Mata Pelajaran &amp; Kelas dahulu</option>
+          </select>
+        </div>
         <div class="form-group full">
           <label for="inputKode">Kode Mapping</label>
           <div class="kode-row">
@@ -539,6 +547,7 @@
   const SUPABASE_URL = "https://obyeehxaencjphzejrmc.supabase.co/rest/v1";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ieWVlaHhhZW5janBoemVqcm1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NTY1MTEsImV4cCI6MjEwNTUzMjUxMX0.Dt-l_xY-nZw9eDtttwNXn0joMjE9O-hrFWvO2i-ogkw";
   const TABLE = "mappingpenilaian";
+  const TABLE_MATERIAJAR = "materiajar";
 
   function sbHeaders(extra){
     return Object.assign({
@@ -668,6 +677,12 @@
     }
   }
 
+  // ---------- Ambil daftar Nama Materi/Bab (tabel materiajar) ----------
+  // Kolom "kelas" pada materiajar bisa berisi beberapa kelas dipisah koma
+  // (mis. "X-1, X-2"), jadi dicocokkan satu per satu, bukan exact match.
+  // (Fungsi dan event listener terkait didefinisikan di bawah, setelah
+  // elemen form inputMapel/inputKelas/inputNamaMateri dideklarasikan.)
+
   // ================= State & Pagination =================
   const PAGE_SIZE = 10;
   let currentPage = 0;
@@ -691,12 +706,12 @@
     const list = guruMapelList || [];
     if(list.length === 0){
       totalRows = 0;
-      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Anda belum memiliki mata pelajaran yang ditugaskan.</td></tr>';
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="9">Anda belum memiliki mata pelajaran yang ditugaskan.</td></tr>';
       renderFoot(0, 0);
       return;
     }
 
-    tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Memuat data...</td></tr>';
+    tableBody.innerHTML = '<tr class="empty-row"><td colspan="9">Memuat data...</td></tr>';
     const offset = currentPage * PAGE_SIZE;
     // Batasi hanya mapel yang diampu guru ini, supaya guru tidak melihat
     // mapping penilaian mata pelajaran lain.
@@ -725,7 +740,7 @@
       renderFoot(offset, rows.length);
     }catch(err){
       console.error('Gagal memuat mapping penilaian:', err);
-      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Gagal memuat data. Pastikan tabel "mappingpenilaian" sudah dibuat di Supabase.</td></tr>';
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="9">Gagal memuat data. Pastikan tabel "mappingpenilaian" sudah dibuat di Supabase.</td></tr>';
       entriesInfo.textContent = 'Menampilkan 0 entri';
       btnPrev.disabled = true;
       btnNext.disabled = true;
@@ -734,7 +749,7 @@
 
   function renderTable(rows){
     if(!rows || rows.length === 0){
-      tableBody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada data mapping penilaian.</td></tr>';
+      tableBody.innerHTML = '<tr class="empty-row"><td colspan="9">Belum ada data mapping penilaian.</td></tr>';
       return;
     }
     tableBody.innerHTML = rows.map(row => `
@@ -743,6 +758,7 @@
         <td>${escapeHtml(row.mata_pelajaran)}</td>
         <td>${escapeHtml(row.kelas)}</td>
         <td>${escapeHtml(row.jenis_penilaian)}</td>
+        <td>${escapeHtml(row.nama_materi) || '-'}</td>
         <td><span class="kkm-pill">${escapeHtml(row.kkm)}</span></td>
         <td class="truncate" title="${escapeHtml(row.tujuan_pembelajaran)}">${escapeHtml(row.tujuan_pembelajaran) || '-'}</td>
         <td class="truncate" title="${escapeHtml(row.capaian_pembelajaran)}">${escapeHtml(row.capaian_pembelajaran) || '-'}</td>
@@ -802,6 +818,59 @@
   const inputJenis = document.getElementById('inputJenis');
   const inputKkm = document.getElementById('inputKkm');
   const inputBentukSoal = document.getElementById('inputBentukSoal');
+  const inputNamaMateri = document.getElementById('inputNamaMateri');
+
+  // Kolom "kelas" pada materiajar bisa berisi beberapa kelas dipisah koma
+  // (mis. "X-1, X-2"), jadi dicocokkan satu per satu, bukan exact match.
+  function kelasCocokMateri(kelasMateri, kelasDicari){
+    const daftar = String(kelasMateri || '').split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+    return daftar.includes(String(kelasDicari || '').trim().toLowerCase());
+  }
+
+  async function loadMateriOptions(preserveValue){
+    const mapel = inputMapel.value.trim();
+    const kelas = inputKelas.value.trim();
+
+    if(!mapel || !kelas){
+      inputNamaMateri.innerHTML = '<option value="" disabled selected>Pilih Mata Pelajaran &amp; Kelas dahulu</option>';
+      inputNamaMateri.disabled = true;
+      return;
+    }
+
+    inputNamaMateri.disabled = false;
+    inputNamaMateri.innerHTML = '<option value="" disabled selected>Memuat data materi...</option>';
+    try{
+      const url = `${SUPABASE_URL}/${TABLE_MATERIAJAR}?select=judul_materi,kelas&mata_pelajaran=eq.${encodeURIComponent(mapel)}&order=judul_materi.asc`;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if(!res.ok) throw new Error('Status ' + res.status);
+      const rows = await res.json();
+
+      const judulList = Array.from(new Set(
+        (rows || [])
+          .filter(r => kelasCocokMateri(r.kelas, kelas))
+          .map(r => (r.judul_materi || '').trim())
+          .filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'id'));
+
+      if(judulList.length === 0){
+        inputNamaMateri.innerHTML = '<option value="" disabled selected>Belum ada materi/bab untuk mapel &amp; kelas ini</option>';
+        return;
+      }
+
+      inputNamaMateri.innerHTML = '<option value="" disabled selected>Pilih nama materi/bab</option>' +
+        judulList.map(j => `<option value="${escapeHtml(j)}">${escapeHtml(j)}</option>`).join('');
+
+      if(preserveValue && judulList.includes(preserveValue)){
+        inputNamaMateri.value = preserveValue;
+      }
+    }catch(err){
+      console.error('Gagal memuat daftar nama materi/bab:', err);
+      inputNamaMateri.innerHTML = '<option value="" disabled selected>Gagal memuat data materi</option>';
+    }
+  }
+
+  inputMapel.addEventListener('change', () => loadMateriOptions());
+  inputKelas.addEventListener('change', () => loadMateriOptions());
   const inputTujuan = document.getElementById('inputTujuan');
   const inputCapaian = document.getElementById('inputCapaian');
 
@@ -814,6 +883,8 @@
     mappingForm.reset();
     inputKode.readOnly = false;
     editingKode = null;
+    inputNamaMateri.innerHTML = '<option value="" disabled selected>Pilih Mata Pelajaran &amp; Kelas dahulu</option>';
+    inputNamaMateri.disabled = true;
     setFormMsg('');
   }
 
@@ -834,7 +905,7 @@
         if(!res.ok) throw new Error('Status ' + res.status);
         return res.json();
       })
-      .then(rows=>{
+      .then(async rows=>{
         const row = rows && rows[0];
         if(!row){ setFormMsg('Data tidak ditemukan.', 'error'); return; }
         editingKode = row.kode_mapping;
@@ -847,6 +918,7 @@
         inputBentukSoal.value = row.bentuk_soal || '';
         inputTujuan.value = row.tujuan_pembelajaran || '';
         inputCapaian.value = row.capaian_pembelajaran || '';
+        await loadMateriOptions(row.nama_materi || '');
         setFormMsg('');
       })
       .catch(err=>{
@@ -940,9 +1012,15 @@
       jenis_penilaian: inputJenis.value.trim(),
       kkm: inputKkm.value === '' ? null : Number(inputKkm.value),
       bentuk_soal: inputBentukSoal.value,
+      nama_materi: inputNamaMateri.value.trim(),
       tujuan_pembelajaran: inputTujuan.value.trim(),
       capaian_pembelajaran: inputCapaian.value.trim()
     };
+
+    if(!payload.nama_materi){
+      setFormMsg('Silahkan memilih Nama Materi atau membuat materi terlebih dahulu jika anda belum membuat materi', 'error');
+      return;
+    }
 
     if(!payload.kode_mapping || !payload.mata_pelajaran || !payload.kelas || !payload.jenis_penilaian || payload.kkm === null || !payload.bentuk_soal){
       setFormMsg('Mohon lengkapi semua field yang wajib diisi.', 'error');
