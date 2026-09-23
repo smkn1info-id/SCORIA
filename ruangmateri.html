@@ -952,6 +952,7 @@
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Catatanku</h3>
       <textarea class="note-area" id="catatanArea" placeholder="Tuliskan hal-hal apa yang Anda dapatkan setelah mempelajari materi ini."></textarea>
       <p class="note-status" id="catatanStatus">Catatan tersimpan di perangkat ini saja.</p>
+      <p class="note-status" id="catatanHitung" style="font-weight:600;">0 / 200 kata</p>
     </div>`;
   }
 
@@ -1066,8 +1067,25 @@
     const statusDone = document.getElementById('statusDone');
     const statusDoneText = document.getElementById('statusDoneText');
 
+    const MIN_KATA = 200;
+    const catatanHitung = document.getElementById('catatanHitung');
+
+    function hitungKata(){
+      const t = (catatanArea.value || '').trim();
+      return t ? t.split(/\s+/).length : 0;
+    }
+
     function catatanTerisi(){
-      return !!(catatanArea.value && catatanArea.value.trim());
+      return hitungKata() >= MIN_KATA;
+    }
+
+    function perbaruiHitung(){
+      const n = hitungKata();
+      const cukup = n >= MIN_KATA;
+      catatanHitung.textContent = cukup
+        ? n + ' kata \u2713 (syarat minimal ' + MIN_KATA + ' kata terpenuhi)'
+        : n + ' / ' + MIN_KATA + ' kata (kurang ' + (MIN_KATA - n) + ' kata lagi)';
+      catatanHitung.style.color = cukup ? '#16a34a' : '';
     }
 
     function segarkanStatus(){
@@ -1088,7 +1106,7 @@
         tandaiBtn.classList.add('green');
         tandaiBtn.lastChild.textContent = ' Tandai sudah dipelajari';
         tandaiBtn.disabled = !catatanTerisi();
-        tandaiBtn.title = tandaiBtn.disabled ? 'Isi dulu "Catatanku" sebelum menandai materi ini selesai dipelajari.' : '';
+        tandaiBtn.title = tandaiBtn.disabled ? 'Isi "Catatanku" minimal ' + MIN_KATA + ' kata (saat ini ' + hitungKata() + ' kata) sebelum menandai materi ini selesai dipelajari.' : '';
       }
     }
 
@@ -1121,9 +1139,11 @@
       segarkanStatus();
     });
     segarkanStatus();
+    perbaruiHitung();
 
     let catatanTimer = null;
     catatanArea.addEventListener('input', () => {
+      perbaruiHitung();
       segarkanStatus();
       clearTimeout(catatanTimer);
       catatanStatus.textContent = 'Menyimpan...';
