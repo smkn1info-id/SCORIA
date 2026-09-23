@@ -194,6 +194,7 @@
   .badge-jenis.video{ background:#FDE7EE; color:var(--brick); }
   .badge-jenis.tautan{ background:#E6F0FF; color:var(--blue); }
   .badge-jenis.teks{ background:#FFF3DE; color:var(--amber); }
+  .badge-jenis.ganda{ background:#E4F7F1; color:var(--turquoise); }
 
   .btn-mini{
     font-family:inherit; font-size:0.72rem; font-weight:600; border:none; border-radius:5px;
@@ -497,6 +498,7 @@
           <select id="inputJenis" required>
             <option value="Dokumen">Dokumen (PDF/Word)</option>
             <option value="Video">Video</option>
+            <option value="PDF & Video">PDF & Video (Ganda)</option>
             <option value="Tautan">Tautan/Link</option>
             <option value="Teks Bacaan">Teks Bacaan</option>
           </select>
@@ -516,6 +518,14 @@
           <span class="hint" id="hintUrlKonten">Tempel link Google Drive / file PDF yang bisa diakses siswa</span>
         </label>
         <input type="text" id="inputUrlKonten" placeholder="https://...">
+      </div>
+
+      <div class="form-group full" id="groupUrlVideo" style="display:none;">
+        <label for="inputUrlVideo">
+          <span>Link Video</span>
+          <span class="hint">Tempel link YouTube atau video lain yang bisa ditonton siswa</span>
+        </label>
+        <input type="text" id="inputUrlVideo" placeholder="https://...">
       </div>
 
       <div class="form-group full" id="groupIsiTeks" style="display:none;">
@@ -794,6 +804,7 @@
   function jenisBadgeClass(jenis){
     switch(jenis){
       case 'Video': return 'badge-jenis video';
+      case 'PDF & Video': return 'badge-jenis ganda';
       case 'Tautan': return 'badge-jenis tautan';
       case 'Teks Bacaan': return 'badge-jenis teks';
       default: return 'badge-jenis';
@@ -952,9 +963,11 @@
   const groupIsiTeks = document.getElementById('groupIsiTeks');
   const labelUrlKonten = document.getElementById('labelUrlKonten');
   const hintUrlKonten = document.getElementById('hintUrlKonten');
+  const groupUrlVideo = document.getElementById('groupUrlVideo');
 
   function toggleJenisFields(){
     const jenis = inputJenis.value;
+    groupUrlVideo.style.display = 'none';
     if(jenis === 'Teks Bacaan'){
       groupIsiTeks.style.display = '';
       groupUrlKonten.style.display = '';
@@ -965,6 +978,12 @@
       groupUrlKonten.style.display = '';
       labelUrlKonten.textContent = 'Link Video';
       hintUrlKonten.textContent = 'Tempel link YouTube atau video lain yang bisa diakses siswa';
+    } else if(jenis === 'PDF & Video'){
+      groupIsiTeks.style.display = 'none';
+      groupUrlKonten.style.display = '';
+      groupUrlVideo.style.display = '';
+      labelUrlKonten.textContent = 'Link PDF';
+      hintUrlKonten.textContent = 'Tempel link Google Drive / file PDF yang bisa dibaca siswa';
     } else if(jenis === 'Tautan'){
       groupIsiTeks.style.display = 'none';
       groupUrlKonten.style.display = '';
@@ -1004,6 +1023,7 @@
       document.getElementById('inputJenis').value = row.jenis_materi || 'Dokumen';
       document.getElementById('inputStatus').value = row.status || 'Aktif';
       document.getElementById('inputUrlKonten').value = row.url_konten || '';
+      document.getElementById('inputUrlVideo').value = row.url_video || '';
       document.getElementById('inputIsiTeks').value = row.isi_teks || '';
       document.getElementById('inputDeskripsi').value = row.deskripsi || '';
     } else {
@@ -1047,6 +1067,7 @@
     const jenis = document.getElementById('inputJenis').value;
     const status = document.getElementById('inputStatus').value;
     const urlKonten = document.getElementById('inputUrlKonten').value.trim();
+    const urlVideo = document.getElementById('inputUrlVideo').value.trim();
     const isiTeks = document.getElementById('inputIsiTeks').value.trim();
     const deskripsi = document.getElementById('inputDeskripsi').value.trim();
 
@@ -1060,7 +1081,12 @@
       formError.classList.add('show');
       return;
     }
-    if(jenis !== 'Teks Bacaan' && !urlKonten){
+    if(jenis === 'PDF & Video' && (!urlKonten || !urlVideo)){
+      formError.textContent = 'Link PDF dan Link Video wajib diisi untuk jenis materi Ganda.';
+      formError.classList.add('show');
+      return;
+    }
+    if(jenis !== 'Teks Bacaan' && jenis !== 'PDF & Video' && !urlKonten){
       formError.textContent = 'Link konten wajib diisi untuk jenis materi ini.';
       formError.classList.add('show');
       return;
@@ -1075,6 +1101,7 @@
       jenis_materi: jenis,
       status: status,
       url_konten: urlKonten || null,
+      url_video: jenis === 'PDF & Video' ? (urlVideo || null) : null,
       isi_teks: jenis === 'Teks Bacaan' ? (isiTeks || null) : null,
       deskripsi: deskripsi || null
     };
