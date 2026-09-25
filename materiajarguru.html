@@ -140,6 +140,21 @@
   .filter-bar select:focus, .filter-bar input:focus{ border-color:var(--brick); outline:none; }
   .filter-spacer{ flex:1; }
 
+  .kelas-tabs{
+    display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding-bottom:6px; margin-bottom:14px; scrollbar-width:thin; scrollbar-color:var(--brand) var(--paper-deep);
+  }
+  .kelas-tabs::-webkit-scrollbar{height:6px;}
+  .kelas-tabs::-webkit-scrollbar-track{background:var(--paper-deep); border-radius:6px;}
+  .kelas-tabs::-webkit-scrollbar-thumb{background:var(--brand); border-radius:6px;}
+  .kelas-tab{
+    font-family:inherit; font-size:0.82rem; font-weight:600; white-space:nowrap; flex-shrink:0;
+    padding:8px 16px; border-radius:20px; border:1px solid var(--paper-line);
+    background:#fbf8f0; color:var(--ink-soft); cursor:pointer; transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .kelas-tab:hover{ border-color:var(--brand); color:var(--brand); }
+  .kelas-tab.active{ background:var(--brand); border-color:var(--brand); color:#FFFFFF; }
+
   .btn-primary{
     font-family:inherit; font-size:0.85rem; font-weight:600; color:#FFFFFF;
     background:var(--brand); border:none; border-radius:6px; padding:10px 18px;
@@ -440,6 +455,10 @@
       </div>
     </div>
 
+    <div class="kelas-tabs" id="kelasTabs">
+      <button type="button" class="kelas-tab active" data-kelas="">Semua Kelas</button>
+    </div>
+
     <div class="filter-bar">
       <div class="field">
         <label for="filterMapel">Mata Pelajaran</label>
@@ -453,12 +472,6 @@
           <option value="">Semua Status</option>
           <option value="Aktif">Aktif</option>
           <option value="Nonaktif">Nonaktif</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="filterKelas">Kelas</label>
-        <select id="filterKelas">
-          <option value="">Semua Kelas</option>
         </select>
       </div>
       <div class="field" style="flex:1; min-width:180px;">
@@ -820,18 +833,18 @@
     }
   }
 
-  // ---------- Dropdown Kelas (data dari tabel "rombel" di Supabase) ----------
+  // ---------- Dropdown & Tab Kelas (data dari tabel "rombel" di Supabase) ----------
   let kelasList = [];
 
-  function populateFilterKelas(){
-    const filterKelas = document.getElementById('filterKelas');
-    if(!filterKelas) return;
-    const nilaiSebelumnya = filterKelas.value;
-    filterKelas.innerHTML = '<option value="">Semua Kelas</option>' +
-      kelasList.map(k => `<option value="${escapeHtmlGuru(k)}">${escapeHtmlGuru(k)}</option>`).join('');
-    if(nilaiSebelumnya && kelasList.includes(nilaiSebelumnya)){
-      filterKelas.value = nilaiSebelumnya;
-    }
+  function renderKelasTabs(){
+    const kelasTabsEl = document.getElementById('kelasTabs');
+    if(!kelasTabsEl) return;
+    const nilaiSebelumnya = filterKelasValue;
+    const masihAda = nilaiSebelumnya && kelasList.includes(nilaiSebelumnya);
+    if(!masihAda) filterKelasValue = '';
+
+    kelasTabsEl.innerHTML = `<button type="button" class="kelas-tab${filterKelasValue === '' ? ' active' : ''}" data-kelas="">Semua Kelas</button>` +
+      kelasList.map(k => `<button type="button" class="kelas-tab${filterKelasValue === k ? ' active' : ''}" data-kelas="${escapeHtmlGuru(k)}">${escapeHtmlGuru(k)}</button>`).join('');
   }
 
   async function loadKelasRombel(){
@@ -845,11 +858,11 @@
       console.error('Gagal memuat data rombel:', err);
       kelasList = [];
       inputKelas.innerHTML = '<option value="">Gagal memuat kelas</option>';
-      populateFilterKelas();
+      renderKelasTabs();
       return;
     }
 
-    populateFilterKelas();
+    renderKelasTabs();
 
     if(kelasList.length === 0){
       inputKelas.innerHTML = '<option value="">Belum ada data rombel</option>';
@@ -875,7 +888,7 @@
   const searchMateriEl = document.getElementById('searchMateri');
   const filterMapelEl = document.getElementById('filterMapel');
   const filterStatusEl = document.getElementById('filterStatus');
-  const filterKelasEl = document.getElementById('filterKelas');
+  const kelasTabsEl = document.getElementById('kelasTabs');
 
   function jenisBadgeClass(jenis){
     switch(jenis){
@@ -1017,8 +1030,11 @@
     currentPageMateri = 0;
     renderTabelMateri();
   });
-  filterKelasEl.addEventListener('change', (e) => {
-    filterKelasValue = e.target.value;
+  kelasTabsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.kelas-tab');
+    if(!btn) return;
+    filterKelasValue = btn.getAttribute('data-kelas') || '';
+    kelasTabsEl.querySelectorAll('.kelas-tab').forEach(t => t.classList.toggle('active', t === btn));
     currentPageMateri = 0;
     renderTabelMateri();
   });
